@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Cube Clash: Battle Arena</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+        <script src="https://cdn.jsdelivr.net/npm/webvr-polyfill@latest/build/webvr-polyfill.js"></script>
+        <script>
+            // Authentication check - redirect to landing if not logged in
+            (function() {
+                // Skip auth check if we're already in a specific state
+                const urlParams = new URLSearchParams(window.location.search);
+                const state = urlParams.get('state');
+            
+                // Don't redirect if we're in onboarding or game state
+                if (state === 'onboarding' || state === 'game') {
+                    return;
+                }
+            
+                // Check if user is logged in
+                const userData = localStorage.getItem('smartCampusUser');
+                if (!userData) {
+                    console.log('[Auth] User not authenticated, redirecting to landing page');
+                    window.location.href = 'landing.html';
+                    return;
+                }
+            
+                // Check if user has completed onboarding
+                const onboardingCompleted = localStorage.getItem('smartCampusOnboardingCompleted');
+                if (!onboardingCompleted) {
+                    console.log('[Auth] User authenticated but onboarding not completed, redirecting to onboarding');
+                    window.location.href = 'index.html?state=onboarding';
+                    return;
+                }
+            
+                console.log('[Auth] User authenticated and onboarded, proceeding to game');
+            })();
+        </script>
+        <script type="module" src="/src/main.js"></script>
+        <link rel="stylesheet" href="/src/styles/index.css" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- THIS IS THE LINE TO ADD -->
+    </head>
+    <body>
+        <!-- NEW: Added #game-wrap container -->
+        <div id="game-wrap">
+            <div id="game-container">
+                <canvas id="game-canvas"></canvas>
+            </div>
+
+            <div id="ui-container">
+                <!-- Main Menu -->
+                <div class="menu-wrap" style="display: block">
+                    <div class="logo"></div>
+                    <div class="menu">
+                        <div class="bt start">START</div>
+                        <div class="bt settings">SETTINGS</div>
+                        <div class="bt exit">EXIT</div>
+                    </div>
+                    <div class="players pl0"></div>
+                    <div class="players pl1"></div>
+                    <div class="lamp lamp0"></div>
+                    <div class="lamp lamp1"></div>
+                    <div class="floor"></div>
+                    <div class="lvl-players"></div>
+                </div>
+
+                <!-- Level Select -->
+                <div class="lvl-select-wrap" style="display: none">
+                    <div class="logo"></div>
+                    <div class="lvl-select-frame" data-lvl="0" style="pointer-events: auto;">LEVEL 1</div>
+                    <div class="lvl-select-frame lvl1" data-lvl="1" style="pointer-events: auto;">LEVEL 2</div>
+                    <div class="lvl-select-frame lvl2" data-lvl="2" style="pointer-events: auto;">LEVEL 3</div>
+                    <div class="lvl-select-frame lvl3" data-lvl="3" style="pointer-events: auto;">LEVEL 4</div>
+                    <div class="foreground"></div>
+                </div>
+
+                <!-- Character Select -->
+                <div
+                    id="character-select"
+                    class="hidden w-full h-full flex flex-col items-center justify-center bg-black bg-opacity-90"
+                    style="pointer-events: auto;"
+                >
+                    <h1 class="text-4xl mb-8 text-yellow-400">
+                        SELECT CHARACTER
+                    </h1>
+                    <div
+                        id="character-grid"
+                        class="grid grid-cols-4 gap-6 w-3/4"
+                    ></div>
+                    <button
+                        id="start-game"
+                        class="mt-8 px-6 py-3 bg-green-600 rounded-lg text-white hover:bg-green-700 transition"
+                        style="pointer-events: auto; cursor: pointer;"
+                    >
+                        START GAME
+                    </button>
+                </div>
+
+                <div id="game-hud" class="hidden w-full h-full">
+                    <!-- Add game HUD contents -->
+                </div>
+
+                <div id="player-hud">
+                    <div class="player-ui" id="player-0-ui"></div>
+                    <div class="player-ui" id="player-1-ui"></div>
+                    <div class="player-ui" id="player-2-ui"></div>
+                    <div class="player-ui" id="player-3-ui"></div>
+                </div>
+            </div>
+        </div>
+        <!-- END NEW: #game-wrap -->
+    </body>
+</html>

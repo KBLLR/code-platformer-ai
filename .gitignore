@@ -1,0 +1,36 @@
+# Node.js dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+*.env.local
+*.env.development
+*.env.production
+*.env.test
+
+# IDE and OS files
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Log files
+*.log
+
+# Temporary files
+*~
+\#*#
+
+# Other files
+.DS_Store?
+.cache/
+pyrightconfig.json
+
+# Directories
+node_modules/
+
+# npm lock file that will be generated in yarn projects
+package-lock.json

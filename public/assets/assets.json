@@ -1,0 +1,176 @@
+{
+  "images": {
+    "arrow": [
+      "images/arrow/arrow_0.png",
+      "images/arrow/arrow_1.png",
+      "images/arrow/arrow_2.png",
+      "images/arrow/arrow_3.png"
+    ],
+    "bow": [
+      "images/bow/bow_0.png",
+      "images/bow/bow_1.png",
+      "images/bow/bow_2.png",
+      "images/bow/bow_3.png"
+    ],
+    "diverse": ["images/diverse/coffee_cup.png", "images/diverse/money.png"],
+    "gun": [
+      "images/gun/gun_0.png",
+      "images/gun/gun_1.png",
+      "images/gun/gun_2.png",
+      "images/gun/gun_3.png"
+    ],
+    "levels": [
+      "images/levels/background_ballpit.png",
+      "images/levels/background_basement.png",
+      "images/levels/background_code.png",
+      "images/levels/background_google.png",
+      "images/levels/wall_ballpit.png",
+      "images/levels/wall_basement.png",
+      "images/levels/wall_code.png",
+      "images/levels/wall_google.png",
+      "images/levels/wall.png"
+    ],
+    "minigun": [
+      "images/minigun/minigun_0.png",
+      "images/minigun/minigun_1.png",
+      "images/minigun/minigun_2.png",
+      "images/minigun/minigun_3.png"
+    ],
+    "player": {
+      "player1": [
+        "images/player/player1/pl1_dead.png",
+        "images/player/player1/pl1_jump.png",
+        "images/player/player1/pl1_run_3.png",
+        "images/player/player1/pl1_run.png",
+        "images/player/player1/pl1_standing.png"
+      ],
+      "player2": [
+        "images/player/player2/pl2_dead.png",
+        "images/player/player2/pl2_jump.png",
+        "images/player/player2/pl2_run.png",
+        "images/player/player2/pl2_standing.png"
+      ],
+      "player3": [
+        "images/player/player3/pl3_dead.png",
+        "images/player/player3/pl3_jump.png",
+        "images/player/player3/pl3_run.png",
+        "images/player/player3/pl3_standing.png"
+      ],
+      "player4": [
+        "images/player/player4/pl4_dead.png",
+        "images/player/player4/pl4_jump.png",
+        "images/player/player4/pl4_run.png",
+        "images/player/player4/pl4_standing.png"
+      ]
+    },
+    "player_head": [
+      "images/player_head/player_head_0.png",
+      "images/player_head/player_head_1.png",
+      "images/player_head/player_head_2.png",
+      "images/player_head/player_head_3.png"
+    ],
+    "shotgun": [
+      "images/shotgun/shotgun_0.png",
+      "images/shotgun/shotgun_1.png",
+      "images/shotgun/shotgun_2.png",
+      "images/shotgun/shotgun_3.png"
+    ],
+    "weapon_spawn": [
+      "images/weapon_spawn/mystery_box_blank.png",
+      "images/weapon_spawn/mystery_box.png"
+    ],
+    "win": [
+      "images/win/pl1_win.png",
+      "images/win/pl2_win.png",
+      "images/win/pl3_win.png",
+      "images/win/pl4_win.png"
+    ]
+  },
+  "videos": [
+    "videos/video_0.mp4",
+    "videos/video_1.mp4",
+    "videos/video_2.mp4",
+    "videos/video_3.mp4",
+    "videos/video_4.mp4",
+    "videos/video_5.mp4",
+    "videos/video_6.mp4",
+    "videos/video_7.mp4",
+    "videos/video_8.mp4",
+    "videos/video_9.mp4",
+    "videos/video_10.mp4",
+    "videos/video_11.mp4",
+    "videos/video_12.mp4"
+  ],
+
+  "mainmenu": [
+    "mainmenu/background.png",
+    "mainmenu/floor.png",
+    "mainmenu/foreground.png",
+    "mainmenu/lamp_0.png",
+    "mainmenu/lamp_1.png",
+    "mainmenu/logo.png",
+    "mainmenu/lvl_0_title.png",
+    "mainmenu/lvl_1_title.png",
+    "mainmenu/lvl_2_title.png",
+    "mainmenu/lvl_3_title.png",
+    "mainmenu/lvl_ballpit.png",
+    "mainmenu/lvl_ballpit-2.png",
+    "mainmenu/lvl_code.png",
+    "mainmenu/lvl_code-2.png",
+    "mainmenu/lvl_frame.png",
+    "mainmenu/lvl_google.png",
+    "mainmenu/lvl_google-2.png",
+    "mainmenu/lvl_select_players.png",
+    "mainmenu/lvl_vr.png",
+    "mainmenu/lvl_vr-2.png",
+    "mainmenu/players_0.png",
+    "mainmenu/players_1.png"
+  ],
+
+  "models": [
+    {
+      "file": "models/player_001-v1.glb",
+      "displayName": "Player 1",
+      "tags": ["player"]
+    },
+    {
+      "file": "models/player_002-v1.glb",
+      "displayName": "Player 2",
+      "tags": ["player"]
+    },
+    {
+      "file": "models/player_003-v1.glb",
+      "displayName": "Player 3",
+      "tags": ["player"]
+    },
+    {
+      "file": "models/player_004-v1.glb",
+      "displayName": "Player 4",
+      "tags": ["player"]
+    },
+    {
+      "file": "models/bow-v1.glb",
+      "displayName": "Bow",
+      "tags": ["weapon", "bow"]
+    },
+    {
+      "file": "models/mini-gun-v1.glb",
+      "displayName": "Mini Gun",
+      "tags": ["weapon", "gun"]
+    },
+    {
+      "file": "models/shotgun-v1.glb",
+      "displayName": "Shotgun",
+      "tags": ["weapon", "shotgun"]
+    }
+  ],
+
+  "sounds": [
+    { "file": "sounds/bow.wav", "type": "sfx", "label": "Bow" },
+    { "file": "sounds/gun.wav", "type": "sfx", "label": "Gun" },
+    { "file": "sounds/minigun.wav", "type": "sfx", "label": "Minigun" },
+    { "file": "sounds/reward.wav", "type": "sfx", "label": "Reward" },
+    { "file": "sounds/shotgun.wav", "type": "sfx", "label": "Shotgun" },
+    { "file": "sounds/theme.wav", "type": "music", "label": "Theme" }
+  ]
+}

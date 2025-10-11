@@ -1,0 +1,43 @@
+// .eslintrc.js
+module.exports = {
+    env: {
+        browser: true,
+        es6: true,
+        node: true
+    },
+    extends: "eslint:recommended",
+    parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: "module"
+    },
+    rules: {
+        "no-console": "off",
+        "indent": [
+            "error",
+            2,
+            { "SwitchCase": 1 }
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "never"
+        ],
+        "no-empty": [
+            "warn"
+        ],
+        "no-unused-vars": [
+            "warn",
+            { "args": "none" }
+        ],
+        "no-unreachable": [
+          "warn"
+        ]
+    }
+};

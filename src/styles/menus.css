@@ -1,0 +1,139 @@
+/* src/styles/menus.css */
+
+.menu-wrap {
+    display: none; /* Initially hidden, JS controls visibility */
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* Corrected path to assets */
+    background-image: url("/assets/mainmenu/background.png");
+    background-position: 70% center;
+    background-size: cover;
+}
+
+.menu-wrap .logo {
+    height: 50vh;
+    position: absolute;
+    left: 50%;
+    top: 10%;
+    transform: translateX(-50%) translateY(-20%);
+    z-index: 30;
+    /* Background image will be set by menus.js */
+}
+
+.menu-wrap .players {
+    height: 40vh;
+    position: absolute;
+    top: 100vh;
+    transform: translateY(calc(-100% - 2vw));
+    z-index: 5;
+    /* These might need individual background-image URLs like '/assets/mainmenu/players_0.png' if they are images */
+}
+
+.menu-wrap .pl0 {
+    left: 3vw;
+}
+
+.menu-wrap .pl1 {
+    right: 10vw;
+    height: 35vh;
+}
+
+.menu-wrap .lamp {
+    position: absolute;
+    top: 0;
+    height: 100vh;
+    z-index: 5;
+    /* These might need individual background-image URLs like '/assets/mainmenu/lamp_0.png' if they are images */
+}
+
+.menu-wrap .lamp0 {
+    left: 0;
+}
+
+.menu-wrap .lamp1 {
+    right: 0;
+}
+
+.menu-wrap .floor {
+    position: absolute;
+    bottom: 0;
+    width: 100vw;
+    left: 0;
+    /* This might need a background-image URL like '/assets/mainmenu/floor.png' if it's an image */
+}
+
+.menu-wrap .lvl-players {
+    /* This class name seems related to old 2D logic */
+    position: absolute;
+    width: 35vw;
+    left: 52%;
+    transform: translateX(-50%) translateY(-2vh);
+    bottom: 0;
+    /* This might need a background-image URL like '/assets/mainmenu/lvl_select_players.png' if it's an image */
+}
+
+.menu-wrap .menu {
+    position: absolute;
+    z-index: 30;
+    left: 50%;
+    top: 55%;
+    transform: translateX(-50%);
+    width: 15vw;
+    min-width: 8.5em;
+    height: 15vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 24px;
+    word-spacing: 0.15em;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.menu-wrap .menu .bt {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    height: 20%;
+    font-family: "Press Start 2P", cursive;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 100%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5em 1em;
+    margin: 0.2em 0;
+    box-sizing: border-box;
+    border: 2px solid white;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    pointer-events: auto !important;
+    text-align: center;
+}
+
+.menu-wrap .menu .bt:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: #ffff00;
+    color: #ffff00;
+    transform: scale(1.05);
+}
+
+.menu-wrap .menu .bt:active {
+    transform: scale(0.95);
+    background-color: rgba(255, 255, 0, 0.3);
+}
+
+.menu-wrap .menu .start {
+    width: 100%;
+}
+.menu-wrap .menu .settings {
+    width: 66%;
+}
+.menu-wrap .menu .exit {
+    width: 33%;
+}

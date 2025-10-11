@@ -1,0 +1,1031 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CubeQuest 2.5D Platformer</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.min.js"></script>
+        <style>
+            @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
+            body {
+                margin: 0;
+                overflow: hidden;
+                font-family: "Press Start 2P", cursive;
+                background-color: #111;
+                color: white;
+            }
+
+            #game-container {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+            }
+
+            #ui-container {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+            }
+
+            .character-select-tile {
+                transition: all 0.3s ease;
+                filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0));
+            }
+
+            .character-select-tile:hover {
+                transform: scale(1.05);
+                filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+            }
+
+            .locked-character {
+                filter: brightness(0.3) blur(1px);
+            }
+
+            .hud-element {
+                background-color: rgba(0, 0, 0, 0.7);
+                border: 2px solid white;
+                border-radius: 8px;
+                padding: 8px;
+            }
+
+            .health-bar {
+                height: 20px;
+                background: linear-gradient(
+                    to right,
+                    #ff0000,
+                    #ffff00,
+                    #00ff00
+                );
+                transition: width 0.3s ease;
+            }
+
+            #game-canvas {
+                display: block;
+                width: 100%;
+                height: 100%;
+            }
+
+            .zoom-effect {
+                animation: zoomInOut 0.5s ease-out;
+            }
+
+            @keyframes zoomInOut {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.1);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Main Game Container -->
+        <div id="game-container">
+            <canvas id="game-canvas"></canvas>
+        </div>
+
+        <!-- UI Container (overlays) -->
+        <div id="ui-container">
+            <!-- Character Select Screen -->
+            <div
+                id="character-select"
+                class="w-full h-full flex flex-col items-center justify-center bg-black bg-opacity-90"
+            >
+                <h1 class="text-4xl mb-8 text-yellow-400">
+                    SELECT YOUR CHARACTER
+                </h1>
+                <div class="grid grid-cols-5 gap-6 w-3/4">
+                    <!-- Character tiles will be generated here -->
+                </div>
+                <div class="mt-8 flex space-x-4">
+                    <button
+                        id="start-game"
+                        class="px-6 py-3 bg-green-600 rounded-lg text-white font-bold pointer-events-auto hover:bg-green-700 transition"
+                    >
+                        START GAME
+                    </button>
+                    <button
+                        id="back-button"
+                        class="px-6 py-3 bg-gray-600 rounded-lg text-white font-bold pointer-events-auto hover:bg-gray-700 transition"
+                    >
+                        BACK
+                    </button>
+                </div>
+                <div class="mt-4 text-sm text-gray-400">
+                    <p>
+                        Player 1: Use WASD to move, SPACE to jump, F to attack
+                    </p>
+                    <p>
+                        Player 2: Use Arrow Keys to move, ENTER to jump, M to
+                        attack
+                    </p>
+                </div>
+            </div>
+
+            <!-- In-Game HUD -->
+            <div id="game-hud" class="hidden w-full h-full pointer-events-none">
+                <div class="absolute top-4 left-4 flex space-x-4">
+                    <!-- Player 1 HUD -->
+                    <div class="hud-element">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-red-500 rounded-full"></div>
+                            <span>P1</span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="health-bar w-full" id="p1-health"></div>
+                            <div class="text-xs mt-1" id="p1-score">
+                                Score: 0
+                            </div>
+                        </div>
+                        <div class="mt-2 text-xs" id="p1-weapon">
+                            Weapon: Fists
+                        </div>
+                    </div>
+
+                    <!-- Player 2 HUD -->
+                    <div class="hud-element">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-blue-500 rounded-full"></div>
+                            <span>P2</span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="health-bar w-full" id="p2-health"></div>
+                            <div class="text-xs mt-1" id="p2-score">
+                                Score: 0
+                            </div>
+                        </div>
+                        <div class="mt-2 text-xs" id="p2-weapon">
+                            Weapon: Fists
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute top-4 right-4 hud-element">
+                    <div class="text-sm">
+                        Time: <span id="game-time">00:00</span>
+                    </div>
+                    <div class="text-xs mt-2">
+                        Kills: <span id="total-kills">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pause Menu -->
+            <div
+                id="pause-menu"
+                class="hidden w-full h-full flex flex-col items-center justify-center bg-black bg-opacity-80"
+            >
+                <h1 class="text-4xl mb-8 text-yellow-400">GAME PAUSED</h1>
+                <div class="flex flex-col space-y-4">
+                    <button
+                        id="resume-game"
+                        class="px-6 py-3 bg-green-600 rounded-lg text-white font-bold pointer-events-auto hover:bg-green-700 transition"
+                    >
+                        RESUME
+                    </button>
+                    <button
+                        id="restart-game"
+                        class="px-6 py-3 bg-yellow-600 rounded-lg text-white font-bold pointer-events-auto hover:bg-yellow-700 transition"
+                    >
+                        RESTART
+                    </button>
+                    <button
+                        id="quit-game"
+                        class="px-6 py-3 bg-red-600 rounded-lg text-white font-bold pointer-events-auto hover:bg-red-700 transition"
+                    >
+                        QUIT TO MENU
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Game Constants
+            const CHARACTERS = [
+                {
+                    id: 1,
+                    name: "Cube Knight",
+                    unlocked: true,
+                    model: "knight.glb",
+                    texture: "knight.png",
+                },
+                {
+                    id: 2,
+                    name: "Pixel Wizard",
+                    unlocked: true,
+                    model: "wizard.glb",
+                    texture: "wizard.png",
+                },
+                {
+                    id: 3,
+                    name: "Block Ninja",
+                    unlocked: true,
+                    model: "ninja.glb",
+                    texture: "ninja.png",
+                },
+                {
+                    id: 4,
+                    name: "Square Brawler",
+                    unlocked: true,
+                    model: "brawler.glb",
+                    texture: "brawler.png",
+                },
+                {
+                    id: 5,
+                    name: "Mystery 1",
+                    unlocked: false,
+                    model: "secret1.glb",
+                    texture: "secret1.png",
+                },
+                {
+                    id: 6,
+                    name: "Mystery 2",
+                    unlocked: false,
+                    model: "secret2.glb",
+                    texture: "secret2.png",
+                },
+                {
+                    id: 7,
+                    name: "Mystery 3",
+                    unlocked: false,
+                    model: "secret3.glb",
+                    texture: "secret3.png",
+                },
+                {
+                    id: 8,
+                    name: "Mystery 4",
+                    unlocked: false,
+                    model: "secret4.glb",
+                    texture: "secret4.png",
+                },
+                {
+                    id: 9,
+                    name: "Mystery 5",
+                    unlocked: false,
+                    model: "secret5.glb",
+                    texture: "secret5.png",
+                },
+                {
+                    id: 10,
+                    name: "Mystery 6",
+                    unlocked: false,
+                    model: "secret6.glb",
+                    texture: "secret6.png",
+                },
+            ];
+
+            const WEAPONS = [
+                { id: 1, name: "Fists", damage: 5, model: "fists.glb" },
+                { id: 2, name: "Sword", damage: 15, model: "sword.glb" },
+                { id: 3, name: "Hammer", damage: 20, model: "hammer.glb" },
+                {
+                    id: 4,
+                    name: "Gun",
+                    damage: 10,
+                    model: "gun.glb",
+                    ranged: true,
+                },
+            ];
+
+            // Game State
+            let gameState = {
+                scene: null,
+                camera: null,
+                renderer: null,
+                controls: null,
+                world: [],
+                players: [],
+                weapons: [],
+                selectedCharacters: [1, 1], // Default to first character for both players
+                gameStarted: false,
+                gameTime: 0,
+                gameInterval: null,
+                keys: {},
+                lastTime: 0,
+                physicsWorld: null,
+            };
+
+            // DOM Elements
+            const dom = {
+                gameCanvas: document.getElementById("game-canvas"),
+                characterSelect: document.getElementById("character-select"),
+                gameHud: document.getElementById("game-hud"),
+                pauseMenu: document.getElementById("pause-menu"),
+                startGameBtn: document.getElementById("start-game"),
+                backButton: document.getElementById("back-button"),
+                resumeGameBtn: document.getElementById("resume-game"),
+                restartGameBtn: document.getElementById("restart-game"),
+                quitGameBtn: document.getElementById("quit-game"),
+                characterGrid: document.querySelector(
+                    "#character-select .grid",
+                ),
+            };
+
+            // Initialize the game
+            function init() {
+                setupCharacterSelect();
+                setupEventListeners();
+                initThreeJS();
+                createWorld();
+
+                // Start with character select screen
+                showCharacterSelect();
+            }
+
+            // Set up the character selection grid
+            function setupCharacterSelect() {
+                dom.characterGrid.innerHTML = "";
+
+                CHARACTERS.forEach((character, index) => {
+                    const tile = document.createElement("div");
+                    tile.className = `character-select-tile flex flex-col items-center justify-center p-4 rounded-lg bg-gray-800 cursor-pointer pointer-events-auto ${character.unlocked ? "" : "locked-character"}`;
+                    tile.dataset.id = character.id;
+
+                    tile.innerHTML = `
+                    <div class="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center mb-2">
+                        ${
+                            character.unlocked
+                                ? `<img src="assets/characters/${character.texture}" alt="${character.name}" class="w-full h-full object-cover rounded-full">`
+                                : `<span class="text-4xl">?</span>`
+                        }
+                    </div>
+                    <span class="text-sm text-center">${character.unlocked ? character.name : "???"}</span>
+                `;
+
+                    if (character.unlocked) {
+                        tile.addEventListener("click", () =>
+                            selectCharacter(index + 1),
+                        );
+                    } else {
+                        tile.addEventListener("click", () => {
+                            tile.classList.add("zoom-effect");
+                            setTimeout(
+                                () => tile.classList.remove("zoom-effect"),
+                                500,
+                            );
+                        });
+                    }
+
+                    dom.characterGrid.appendChild(tile);
+                });
+            }
+
+            // Handle character selection
+            function selectCharacter(characterId) {
+                // For simplicity, we'll just alternate between players
+                const currentPlayer =
+                    gameState.selectedCharacters[0] ===
+                    gameState.selectedCharacters[1]
+                        ? 0
+                        : 1;
+                gameState.selectedCharacters[currentPlayer] = characterId;
+
+                // Update UI to show selection
+                const tiles = document.querySelectorAll(
+                    ".character-select-tile",
+                );
+                tiles.forEach((tile) => {
+                    tile.classList.remove(
+                        "border-4",
+                        "border-red-500",
+                        "border-blue-500",
+                    );
+                });
+
+                if (gameState.selectedCharacters[0]) {
+                    const p1Tile = document.querySelector(
+                        `.character-select-tile[data-id="${gameState.selectedCharacters[0]}"]`,
+                    );
+                    if (p1Tile)
+                        p1Tile.classList.add("border-4", "border-red-500");
+                }
+
+                if (gameState.selectedCharacters[1]) {
+                    const p2Tile = document.querySelector(
+                        `.character-select-tile[data-id="${gameState.selectedCharacters[1]}"]`,
+                    );
+                    if (p2Tile)
+                        p2Tile.classList.add("border-4", "border-blue-500");
+                }
+            }
+
+            // Set up event listeners
+            function setupEventListeners() {
+                // Character select buttons
+                dom.startGameBtn.addEventListener("click", startGame);
+                dom.backButton.addEventListener("click", showCharacterSelect);
+
+                // Pause menu buttons
+                dom.resumeGameBtn.addEventListener("click", resumeGame);
+                dom.restartGameBtn.addEventListener("click", restartGame);
+                dom.quitGameBtn.addEventListener("click", quitGame);
+
+                // Keyboard controls
+                window.addEventListener("keydown", (e) => {
+                    gameState.keys[e.key] = true;
+
+                    // Pause game with ESC
+                    if (e.key === "Escape" && gameState.gameStarted) {
+                        togglePause();
+                    }
+                });
+
+                window.addEventListener("keyup", (e) => {
+                    gameState.keys[e.key] = false;
+                });
+            }
+
+            // Initialize Three.js
+            function initThreeJS() {
+                // Create scene
+                gameState.scene = new THREE.Scene();
+                gameState.scene.background = new THREE.Color(0x87ceeb); // Sky blue
+
+                // Create camera
+                gameState.camera = new THREE.PerspectiveCamera(
+                    75,
+                    window.innerWidth / window.innerHeight,
+                    0.1,
+                    1000,
+                );
+                gameState.camera.position.set(0, 10, 20);
+                gameState.camera.lookAt(0, 0, 0);
+
+                // Create renderer
+                gameState.renderer = new THREE.WebGLRenderer({
+                    canvas: dom.gameCanvas,
+                    antialias: true,
+                });
+                gameState.renderer.setSize(
+                    window.innerWidth,
+                    window.innerHeight,
+                );
+                gameState.renderer.shadowMap.enabled = true;
+
+                // Add lights
+                const ambientLight = new THREE.AmbientLight(0x404040);
+                gameState.scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(
+                    0xffffff,
+                    1,
+                );
+                directionalLight.position.set(10, 20, 10);
+                directionalLight.castShadow = true;
+                directionalLight.shadow.mapSize.width = 2048;
+                directionalLight.shadow.mapSize.height = 2048;
+                gameState.scene.add(directionalLight);
+
+                // Handle window resize
+                window.addEventListener("resize", () => {
+                    gameState.camera.aspect =
+                        window.innerWidth / window.innerHeight;
+                    gameState.camera.updateProjectionMatrix();
+                    gameState.renderer.setSize(
+                        window.innerWidth,
+                        window.innerHeight,
+                    );
+                });
+            }
+
+            // Create the game world
+            function createWorld() {
+                // Create ground
+                const groundGeometry = new THREE.BoxGeometry(50, 1, 50);
+                const groundMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x00aa00,
+                });
+                const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+                ground.position.y = -0.5;
+                ground.receiveShadow = true;
+                gameState.scene.add(ground);
+
+                // Create some platforms
+                const platformGeometry = new THREE.BoxGeometry(5, 1, 5);
+                const platformMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x8888ff,
+                });
+
+                for (let i = 0; i < 5; i++) {
+                    const platform = new THREE.Mesh(
+                        platformGeometry,
+                        platformMaterial,
+                    );
+                    platform.position.set(
+                        Math.random() * 30 - 15,
+                        Math.random() * 5 + 2,
+                        Math.random() * 30 - 15,
+                    );
+                    platform.castShadow = true;
+                    platform.receiveShadow = true;
+                    gameState.scene.add(platform);
+                    gameState.world.push(platform);
+                }
+
+                // Create some obstacles
+                const obstacleGeometry = new THREE.BoxGeometry(2, 2, 2);
+                const obstacleMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xff0000,
+                });
+
+                for (let i = 0; i < 10; i++) {
+                    const obstacle = new THREE.Mesh(
+                        obstacleGeometry,
+                        obstacleMaterial,
+                    );
+                    obstacle.position.set(
+                        Math.random() * 40 - 20,
+                        1,
+                        Math.random() * 40 - 20,
+                    );
+                    obstacle.castShadow = true;
+                    obstacle.receiveShadow = true;
+                    gameState.scene.add(obstacle);
+                    gameState.world.push(obstacle);
+                }
+            }
+
+            // Create players
+            function createPlayers() {
+                // For now, we'll just use cubes as placeholders
+                // In a real implementation, you'd load GLB models here
+
+                // Player 1
+                const p1Geometry = new THREE.BoxGeometry(1, 2, 1);
+                const p1Material = new THREE.MeshStandardMaterial({
+                    color: 0xff0000,
+                });
+                const player1 = new THREE.Mesh(p1Geometry, p1Material);
+                player1.position.set(-5, 1, 0);
+                player1.castShadow = true;
+                gameState.scene.add(player1);
+                gameState.players.push({
+                    mesh: player1,
+                    health: 100,
+                    score: 0,
+                    weapon: WEAPONS[0],
+                    velocity: new THREE.Vector3(),
+                    onGround: false,
+                });
+
+                // Player 2
+                const p2Geometry = new THREE.BoxGeometry(1, 2, 1);
+                const p2Material = new THREE.MeshStandardMaterial({
+                    color: 0x0000ff,
+                });
+                const player2 = new THREE.Mesh(p2Geometry, p2Material);
+                player2.position.set(5, 1, 0);
+                player2.castShadow = true;
+                gameState.scene.add(player2);
+                gameState.players.push({
+                    mesh: player2,
+                    health: 100,
+                    score: 0,
+                    weapon: WEAPONS[0],
+                    velocity: new THREE.Vector3(),
+                    onGround: false,
+                });
+
+                // Add some AI players if less than 4 human players
+                for (let i = gameState.selectedCharacters.length; i < 4; i++) {
+                    const aiGeometry = new THREE.BoxGeometry(1, 2, 1);
+                    const aiMaterial = new THREE.MeshStandardMaterial({
+                        color: 0x00ff00,
+                    });
+                    const aiPlayer = new THREE.Mesh(aiGeometry, aiMaterial);
+                    aiPlayer.position.set(
+                        Math.random() * 20 - 10,
+                        1,
+                        Math.random() * 20 - 10,
+                    );
+                    aiPlayer.castShadow = true;
+                    gameState.scene.add(aiPlayer);
+                    gameState.players.push({
+                        mesh: aiPlayer,
+                        health: 100,
+                        score: 0,
+                        weapon: WEAPONS[0],
+                        velocity: new THREE.Vector3(),
+                        onGround: false,
+                        isAI: true,
+                    });
+                }
+            }
+
+            // Create weapons in the world
+            function createWeapons() {
+                // Place some weapons in the world
+                WEAPONS.slice(1).forEach((weapon) => {
+                    // For now, we'll just use cubes as placeholders
+                    // In a real implementation, you'd load GLB models here
+                    const weaponGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+                    const weaponMaterial = new THREE.MeshStandardMaterial({
+                        color: 0xffff00,
+                    });
+                    const weaponMesh = new THREE.Mesh(
+                        weaponGeometry,
+                        weaponMaterial,
+                    );
+                    weaponMesh.position.set(
+                        Math.random() * 30 - 15,
+                        1,
+                        Math.random() * 30 - 15,
+                    );
+                    weaponMesh.castShadow = true;
+                    gameState.scene.add(weaponMesh);
+                    gameState.weapons.push({
+                        mesh: weaponMesh,
+                        weaponData: weapon,
+                        collected: false,
+                    });
+                });
+            }
+
+            // Start the game
+            function startGame() {
+                createPlayers();
+                createWeapons();
+
+                gameState.gameStarted = true;
+                gameState.gameTime = 0;
+
+                // Start game timer
+                gameState.gameInterval = setInterval(() => {
+                    gameState.gameTime += 1;
+                    updateGameTimeDisplay();
+                }, 1000);
+
+                // Hide character select, show HUD
+                dom.characterSelect.classList.add("hidden");
+                dom.gameHud.classList.remove("hidden");
+
+                // Start game loop
+                gameState.lastTime = performance.now();
+                animate();
+            }
+
+            // Game loop
+            function animate() {
+                if (!gameState.gameStarted) return;
+
+                requestAnimationFrame(animate);
+
+                const currentTime = performance.now();
+                const deltaTime = (currentTime - gameState.lastTime) / 1000;
+                gameState.lastTime = currentTime;
+
+                // Update players
+                updatePlayers(deltaTime);
+
+                // Update camera
+                updateCamera();
+
+                // Update HUD
+                updateHUD();
+
+                gameState.renderer.render(gameState.scene, gameState.camera);
+            }
+
+            // Update player positions and actions
+            function updatePlayers(deltaTime) {
+                gameState.players.forEach((player, index) => {
+                    if (player.isAI) {
+                        updateAI(player, deltaTime);
+                    } else {
+                        updateHumanPlayer(player, index, deltaTime);
+                    }
+
+                    // Apply gravity
+                    player.velocity.y -= 9.8 * deltaTime;
+
+                    // Update position
+                    player.mesh.position.x += player.velocity.x * deltaTime;
+                    player.mesh.position.y += player.velocity.y * deltaTime;
+                    player.mesh.position.z += player.velocity.z * deltaTime;
+
+                    // Simple ground collision
+                    if (player.mesh.position.y < 1) {
+                        player.mesh.position.y = 1;
+                        player.velocity.y = 0;
+                        player.onGround = true;
+                    } else {
+                        player.onGround = false;
+                    }
+
+                    // Check weapon collisions
+                    checkWeaponCollisions(player);
+                });
+            }
+
+            // Update human-controlled player
+            function updateHumanPlayer(player, playerIndex, deltaTime) {
+                const moveSpeed = 5;
+                const jumpForce = 8;
+
+                // Player 1 controls (WASD, Space, F)
+                if (playerIndex === 0) {
+                    if (gameState.keys["w"] || gameState.keys["W"]) {
+                        player.velocity.z = -moveSpeed;
+                    } else if (gameState.keys["s"] || gameState.keys["S"]) {
+                        player.velocity.z = moveSpeed;
+                    } else {
+                        player.velocity.z = 0;
+                    }
+
+                    if (gameState.keys["a"] || gameState.keys["A"]) {
+                        player.velocity.x = -moveSpeed;
+                    } else if (gameState.keys["d"] || gameState.keys["D"]) {
+                        player.velocity.x = moveSpeed;
+                    } else {
+                        player.velocity.x = 0;
+                    }
+
+                    if (
+                        (gameState.keys[" "] || gameState.keys["Space"]) &&
+                        player.onGround
+                    ) {
+                        player.velocity.y = jumpForce;
+                    }
+
+                    if (gameState.keys["f"] || gameState.keys["F"]) {
+                        // Attack
+                        performAttack(player);
+                    }
+                }
+
+                // Player 2 controls (Arrow keys, Enter, M)
+                if (playerIndex === 1) {
+                    if (gameState.keys["ArrowUp"]) {
+                        player.velocity.z = -moveSpeed;
+                    } else if (gameState.keys["ArrowDown"]) {
+                        player.velocity.z = moveSpeed;
+                    } else {
+                        player.velocity.z = 0;
+                    }
+
+                    if (gameState.keys["ArrowLeft"]) {
+                        player.velocity.x = -moveSpeed;
+                    } else if (gameState.keys["ArrowRight"]) {
+                        player.velocity.x = moveSpeed;
+                    } else {
+                        player.velocity.x = 0;
+                    }
+
+                    if (gameState.keys["Enter"] && player.onGround) {
+                        player.velocity.y = jumpForce;
+                    }
+
+                    if (gameState.keys["m"] || gameState.keys["M"]) {
+                        // Attack
+                        performAttack(player);
+                    }
+                }
+            }
+
+            // Update AI-controlled player
+            function updateAI(player, deltaTime) {
+                // Simple AI that moves randomly and sometimes jumps
+                if (Math.random() < 0.02) {
+                    player.velocity.x = (Math.random() - 0.5) * 5;
+                    player.velocity.z = (Math.random() - 0.5) * 5;
+                }
+
+                if (Math.random() < 0.01 && player.onGround) {
+                    player.velocity.y = 8;
+                }
+
+                // Simple attack logic
+                if (Math.random() < 0.05) {
+                    performAttack(player);
+                }
+            }
+
+            // Perform an attack
+            function performAttack(player) {
+                // Simple attack logic - in a real game, you'd have proper hit detection
+                console.log(
+                    `${player.isAI ? "AI" : "Player"} attacks with ${player.weapon.name}`,
+                );
+
+                // Check for nearby players to damage
+                gameState.players.forEach((otherPlayer) => {
+                    if (otherPlayer !== player) {
+                        const distance = player.mesh.position.distanceTo(
+                            otherPlayer.mesh.position,
+                        );
+                        if (distance < 3) {
+                            // Attack range
+                            otherPlayer.health -= player.weapon.damage;
+                            if (otherPlayer.health <= 0) {
+                                otherPlayer.health = 0;
+                                player.score += 100;
+                                // Respawn player
+                                setTimeout(() => {
+                                    otherPlayer.health = 100;
+                                    otherPlayer.mesh.position.set(
+                                        Math.random() * 20 - 10,
+                                        1,
+                                        Math.random() * 20 - 10,
+                                    );
+                                }, 1000);
+                            }
+
+                            // Add zoom effect for impactful attacks
+                            document
+                                .getElementById("game-hud")
+                                .classList.add("zoom-effect");
+                            setTimeout(() => {
+                                document
+                                    .getElementById("game-hud")
+                                    .classList.remove("zoom-effect");
+                            }, 200);
+                        }
+                    }
+                });
+            }
+
+            // Check for weapon pickups
+            function checkWeaponCollisions(player) {
+                gameState.weapons.forEach((weapon) => {
+                    if (
+                        !weapon.collected &&
+                        player.mesh.position.distanceTo(weapon.mesh.position) <
+                            1.5
+                    ) {
+                        // Pick up weapon
+                        player.weapon = weapon.weaponData;
+                        weapon.collected = true;
+                        weapon.mesh.visible = false;
+
+                        // Show weapon pickup effect
+                        const pickupEffect = new THREE.Mesh(
+                            new THREE.SphereGeometry(1, 16, 16),
+                            new THREE.MeshBasicMaterial({
+                                color: 0xffff00,
+                                transparent: true,
+                                opacity: 0.7,
+                            }),
+                        );
+                        pickupEffect.position.copy(player.mesh.position);
+                        gameState.scene.add(pickupEffect);
+
+                        // Animate and remove effect
+                        let scale = 1;
+                        const animateEffect = () => {
+                            scale += 0.1;
+                            pickupEffect.scale.set(scale, scale, scale);
+                            pickupEffect.material.opacity -= 0.02;
+
+                            if (pickupEffect.material.opacity > 0) {
+                                requestAnimationFrame(animateEffect);
+                            } else {
+                                gameState.scene.remove(pickupEffect);
+                            }
+                        };
+                        animateEffect();
+                    }
+                });
+            }
+
+            // Update camera position
+            function updateCamera() {
+                // Simple camera that follows all players
+                if (gameState.players.length > 0) {
+                    const avgPosition = new THREE.Vector3(0, 0, 0);
+                    gameState.players.forEach((player) => {
+                        avgPosition.add(player.mesh.position);
+                    });
+                    avgPosition.divideScalar(gameState.players.length);
+
+                    // Position camera behind and above the average position
+                    const cameraOffset = new THREE.Vector3(0, 10, 20);
+                    gameState.camera.position
+                        .copy(avgPosition)
+                        .add(cameraOffset);
+                    gameState.camera.lookAt(avgPosition);
+                }
+            }
+
+            // Update HUD displays
+            function updateHUD() {
+                // Player 1 HUD
+                if (gameState.players[0]) {
+                    document.getElementById("p1-health").style.width =
+                        `${gameState.players[0].health}%`;
+                    document.getElementById("p1-score").textContent =
+                        `Score: ${gameState.players[0].score}`;
+                    document.getElementById("p1-weapon").textContent =
+                        `Weapon: ${gameState.players[0].weapon.name}`;
+                }
+
+                // Player 2 HUD
+                if (gameState.players[1]) {
+                    document.getElementById("p2-health").style.width =
+                        `${gameState.players[1].health}%`;
+                    document.getElementById("p2-score").textContent =
+                        `Score: ${gameState.players[1].score}`;
+                    document.getElementById("p2-weapon").textContent =
+                        `Weapon: ${gameState.players[1].weapon.name}`;
+                }
+
+                // Total kills (simplified)
+                let totalKills = 0;
+                gameState.players.forEach((player) => {
+                    if (player.score) {
+                        totalKills += Math.floor(player.score / 100);
+                    }
+                });
+                document.getElementById("total-kills").textContent = totalKills;
+            }
+
+            // Update game time display
+            function updateGameTimeDisplay() {
+                const minutes = Math.floor(gameState.gameTime / 60);
+                const seconds = gameState.gameTime % 60;
+                document.getElementById("game-time").textContent =
+                    `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+            }
+
+            // Toggle pause menu
+            function togglePause() {
+                if (dom.pauseMenu.classList.contains("hidden")) {
+                    // Pause game
+                    clearInterval(gameState.gameInterval);
+                    dom.pauseMenu.classList.remove("hidden");
+                } else {
+                    // Resume game
+                    gameState.gameInterval = setInterval(() => {
+                        gameState.gameTime += 1;
+                        updateGameTimeDisplay();
+                    }, 1000);
+                    dom.pauseMenu.classList.add("hidden");
+                }
+            }
+
+            // Resume game from pause
+            function resumeGame() {
+                dom.pauseMenu.classList.add("hidden");
+                gameState.gameInterval = setInterval(() => {
+                    gameState.gameTime += 1;
+                    updateGameTimeDisplay();
+                }, 1000);
+                animate(); // Restart game loop
+            }
+
+            // Restart game
+            function restartGame() {
+                // Clear existing game state
+                clearInterval(gameState.gameInterval);
+                gameState.players.forEach((player) => {
+                    gameState.scene.remove(player.mesh);
+                });
+                gameState.weapons.forEach((weapon) => {
+                    gameState.scene.remove(weapon.mesh);
+                });
+                gameState.players = [];
+                gameState.weapons = [];
+
+                // Start new game
+                startGame();
+                dom.pauseMenu.classList.add("hidden");
+            }
+
+            // Quit to menu
+            function quitGame() {
+                // Clear game state
+                clearInterval(gameState.gameInterval);
+                gameState.players.forEach((player) => {
+                    gameState.scene.remove(player.mesh);
+                });
+                gameState.weapons.forEach((weapon) => {
+                    gameState.scene.remove(weapon.mesh);
+                });
+                gameState.players = [];
+                gameState.weapons = [];
+                gameState.gameStarted = false;
+
+                // Show character select
+                showCharacterSelect();
+            }
+
+            // Show character select screen
+            function showCharacterSelect() {
+                dom.characterSelect.classList.remove("hidden");
+                dom.gameHud.classList.add("hidden");
+                dom.pauseMenu.classList.add("hidden");
+            }
+
+            // Initialize the game when the page loads
+            window.addEventListener("load", init);
+        </script>
+    </body>
+</html>

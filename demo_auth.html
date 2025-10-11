@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Campus - Auth Demo & Debug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .code-block {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-green { background-color: #10b981; }
+        .status-red { background-color: #ef4444; }
+        .status-yellow { background-color: #f59e0b; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Smart Campus Auth Demo</h1>
+            <p class="text-gray-600 mb-4">Debug and test the authentication flow</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-blue-800 mb-2">
+                        <span id="auth-status" class="status-indicator status-red"></span>
+                        Authentication Status
+                    </h3>
+                    <p id="auth-text" class="text-sm text-blue-600">Not Authenticated</p>
+                </div>
+                
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-green-800 mb-2">
+                        <span id="onboard-status" class="status-indicator status-red"></span>
+                        Onboarding Status
+                    </h3>
+                    <p id="onboard-text" class="text-sm text-green-600">Not Completed</p>
+                </div>
+                
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-purple-800 mb-2">
+                        <span id="user-status" class="status-indicator status-red"></span>
+                        User Data
+                    </h3>
+                    <p id="user-text" class="text-sm text-purple-600">No User</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Navigation Panel -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">🚀 Navigation</h2>
+                <div class="space-y-3">
+                    <button onclick="goToLanding()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                        Go to Landing Page
+                    </button>
+                    <button onclick="goToOnboarding()" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                        Go to Onboarding
+                    </button>
+                    <button onclick="goToGame()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                        Go to Game
+                    </button>
+                    <button onclick="goToMainMenu()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                        Go to Main Menu
+                    </button>
+                </div>
+            </div>
+
+            <!-- Authentication Controls -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">🔐 Auth Controls</h2>
+                <div class="space-y-3">
+                    <button onclick="simulateLogin()" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                        Simulate Login
+                    </button>
+                    <button onclick="completeOnboarding()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                        Complete Onboarding
+                    </button>
+                    <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                        Logout (Clear All)
+                    </button>
+                    <button onclick="clearOnboarding()" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                        Reset Onboarding Only
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Display -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">💾 localStorage Data</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-2">User Data:</h3>
+                    <div id="user-data" class="code-block">null</div>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-2">Onboarding Status:</h3>
+                    <div id="onboarding-data" class="code-block">null</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Scenarios -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">🧪 Test Scenarios</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <button onclick="testScenario('newUser')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-3 px-4 rounded transition-colors">
+                    New User Flow
+                </button>
+                <button onclick="testScenario('returningUser')" class="bg-green-100 hover:bg-green-200 text-green-800 font-medium py-3 px-4 rounded transition-colors">
+                    Returning User
+                </button>
+                <button onclick="testScenario('incompleteOnboarding')" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-medium py-3 px-4 rounded transition-colors">
+                    Incomplete Onboarding
+                </button>
+            </div>
+            
+            <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-semibold text-gray-700 mb-2">Scenario Results:</h3>
+                <div id="scenario-results" class="text-sm text-gray-600">Click a scenario to see expected behavior</div>
+            </div>
+        </div>
+
+        <!-- Debug Console -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">🔍 Debug Console</h2>
+            <div id="debug-console" class="code-block min-h-32 mb-4">Debug output will appear here...</div>
+            <button onclick="clearConsole()" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                Clear Console
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Debug console functionality
+        function log(message) {
+            const console = document.getElementById('debug-console');
+            const timestamp = new Date().toLocaleTimeString();
+            console.textContent += `[${timestamp}] ${message}\n`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('debug-console').textContent = 'Debug output will appear here...\n';
+        }
+
+        // Update status display
+        function updateStatus() {
+            const userData = localStorage.getItem('smartCampusUser');
+            const onboardingComplete = localStorage.getItem('smartCampusOnboardingCompleted');
+            
+            // Authentication status
+            const authStatus = document.getElementById('auth-status');
+            const authText = document.getElementById('auth-text');
+            if (userData) {
+                authStatus.className = 'status-indicator status-green';
+                authText.textContent = 'Authenticated';
+            } else {
+                authStatus.className = 'status-indicator status-red';
+                authText.textContent = 'Not Authenticated';
+            }
+
+            // Onboarding status
+            const onboardStatus = document.getElementById('onboard-status');
+            const onboardText = document.getElementById('onboard-text');
+            if (onboardingComplete === 'true') {
+                onboardStatus.className = 'status-indicator status-green';
+                onboardText.textContent = 'Completed';
+            } else {
+                onboardStatus.className = 'status-indicator status-red';
+                onboardText.textContent = 'Not Completed';
+            }
+
+            // User data status
+            const userStatus = document.getElementById('user-status');
+            const userText = document.getElementById('user-text');
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    userStatus.className = 'status-indicator status-green';
+                    userText.textContent = user.name || user.email || 'Unknown User';
+                } catch (e) {
+                    userStatus.className = 'status-indicator status-yellow';
+                    userText.textContent = 'Invalid Data';
+                }
+            } else {
+                userStatus.className = 'status-indicator status-red';
+                userText.textContent = 'No User';
+            }
+
+            // Update data display
+            document.getElementById('user-data').textContent = userData || 'null';
+            document.getElementById('onboarding-data').textContent = onboardingComplete || 'null';
+        }
+
+        // Navigation functions
+        function goToLanding() {
+            log('Navigating to landing page...');
+            window.location.href = 'landing.html';
+        }
+
+        function goToOnboarding() {
+            log('Navigating to onboarding...');
+            window.location.href = 'index.html?state=onboarding';
+        }
+
+        function goToGame() {
+            log('Navigating to game...');
+            window.location.href = 'index.html?state=game';
+        }
+
+        function goToMainMenu() {
+            log('Navigating to main menu...');
+            window.location.href = 'index.html';
+        }
+
+        // Authentication functions
+        function simulateLogin() {
+            log('Simulating user login...');
+            const mockUser = {
+                name: 'Demo User',
+                email: 'demo@codecollege.edu',
+                picture: 'https://via.placeholder.com/150',
+                sub: 'demo_user_' + Date.now()
+            };
+            localStorage.setItem('smartCampusUser', JSON.stringify(mockUser));
+            log(`User logged in: ${mockUser.name} (${mockUser.email})`);
+            updateStatus();
+        }
+
+        function completeOnboarding() {
+            log('Marking onboarding as completed...');
+            localStorage.setItem('smartCampusOnboardingCompleted', 'true');
+            updateStatus();
+        }
+
+        function logout() {
+            log('Logging out user and clearing all data...');
+            localStorage.removeItem('smartCampusUser');
+            localStorage.removeItem('smartCampusOnboardingCompleted');
+            updateStatus();
+        }
+
+        function clearOnboarding() {
+            log('Clearing onboarding status only...');
+            localStorage.removeItem('smartCampusOnboardingCompleted');
+            updateStatus();
+        }
+
+        // Test scenarios
+        function testScenario(scenario) {
+            const results = document.getElementById('scenario-results');
+            
+            switch (scenario) {
+                case 'newUser':
+                    logout();
+                    log('Test: New User - Cleared all data');
+                    results.innerHTML = `
+                        <strong>New User Flow:</strong><br>
+                        1. User visits index.html → Redirected to landing.html<br>
+                        2. User logs in → Redirected to onboarding<br>
+                        3. User completes onboarding → Enters game
+                    `;
+                    break;
+                    
+                case 'returningUser':
+                    simulateLogin();
+                    completeOnboarding();
+                    log('Test: Returning User - Set up authenticated + onboarded');
+                    results.innerHTML = `
+                        <strong>Returning User Flow:</strong><br>
+                        1. User visits index.html → Goes directly to main menu<br>
+                        2. No authentication or onboarding required
+                    `;
+                    break;
+                    
+                case 'incompleteOnboarding':
+                    simulateLogin();
+                    clearOnboarding();
+                    log('Test: Incomplete Onboarding - Authenticated but not onboarded');
+                    results.innerHTML = `
+                        <strong>Incomplete Onboarding Flow:</strong><br>
+                        1. User visits index.html → Redirected to onboarding<br>
+                        2. User completes onboarding → Enters game<br>
+                        3. Authentication already handled
+                    `;
+                    break;
+            }
+        }
+
+        // Helper functions for external access
+        window.authDemo = {
+            getUser: () => {
+                try {
+                    return JSON.parse(localStorage.getItem('smartCampusUser'));
+                } catch (e) {
+                    return null;
+                }
+            },
+            isOnboarded: () => localStorage.getItem('smartCampusOnboardingCompleted') === 'true',
+            isAuthenticated: () => localStorage.getItem('smartCampusUser') !== null,
+            clearAll: logout,
+            simulateLogin: simulateLogin,
+            log: log
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            log('Auth Demo initialized');
+            updateStatus();
+        });
+
+        // Auto-refresh status every 2 seconds
+        setInterval(updateStatus, 2000);
+    </script>
+</body>
+</html>

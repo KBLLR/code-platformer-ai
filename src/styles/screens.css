@@ -1,0 +1,12 @@
+.win-screen {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-position: 50% center;
+    background-size: cover;
+    z-index: 100;
+}
