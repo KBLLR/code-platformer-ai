@@ -1,0 +1,57 @@
+# SITEMAP_DETAILED — Directory Tree
+
+_Last generated: 2025-11-12_
+
+```
+.github/
+  workflows/
+agents/
+  audits/
+  projects/
+    gameplay-hardening/
+      future-features/
+      qa/
+      sessions/
+  scripts/
+  templates/
+    project-template/
+      future-features/
+      qa/
+      sessions/
+public/
+  assets/
+    images/
+      arrow/
+      bow/
+      diverse/
+      FFF-2ndPart/
+      gun/
+      levels/
+      minigun/
+      player/
+        player1/
+        player2/
+        player3/
+        player4/
+      player_head/
+      shotgun/
+      weapon_spawn/
+      win/
+    mainmenu/
+    models/
+    sounds/
+    videos/
+  characters3D/
+    2D/
+  data/
+    level/
+scripts/
+  ci/
+src/
+  styles/
+  ui/
+  utils/
+  weapon_spawns/
+  weapons/
+```
+> Generated via `agents/scripts/generate_sitemap.py`.

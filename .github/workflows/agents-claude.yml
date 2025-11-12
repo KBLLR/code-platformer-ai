@@ -1,0 +1,46 @@
+name: Agents - Claude Runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Single OPENTASK to execute"
+        required: true
+
+jobs:
+  claude:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Claude Code Base Action
+        id: claude
+        uses: anthropics/claude-code-base-action@v0.6.6
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Read agents/OPENTASKS.md. Execute the task: "${{ github.event.inputs.task }}".
+            Only modify files under agents/**. If scripts are needed, run:
+              - python agents/scripts/generate_audit.py
+              - python agents/scripts/generate_sitemap.py
+              - python agents/scripts/collect_opentasks.py
+            Summarize changes in 5 lines.
+          allowed_tools: |
+            Bash(git:*)
+            View
+            GlobTool
+            ReadFile
+            WriteFile
+          include_globs: |
+            agents/**
+
+      - name: Commit or PR
+        run: |
+          git config user.name "codex-agent"
+          git config user.email "codex@agents.local"
+          git add agents/** || true
+          git commit -m "claude: ${{ github.event.inputs.task }}" || echo "no changes"
+          git push || true

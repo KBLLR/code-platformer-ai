@@ -1,0 +1,76 @@
+name: Agents - Jules Bridge
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "OPENTASK for Jules to handle (creates/updates issue)"
+        required: true
+
+jobs:
+  jules-bridge:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Jules brief
+        id: brief
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          task_id = "${{ github.event.inputs.task }}".strip()
+          lines = Path("agents/OPENTASKS.md").read_text(encoding="utf-8").splitlines()
+          selected = None
+          for line in lines:
+              if not line.startswith("| ") or line.startswith("| Project"):
+                  continue
+              cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+              if len(cells) < 8:
+                  continue
+              row = {
+                  "Project": cells[0],
+                  "Status": cells[1],
+                  "ID": cells[2],
+                  "Title": cells[3],
+                  "Description": cells[4],
+                  "Priority": cells[5],
+                  "Owner": cells[6],
+                  "Notes": cells[7],
+              }
+              if row["ID"] == task_id:
+                  selected = row
+                  break
+          if selected is None:
+              raise SystemExit(f"Task {task_id} not found in agents/OPENTASKS.md")
+          content = f"""# Jules Task: {selected['ID']}
+
+## Title
+{selected['Title']}
+
+## Description
+{selected['Description']}
+
+## Priority
+{selected['Priority']}
+
+## References
+- agents/AGENTS.md
+- agents/HANDOFFS.md
+- agents/projects/{selected['Project'].lower().replace(' ', '-')}/
+
+## Notes
+{selected['Notes'] or 'None'}
+"""
+          Path("jules-brief.md").write_text(content, encoding="utf-8")
+          PY
+
+      - name: Create or update issue
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "Jules Task: ${{ github.event.inputs.task }}"
+          content-file: jules-brief.md
+          labels: jules,handoff

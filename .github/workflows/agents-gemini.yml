@@ -1,0 +1,37 @@
+name: Agents - Gemini Runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Single OPENTASK to execute"
+        required: true
+
+jobs:
+  gemini:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Gemini CLI
+        id: gemini
+        uses: google-github-actions/run-gemini-cli@v1
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          prompt: |
+            Read agents/OPENTASKS.md. Execute "${{ github.event.inputs.task }}" by running:
+              - python agents/scripts/generate_audit.py
+              - python agents/scripts/generate_sitemap.py
+              - python agents/scripts/collect_opentasks.py
+            Only write to agents/**. Produce a concise summary.
+
+      - name: Commit or PR
+        run: |
+          git config user.name "codex-agent"
+          git config user.email "codex@agents.local"
+          git add agents/** || true
+          git commit -m "gemini: ${{ github.event.inputs.task }}" || echo "no changes"
+          git push || true

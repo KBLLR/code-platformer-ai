@@ -1,0 +1,40 @@
+name: Agents - Codex Runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Single OPENTASK to execute"
+        required: true
+
+jobs:
+  codex:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Execute Codex session
+        id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt: |
+            Execute "${{ github.event.inputs.task }}". Use repo context to run:
+              - python agents/scripts/generate_audit.py
+              - python agents/scripts/generate_sitemap.py
+              - python agents/scripts/collect_opentasks.py
+            Restrict changes to agents/**. Return a 5-line summary.
+
+      - name: Save output
+        run: |
+          if [ -n "${{ steps.codex.outputs.final-message }}" ]; then
+            echo "${{ steps.codex.outputs.final-message }}" > agents/audits/codex-summary.md
+          fi
+          git config user.name "codex-agent"
+          git config user.email "codex@agents.local"
+          git add agents/** || true
+          git commit -m "codex: ${{ github.event.inputs.task }}" || echo "no changes"
+          git push || true

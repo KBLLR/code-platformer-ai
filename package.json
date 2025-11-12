@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "agents:update": "python agents/scripts/generate_audit.py && python agents/scripts/generate_sitemap.py && python agents/scripts/collect_opentasks.py"
   },
   "dependencies": {
     "gsap": "^3.12.7",
