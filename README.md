@@ -1,12 +1,5 @@
 # CODE Platformer AI
 
-![Screenshot](https://docs.google.com/uc?id=1WIytsk3VCZLLf_YjEMzqwUChsTP1ThE7)
-![Screenshot](https://docs.google.com/uc?id=1msGwWIlsMfhQKyv-6eg49_LZ-cS1xMpX)
-![Screenshot](https://docs.google.com/uc?id=1MTlQze9cNbrO_mK8SwvrAQABZgG11nBt)
-![Screenshot](https://docs.google.com/uc?id=1SN5rpQuwPhy9m5OzmBdWhikwqdudRbNR)
-
----
-
 ## Overview
 
 A simple 2D platformer game built using HTML5 Canvas and JavaScript. The game features a player character that can move left and right, jump, and interact with platforms and obstacles. Here is the guide with instructions on how to defeat Eleanor.
@@ -27,6 +20,27 @@ For comprehensive technical documentation, architecture proposals, and agent wor
 
 ## Original Game: Fund Fun Factory 2018 - Factory Battle Royale
 
+<table>
+  <tr>
+    <td width="50%">
+      <img src="https://docs.google.com/uc?id=1WIytsk3VCZLLf_YjEMzqwUChsTP1ThE7" alt="Screenshot 1" width="100%"/>
+    </td>
+    <td width="50%">
+      <img src="https://docs.google.com/uc?id=1msGwWIlsMfhQKyv-6eg49_LZ-cS1xMpX" alt="Screenshot 2" width="100%"/>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="https://docs.google.com/uc?id=1MTlQze9cNbrO_mK8SwvrAQABZgG11nBt" alt="Screenshot 3" width="100%"/>
+    </td>
+    <td width="50%">
+      <img src="https://docs.google.com/uc?id=1SN5rpQuwPhy9m5OzmBdWhikwqdudRbNR" alt="Screenshot 4" width="100%"/>
+    </td>
+  </tr>
+</table>
+
+---
+## Updated Proto: Fund Fun Factory 2025 AI Edition - Global Battle Royale 
 <table>
   <tr>
     <td width="50%">
