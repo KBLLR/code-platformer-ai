@@ -26,6 +26,35 @@
 
 ---
 
+## Entry: 2025-11-14 — "WebGPU Battle Royale Infrastructure" (Agent codename: `Claude`)
+
+### Summary
+
+- Created complete project infrastructure for WebGPU Battle Royale transformation in `agents/projects/webgpu-battle-royale/`
+- Generated comprehensive task breakdown with 104 tasks across 5 phases (Foundation, Content Generation, Networking, Battle Royale Features, Polish & Optimization)
+- Built agent executor script (`agents/scripts/agent_executor.py`) for automated task selection and session management
+- Created GitHub Actions workflow (`.github/workflows/agent-auto-execute.yml`) for automated task execution with manual and scheduled triggers
+- Moved architecture documents to `agents/audits/` (WEBGPU_BATTLE_ROYALE_ARCHITECTURE.md, REPOSITORY_AUDIT.md)
+- Updated README.md with technical documentation links and 2x2 image grid for original Fund Fun Factory game
+- Updated OPENTASKS.md with 8 critical WBR tasks and regenerated sitemaps
+
+### Next Agent To-Do
+
+1. Review architecture proposal in `agents/audits/WEBGPU_BATTLE_ROYALE_ARCHITECTURE.md` to understand the full transformation vision
+2. Execute first task WBR-001 (WebGPU renderer migration) using: `python agents/scripts/agent_executor.py --project webgpu-battle-royale --task WBR-001`
+3. Test GitHub Actions workflow with manual dispatch to validate automation pipeline
+4. Consider updating `collect_opentasks.py` to auto-parse markdown table format from `tasks.md`
+
+### Notes
+
+- All 104 tasks defined with dependencies, priorities, and estimates in `agents/projects/webgpu-battle-royale/tasks.md`
+- Critical path tasks identified: WBR-001 (WebGPU) → WBR-015 (Physics) → WBR-021 (Terrain) → WBR-036 (Server) → WBR-041 (Client) → WBR-055 (Match) → WBR-092 (Testing)
+- Total estimated effort: ~207 days (10 months with 1 developer, 5 months with 2 developers)
+- Agent executor creates session logs and implementation prompts automatically
+- Use task IDs (WBR-XXX) in all commits and PRs
+
+---
+
 ## Entry: 2025-11-12 — "Gameplay Hardening Kickoff" (Agent codename: `Codex`)
 
 ### Summary
