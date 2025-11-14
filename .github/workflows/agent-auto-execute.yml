@@ -1,0 +1,94 @@
+name: Agent Auto-Execute Tasks
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: 'Project name'
+        required: true
+        default: 'webgpu-battle-royale'
+      task_id:
+        description: 'Task ID (leave empty for auto-pick)'
+        required: false
+      agent_name:
+        description: 'Agent name'
+        required: false
+        default: 'GitHub Actions Bot'
+  schedule:
+    # Run daily at 00:00 UTC to pick up tasks
+    - cron: '0 0 * * *'
+
+jobs:
+  auto-execute:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Pick and prepare task
+        id: pick_task
+        run: |
+          if [ -n "${{ github.event.inputs.task_id }}" ]; then
+            python agents/scripts/agent_executor.py \
+              --project "${{ github.event.inputs.project }}" \
+              --task "${{ github.event.inputs.task_id }}" \
+              --owner "${{ github.event.inputs.agent_name }}"
+          else
+            python agents/scripts/agent_executor.py \
+              --project "${{ github.event.inputs.project || 'webgpu-battle-royale' }}" \
+              --auto-pick \
+              --owner "${{ github.event.inputs.agent_name || 'GitHub Actions Bot' }}"
+          fi
+
+      - name: Run agent update scripts
+        run: npm run agents:update
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            agent: prepare task for execution
+
+            Automated task preparation by agent executor.
+          branch: agent/task-execution-${{ github.run_number }}
+          title: '[Agent] Task Execution Preparation'
+          body: |
+            ## Automated Task Preparation
+
+            This PR was created by the Agent Auto-Execute workflow.
+
+            ### Changes
+            - Task moved to In Progress
+            - Session log created
+            - Implementation prompt generated
+            - Agent documentation updated
+
+            ### Next Steps
+            An AI agent should review the implementation prompt and execute the task.
+
+            ---
+            *Automated by GitHub Actions*
+          labels: |
+            automation
+            agent-task
+          assignees: ${{ github.actor }}

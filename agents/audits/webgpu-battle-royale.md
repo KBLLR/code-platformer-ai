@@ -1,19 +1,19 @@
-# Gameplay Hardening Initiative — AUDIT Log
+# WebGPU Battle Royale Transformation — AUDIT Log
 
 **Date:** 2025-11-14
 **LLM Auditor:** Automation Sync
-**Project:** Gameplay Hardening Initiative
+**Project:** WebGPU Battle Royale Transformation
 **Author:** Agent Automation
 **Tags:** [audit, checklist, readiness, project-state]
 
 
 ## Project Summary
 
-Stabilise the CODE Platformer AI build so contributors can resume work without rediscovering tribal knowledge. This project tracks readiness work spanning gameplay systems, onboarding, and documentation.
+Transform CODE Platformer AI from a local 2.5D platformer into a WebGPU-powered 3D multiplayer battle royale with procedurally generated stages, diverse controller support, animated characters, and realistic physics.
 
 ### Artifacts
-- Tasks — `projects/gameplay-hardening/tasks.md`
-- Sessions — `projects/gameplay-hardening/sessions/`
+- Tasks — `projects/webgpu-battle-royale/tasks.md`
+- Sessions — `projects/webgpu-battle-royale/sessions/`
 
 ---
 
