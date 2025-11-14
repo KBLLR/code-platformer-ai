@@ -138,6 +138,26 @@
 
 ---
 
+### Agent Profile & 3D Character
+
+**IMPORTANT**: When completing significant work or your final handoff, create your 3D character profile:
+
+1. Copy `agents/AGENT_PROFILE_TEMPLATE.md` to `agents/profiles/[your-codename].md`
+2. Fill out all sections with your character details
+3. Generate your character using the Sora T-pose prompt provided in the template
+4. Reference your profile in this handoff entry
+
+**Your Agent Card** (fill out when completing major milestone):
+
+```markdown
+**Codename**: [Your alias]
+**Character**: [Brief 1-line description]
+**Profile**: [Link to agents/profiles/your-codename.md]
+**3D Model**: [Link to generated Sora image]
+```
+
+---
+
 ### Final Git status
 
 * **Current branch:** `[branch-name]` (e.g., `main`, `dev`, or feature branch)
@@ -154,3 +174,7 @@
 
 Use this log for every agent or collaborator to document project continuity.
 Each entry should be **self-contained**, concise, and actionable for the next agent.
+
+**Character Creation**: All agents should create a 3D character profile using `agents/AGENT_PROFILE_TEMPLATE.md`
+to establish their visual identity in the SMART CAMPUS arena. This helps build team culture and
+provides visual representation for contributors.
