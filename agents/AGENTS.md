@@ -84,6 +84,17 @@
   - create PRs or commits labeled `automation` + `handoff`
   - require maintainers to review before merging
 
+## Agent Character Profiles
+
+When completing significant contributions or your final handoff:
+
+1. **Create your 3D character** using `agents/AGENT_PROFILE_TEMPLATE.md`
+2. Save your profile to `agents/profiles/[your-codename].md`
+3. Generate your character with Sora using the T-pose template provided
+4. Reference your profile in handoff entries and session logs
+
+This establishes your visual identity in the SMART CAMPUS arena and helps build team culture. See `agents/profiles/README.md` for active agent profiles.
+
 ## Build, Test, and QA
 - `npm install` — sync dependencies after every branch switch.
 - `npm run dev` — Vite dev server with HMR; append `?state=game` or `?state=onboarding` for shortcuts.

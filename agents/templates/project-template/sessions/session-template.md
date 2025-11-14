@@ -45,15 +45,24 @@ Use this template to document each working session **before committing**. Duplic
   - 
 
 ## Session Quote
-- *Famous quote that captured the tone of the session*:  
-  > “ … ” — *Author*
+- *Famous quote that captured the tone of the session*:
+  > " … " — *Author*
 
-## Post Image Prompt
-- Use the following prompt to generate an illustrative image for the post/session recap:  
+## Agent Character Profile
+- **Your Codename**: `[e.g., Shadow Compiler, Render Knight, etc.]`
+- **Character Status**:
+  - [ ] Profile not yet created
+  - [ ] Profile in progress → `agents/profiles/[your-codename].md`
+  - [ ] Profile complete with 3D Sora generation
+
+> **First-time agents**: When completing your first major milestone, create your 3D character using `agents/AGENT_PROFILE_TEMPLATE.md`. This establishes your visual identity in the SMART CAMPUS arena.
+
+## Post Image Prompt (Optional)
+- Use this for session recap visuals (separate from your 3D character profile):
   ```
   Describe the scene, style, and mood in one line
   ```
 
 ---
 
-> **Reminder:** Attach this session log (or link to it) in the PR description so reviewers can quickly understand context, decisions, and outstanding work.
+> **Reminder:** Attach this session log (or link to it) in the PR description so reviewers can quickly understand context, decisions, and outstanding work. For major contributions, create your agent profile using the template at `agents/AGENT_PROFILE_TEMPLATE.md`.
