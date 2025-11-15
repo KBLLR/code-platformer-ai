@@ -24,13 +24,13 @@ python agents/scripts/agent_executor.py --project webgpu-battle-royale --task WB
 Each session log should include:
 
 1. **Task Information** - Task ID, title, priority
-2. **Session Start** - Date, time, agent codename
-3. **Approach** - Strategy and implementation plan
-4. **Changes Made** - Files modified, created, deleted
-5. **Testing** - How changes were validated
-6. **Blockers** - Any issues encountered
-7. **Next Steps** - What remains or what should be done next
-8. **Session End** - Completion time, summary
+1. **Session Start** - Date, time, agent codename
+1. **Approach** - Strategy and implementation plan
+1. **Changes Made** - Files modified, created, deleted
+1. **Testing** - How changes were validated
+1. **Blockers** - Any issues encountered
+1. **Next Steps** - What remains or what should be done next
+1. **Session End** - Completion time, summary
 
 ## Implementation Prompts
 
@@ -50,10 +50,10 @@ These contain:
 
 Agents should:
 1. Read the task prompt before starting
-2. Log all work in the session file
-3. Update the session log as work progresses
-4. Link the session in the PR description
-5. Mark the task as completed when done
+1. Log all work in the session file
+1. Update the session log as work progresses
+1. Link the session in the PR description
+1. Mark the task as completed when done
 
 ## Archiving
 

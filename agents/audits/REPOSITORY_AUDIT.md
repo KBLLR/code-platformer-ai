@@ -250,28 +250,28 @@ async fire(scene, aimDir) {
    - Impact: Cannot support realistic 3D battle royale gameplay
    - Effort: High (need full physics engine integration)
 
-2. **No Animation System**
+1. **No Animation System**
    - Location: src/Player.js:37-44
    - Impact: Static character models break immersion
    - Effort: Medium (Three.js AnimationMixer exists)
 
-3. **No Networking**
+1. **No Networking**
    - Impact: Cannot support online multiplayer
    - Effort: Very High (full architecture change)
 
 ### 2.2 Medium Priority Issues
 
-4. **Level Design is Static**
+1. **Level Design is Static**
    - Location: src/Level.js, src/World.js
    - Impact: Limited replayability for battle royale
    - Effort: High (procedural generation system)
 
-5. **2.5D Camera Constraint**
+1. **2.5D Camera Constraint**
    - Location: src/Game.js:106-127
    - Impact: Limits gameplay to platformer style
    - Effort: Medium (camera controller refactor)
 
-6. **Basic Collision Detection**
+1. **Basic Collision Detection**
    - Location: src/Player.js:352-442
    - Impact: Poor performance with many objects
    - Effort: High (spatial partitioning needed)
@@ -283,7 +283,7 @@ async fire(scene, aimDir) {
    - Impact: Accessibility concerns
    - Effort: Medium (add touch, mouse controls)
 
-2. **Asset Loading Not Optimized**
+1. **Asset Loading Not Optimized**
    - Location: src/LoaderManager.js
    - Impact: 50MB per player model
    - Effort: Low (add DRACO compression)
@@ -528,12 +528,12 @@ async fire(scene, aimDir) {
    - Test compatibility and performance
    - Fallback to WebGL for unsupported browsers
 
-2. **Add Animation System**
+1. **Add Animation System**
    - Use Three.js AnimationMixer
    - Create basic animation clips (idle, walk, jump, attack)
    - Update Player.js to control animations
 
-3. **Implement Touch Controls**
+1. **Implement Touch Controls**
    - Add virtual joystick for mobile
    - Touch buttons for actions
    - Improve accessibility
@@ -545,12 +545,12 @@ async fire(scene, aimDir) {
    - Replace custom physics with rigid bodies
    - Add collision shapes and materials
 
-2. **Prototype Procedural Generation**
+1. **Prototype Procedural Generation**
    - Create terrain generator using noise (Perlin/Simplex)
    - Generate biomes and structures
    - Use compute shaders for GPU generation
 
-3. **Enhance Camera System**
+1. **Enhance Camera System**
    - Add third-person camera controller
    - Implement camera smoothing and following
    - Add camera collision detection
@@ -563,14 +563,14 @@ async fire(scene, aimDir) {
    - Add state synchronization and lag compensation
    - Create lobby and matchmaking systems
 
-2. **Scale for Battle Royale**
+1. **Scale for Battle Royale**
    - Optimize for 50-100 players
    - Implement spatial partitioning (octree)
    - Add Level of Detail (LOD) system
    - Network culling (only sync nearby players)
    - Object pooling
 
-3. **Battle Royale Game Mode**
+1. **Battle Royale Game Mode**
    - Shrinking play zone
    - Loot and equipment systems
    - Match lifecycle (lobby, plane, game, end)
@@ -589,12 +589,12 @@ CODE Platformer AI is a **solid foundation** for a multiplayer game with profess
 
 **Critical Path:**
 1. WebGPU migration (2 weeks)
-2. Physics engine integration (4 weeks)
-3. Animation system (3 weeks)
-4. Networking architecture (8-12 weeks)
-5. Procedural generation (6-8 weeks)
-6. Battle royale features (8-12 weeks)
-7. Optimization and testing (8-12 weeks)
+1. Physics engine integration (4 weeks)
+1. Animation system (3 weeks)
+1. Networking architecture (8-12 weeks)
+1. Procedural generation (6-8 weeks)
+1. Battle royale features (8-12 weeks)
+1. Optimization and testing (8-12 weeks)
 
 **Risk Factors:**
 - High: Networking complexity at scale

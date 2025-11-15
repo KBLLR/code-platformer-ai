@@ -19,14 +19,14 @@
 ## Working Session Flow
 
 1. Claim or create a task (e.g., `GH-001`) in `tasks.md`, assign yourself, and move it to the appropriate section.
-2. Create a session log before coding via the helper script (auto-fills timestamps):
+1. Create a session log before coding via the helper script (auto-fills timestamps):
 
    ```bash
    python agents/scripts/init_agent_session.py --project gameplay-hardening --task GH-001 --title "Audit follow-up"
    ```
 
-3. Note objectives, entry points, commands run, and link the relevant task IDs inside the log.
-4. Keep your session file updated as you work; commit it alongside the code and reference it in PR descriptions.
+1. Note objectives, entry points, commands run, and link the relevant task IDs inside the log.
+1. Keep your session file updated as you work; commit it alongside the code and reference it in PR descriptions.
 
 ## ⚙️ Automation Loop
 
@@ -49,9 +49,9 @@
   - The manual dispatch route adds markdown linting, posts a summary comment (if a PR number is provided), and appends an `automation:ci-validation` entry to `agents/HANDOFFS.md`.
 - Contribution flow:
   1. Pull latest `main`.
-  2. Run `npm run agents:update`.
-  3. Review diffs under `agents/audits/`, `agents/SITEMAP*.md`, `agents/OPENTASKS.md`, and `agents/HANDOFFS.md`.
-  4. Commit alongside your feature work, referencing the relevant task ID and session log.
+  1. Run `npm run agents:update`.
+  1. Review diffs under `agents/audits/`, `agents/SITEMAP*.md`, `agents/OPENTASKS.md`, and `agents/HANDOFFS.md`.
+  1. Commit alongside your feature work, referencing the relevant task ID and session log.
 - Outputs land under `agents/audits/`, `agents/SITEMAP*.md`, `agents/OPENTASKS.md`, and `agents/HANDOFFS.md`. Do not edit these files by hand—re-run the generators instead.
 - `.env.example` at repo root documents non-secret runtime vars (update it when env requirements change so audits stay honest).
 
@@ -89,9 +89,9 @@
 When completing significant contributions or your final handoff:
 
 1. **Create your 3D character** using `agents/AGENT_PROFILE_TEMPLATE.md`
-2. Save your profile to `agents/profiles/[your-codename].md`
-3. Generate your character with Sora using the T-pose template provided
-4. Reference your profile in handoff entries and session logs
+1. Save your profile to `agents/profiles/[your-codename].md`
+1. Generate your character with Sora using the T-pose template provided
+1. Reference your profile in handoff entries and session logs
 
 This establishes your visual identity in the SMART CAMPUS arena and helps build team culture. See `agents/profiles/README.md` for active agent profiles.
 

@@ -137,9 +137,9 @@ Once generated, store the following for future reference:
 ## Usage Guidelines
 
 1. **Complete this profile** when finishing major milestones or before your final handoff entry
-2. **Generate your character** using the compiled Sora prompt
-3. **Reference your codename** consistently in all handoff entries and session logs
-4. **Update your character** if you return for additional work (maintain continuity)
+1. **Generate your character** using the compiled Sora prompt
+1. **Reference your codename** consistently in all handoff entries and session logs
+1. **Update your character** if you return for additional work (maintain continuity)
 
 ---
 

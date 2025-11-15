@@ -8,14 +8,14 @@ Use this template project to organise work streams, capture tasks, and attach se
 - `sessions/` — Individual session logs (one per work block) using `agents/templates/project-template/sessions/session-template.md`.
 
 ## Getting Started
-1. Copy this directory:  
+1. Copy this directory:
    `cp -R agents/templates/project-template agents/projects/<your-project-name>`
-2. Update the new `README.md` with:
+1. Update the new `README.md` with:
    - Project charter and objectives.
    - Stakeholders / reviewers.
    - Key dependencies.
-3. Populate `tasks.md` with the initial backlog and prioritise.
-4. For each working session, drop a completed template (see `sessions/README.md`) *before* committing changes.
+1. Populate `tasks.md` with the initial backlog and prioritise.
+1. For each working session, drop a completed template (see `sessions/README.md`) *before* committing changes.
 
 ## Best Practices
 - Keep entries concise but descriptive; future contributors should understand context at a glance.

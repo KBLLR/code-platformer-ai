@@ -25,11 +25,11 @@ Transform CODE Platformer AI from a local 2.5D platformer into a **WebGPU-powere
 ### Primary Goals
 
 1. ✨ **10x Performance Boost** via WebGPU renderer and compute shaders
-2. 🌍 **Procedural Arenas** with infinite variety and biomes
-3. 🎮 **Universal Input** supporting all controller types
-4. 👥 **Massive Multiplayer** for 50-100 concurrent players
-5. 🎬 **Animated Characters** with skeletal rigs and state machines
-6. ⚡ **Realistic Physics** using Rapier engine
+1. 🌍 **Procedural Arenas** with infinite variety and biomes
+1. 🎮 **Universal Input** supporting all controller types
+1. 👥 **Massive Multiplayer** for 50-100 concurrent players
+1. 🎬 **Animated Characters** with skeletal rigs and state machines
+1. ⚡ **Realistic Physics** using Rapier engine
 
 ### Success Metrics
 

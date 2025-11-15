@@ -13,11 +13,11 @@ Store every working-session log for this project in this directory. Name each fi
    ```bash
    python agents/scripts/init_agent_session.py --project <project> --task TASK-ID --title "Working session"
    ```
-2. Fill in every field:
+1. Fill in every field:
    - Date, start/end time, elapsed time.
    - Objectives, execution notes, errors, decisions, learnings.
    - Session quote and image prompt.
-3. Save before committing any code from that session.
+1. Save before committing any code from that session.
 
 ## Linking Sessions to Tasks
 - Reference relevant task IDs (from `../tasks.md`) in the “Associated Tasks / Issues” field.
