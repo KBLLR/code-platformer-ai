@@ -78,6 +78,7 @@
 - `.github/workflows/agents-gemini.yml` — Google Gemini CLI mirrors the same flow via manual dispatch.
 - `.github/workflows/agents-codex.yml` — OpenAI Codex executes the generator trio, writes a summary, and commits results when dispatched.
 - `.github/workflows/agents-jules-bridge.yml` — creates Jules-friendly GitHub issues for labeled OPENTASKS so the hosted agent can open PRs.
+- `.github/workflows/agent-auto-execute.yml` — hybrid loop that (a) auto-picks the highest priority task (or respects a manual task ID), (b) generates the session log + implementation prompt, (c) ensures the nominated agent has a stub profile in `agents/profiles/`, and (d) opens a draft PR pinging the specified GitHub user so a human can finish the implementation. Run it from Actions with `agent_codename` + `notify_user` filled in to keep humans in the review loop.
 - All agent workflows:
   - restrict edits to `agents/**`
   - log activity via `agents/scripts/handoff_sync.py`

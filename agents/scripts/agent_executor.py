@@ -76,17 +76,57 @@ def prioritize_tasks(tasks):
     return sorted(tasks, key=lambda t: priority_order.get(t['priority'], 99))
 
 
-def create_session_log(project_path, task):
+def ensure_agent_profile(agents_root, agent_codename):
+    """Create a stub profile for the assigned agent if needed."""
+    if not agent_codename:
+        return None
+
+    profiles_dir = agents_root / 'profiles'
+    profiles_dir.mkdir(parents=True, exist_ok=True)
+    profile_file = profiles_dir / f"{agent_codename}.md"
+    if profile_file.exists():
+        return profile_file
+
+    generated_on = datetime.now().strftime("%Y-%m-%d")
+    content = f"""# Agent Profile - {agent_codename}
+
+_Auto-generated on {generated_on}. Replace the prompts below with your completed profile and follow the guidance in `agents/AGENT_PROFILE_TEMPLATE.md` to craft your 3D character + personality._
+
+## Agent Identity
+- **Codename / Alias**: {agent_codename}
+- **Primary Role**:
+- **Active Since**:
+- **Completed Tasks**:
+
+## 3D Character Prompt
+- **Visual Style (Adventure Time 3D | Stylized Toon | etc.)**:
+- **Character Description**:
+- **Special Features**:
+
+## Personality Traits
+- 
+
+## Generation Metadata
+- **Generation Date**:
+- **Image URL/Path**:
+- **Associated Handoff Entry**:
+"""
+    write_md(profile_file, content)
+    return profile_file
+
+
+def create_session_log(project_path, task, agent_codename=None):
     """Create a session log file for the task."""
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     session_file = project_path / 'sessions' / f"{timestamp}-{task['id']}.md"
+    agent_label = agent_codename if agent_codename else "[Your codename]"
 
     content = f"""# Session Log - {task['id']}
 
 **Task:** {task['title']}
 **Priority:** {task['priority'].capitalize()}
 **Started:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-**Agent:** [Your codename]
+**Agent:** {agent_label}
 
 ---
 
@@ -283,6 +323,7 @@ def main():
     parser.add_argument('--auto-pick', action='store_true', help='Automatically pick highest priority task')
     parser.add_argument('--list', action='store_true', help='List available tasks')
     parser.add_argument('--all', action='store_true', help='Show all tasks (use with --list)')
+    parser.add_argument('--agent', help='Codename of the human agent who will continue the task')
 
     args = parser.parse_args()
 
@@ -352,12 +393,17 @@ def main():
         print("Error: Must specify --task, --auto-pick, or --list")
         sys.exit(1)
 
+    agent_codename = args.agent.strip() if args.agent else None
+    profile_file = ensure_agent_profile(agents_root, agent_codename)
+    if profile_file:
+        print(f"✓ Ensured agent profile: {profile_file.relative_to(agents_root)}")
+
     # Create session log and prompt
     print(f"\n{'='*80}")
     print(f"PREPARING TASK: {selected_task['id']}")
     print(f"{'='*80}\n")
 
-    session_file = create_session_log(project_path, selected_task)
+    session_file = create_session_log(project_path, selected_task, agent_codename)
     print(f"✓ Created session log: {session_file.relative_to(agents_root)}")
 
     architecture_path = agents_root / 'audits' / 'WEBGPU_BATTLE_ROYALE_ARCHITECTURE.md'
