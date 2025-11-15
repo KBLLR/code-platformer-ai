@@ -31,6 +31,7 @@ pyrightconfig.json
 
 # Directories
 node_modules/
+dist/
 
 # npm lock file that will be generated in yarn projects
 package-lock.json
