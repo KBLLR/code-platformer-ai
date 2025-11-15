@@ -36,6 +36,8 @@ jobs:
     # Run on push/schedule, but not on pull_request_target
     if: github.event_name != 'pull_request_target'
     runs-on: ubuntu-latest
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
 
@@ -56,22 +58,45 @@ jobs:
             agents/**/*.md
             **/README.md
 
-      - name: Commit updates
+      - name: Clean Python bytecode
         run: |
+          find . -type d -name "__pycache__" -prune -exec rm -rf {} +
+          find . -name "*.py[cod]" -delete
+          find . -name "*.pyo" -delete
+
+      - name: Commit agent docs if changed
+        run: |
+          set -eo pipefail
+
+          # Configure git author inline for CI
           git config user.name "codex-agent"
-          git config user.email "codex@agents.local"
-          if [ -n "$(git status --porcelain)" ]; then
-            git add agents/HANDOFFS.md agents/audits/** agents/SITEMAP*.md agents/OPENTASKS.md agents/AUDIT-log.md
-            git commit -m "ci: auto-update agent docs"
-            git push
-          else
-            echo "No changes to commit"
+          git config user.email "codex-agent@users.noreply.github.com"
+
+          # Stage only the relevant documentation paths
+          git add \
+            agents/AGENTS.md \
+            agents/HANDOFFS.md \
+            agents/OPENTASKS.md \
+            agents/AUDIT-log.md \
+            agents/audits/ \
+            agents/SITEMAP*.md 2>/dev/null || true
+
+          # Check if anything is actually staged
+          if git diff --cached --quiet; then
+            echo "No documentation changes to commit. Exiting cleanly."
+            exit 0
           fi
+
+          # Commit with [skip ci] to prevent infinite loops
+          git commit -m "chore(docs): auto-update agent documentation [skip ci]"
+          git push
 
   handoff-entry:
     # Only when a PR against this repo is closed AND merged
     if: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -87,22 +112,39 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
         run: python agents/scripts/handoff_sync.py
 
+      - name: Clean Python bytecode
+        run: |
+          find . -type d -name "__pycache__" -prune -exec rm -rf {} +
+          find . -name "*.py[cod]" -delete
+          find . -name "*.pyo" -delete
+
       - name: Commit handoff entry
         run: |
+          set -eo pipefail
+
+          # Configure git author inline for CI
           git config user.name "codex-agent"
-          git config user.email "codex@agents.local"
-          if [ -n "$(git status --porcelain agents/HANDOFFS.md)" ]; then
-            git add agents/HANDOFFS.md
-            git commit -m "ci: append handoff entry"
-            git push
-          else
-            echo "No handoff updates"
+          git config user.email "codex-agent@users.noreply.github.com"
+
+          # Stage only HANDOFFS.md
+          git add agents/HANDOFFS.md 2>/dev/null || true
+
+          # Check if anything is actually staged
+          if git diff --cached --quiet; then
+            echo "No handoff changes to commit. Exiting cleanly."
+            exit 0
           fi
+
+          # Commit with [skip ci] to prevent infinite loops
+          git commit -m "chore(handoff): append handoff entry [skip ci]"
+          git push
 
   ci-validation:
     # Only on manual runs
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -129,17 +171,37 @@ jobs:
         run: |
           python agents/scripts/handoff_sync.py --append "automation:ci-validation | $(date -u +%F) | workflow_dispatch:${{ inputs.reason }}"
 
+      - name: Clean Python bytecode
+        run: |
+          find . -type d -name "__pycache__" -prune -exec rm -rf {} +
+          find . -name "*.py[cod]" -delete
+          find . -name "*.pyo" -delete
+
       - name: Commit validation artifacts
         run: |
+          set -eo pipefail
+
+          # Configure git author inline for CI
           git config user.name "codex-agent"
-          git config user.email "codex@agents.local"
-          if [ -n "$(git status --porcelain)" ]; then
-            git add agents/HANDOFFS.md agents/audits/** agents/SITEMAP*.md agents/OPENTASKS.md
-            git commit -m "ci: automation validation sweep"
-            git push
-          else
-            echo "No validation changes"
+          git config user.email "codex-agent@users.noreply.github.com"
+
+          # Stage only the relevant documentation paths
+          git add \
+            agents/HANDOFFS.md \
+            agents/OPENTASKS.md \
+            agents/AUDIT-log.md \
+            agents/audits/ \
+            agents/SITEMAP*.md 2>/dev/null || true
+
+          # Check if anything is actually staged
+          if git diff --cached --quiet; then
+            echo "No validation changes to commit. Exiting cleanly."
+            exit 0
           fi
+
+          # Commit with [skip ci] to prevent infinite loops
+          git commit -m "chore(ci): automation validation sweep [skip ci]"
+          git push
 
       - name: Comment on PR (optional)
         if: ${{ inputs.pull_number != '' }}
