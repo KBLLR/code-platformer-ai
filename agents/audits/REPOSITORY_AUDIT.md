@@ -278,12 +278,12 @@ async fire(scene, aimDir) {
 
 ### 2.3 Low Priority Issues
 
-7. **Limited Controller Support**
+1. **Limited Controller Support**
    - Location: src/InputController.js
    - Impact: Accessibility concerns
    - Effort: Medium (add touch, mouse controls)
 
-8. **Asset Loading Not Optimized**
+2. **Asset Loading Not Optimized**
    - Location: src/LoaderManager.js
    - Impact: 50MB per player model
    - Effort: Low (add DRACO compression)
@@ -540,37 +540,37 @@ async fire(scene, aimDir) {
 
 ### 9.2 Short-Term Goals (Month 1-2)
 
-4. **Integrate Physics Engine**
+1. **Integrate Physics Engine**
    - Choose: Rapier (Rust/WASM) or Ammo.js (Bullet port)
    - Replace custom physics with rigid bodies
    - Add collision shapes and materials
 
-5. **Prototype Procedural Generation**
+2. **Prototype Procedural Generation**
    - Create terrain generator using noise (Perlin/Simplex)
    - Generate biomes and structures
    - Use compute shaders for GPU generation
 
-6. **Enhance Camera System**
+3. **Enhance Camera System**
    - Add third-person camera controller
    - Implement camera smoothing and following
    - Add camera collision detection
 
 ### 9.3 Long-Term Goals (Month 3-6)
 
-7. **Build Networking Layer**
+1. **Build Networking Layer**
    - Choose: WebRTC (P2P) or WebSocket (client-server)
    - Implement client-server architecture
    - Add state synchronization and lag compensation
    - Create lobby and matchmaking systems
 
-8. **Scale for Battle Royale**
+2. **Scale for Battle Royale**
    - Optimize for 50-100 players
    - Implement spatial partitioning (octree)
    - Add Level of Detail (LOD) system
    - Network culling (only sync nearby players)
    - Object pooling
 
-9. **Battle Royale Game Mode**
+3. **Battle Royale Game Mode**
    - Shrinking play zone
    - Loot and equipment systems
    - Match lifecycle (lobby, plane, game, end)
