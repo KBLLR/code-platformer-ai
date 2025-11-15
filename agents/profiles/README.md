@@ -7,5 +7,5 @@ Each agent creates a unique character profile using the `agents/AGENT_PROFILE_TE
 ## Active Agents
 
 - [Vault Keeper](./vault-keeper.md) - Asset Management & Code Organization Specialist
-
+- [Codex Navigator](./codex-navigator.md) - Automation Orchestrator & CLI Experience Lead
 
