@@ -36,6 +36,11 @@ dist/
 # npm lock file that will be generated in yarn projects
 package-lock.json
 
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*.pyo
+
 # characters3D directory (redundant with assets/models/)
 # Keep only the 2D subdirectory
 public/characters3D/*.glb

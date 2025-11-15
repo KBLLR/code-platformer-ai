@@ -36,8 +36,14 @@ Automated continuous integration for agent documentation and validation.
 **Actions:**
 - Generates agent documentation (audit, sitemap, opentasks)
 - Runs markdown linting
-- Auto-commits documentation updates
+- Auto-commits documentation updates (only when changes exist)
 - Tracks handoff entries
+
+**Behavior:**
+- **Idempotent:** The workflow passes cleanly when there are no documentation changes to commit
+- **Bytecode handling:** Python bytecode (`.pyc`, `__pycache__`) files are automatically cleaned and ignored to prevent spurious failures
+- **Loop prevention:** Auto-commits include `[skip ci]` to avoid infinite workflow re-triggering
+- **Scoped commits:** Only stages and commits files in `agents/` documentation paths, not accidental artifacts
 
 #### 2. **Claude Runner** (`.github/workflows/agents-claude.yml`)
 Execute tasks using Claude AI (Anthropic).
