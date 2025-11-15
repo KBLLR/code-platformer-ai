@@ -14,6 +14,7 @@ agents/
       future-features/
       qa/
       sessions/
+    ui-agent-gallery/
     webgpu-battle-royale/
       qa/
       sessions/
