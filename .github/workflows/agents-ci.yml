@@ -2,45 +2,60 @@ name: Agents CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       target_ref:
         description: "Branch or ref to validate"
         default: "main"
         required: false
+        type: string
       pull_number:
         description: "PR number to comment on (optional)"
         required: false
+        type: string
       reason:
         description: "Why run validation?"
         required: true
         default: "manual"
+        type: string
   schedule:
     - cron: "0 9 * * MON"
   pull_request_target:
-    types: [closed]
+    types:
+      - closed
+
+# Needed so jobs that push / comment don't randomly 403
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   update-docs:
+    # Run on push/schedule, but not on pull_request_target
     if: github.event_name != 'pull_request_target'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Generate agent docs
         run: |
           python agents/scripts/generate_audit.py
           python agents/scripts/generate_sitemap.py
           python agents/scripts/collect_opentasks.py
+
       - name: Markdown lint
         uses: DavidAnson/markdownlint-cli2-action@v18
         with:
           globs: |
             agents/**/*.md
             **/README.md
+
       - name: Commit updates
         run: |
           git config user.name "codex-agent"
@@ -54,20 +69,24 @@ jobs:
           fi
 
   handoff-entry:
-    if: github.event_name == 'pull_request_target' && github.event.pull_request.merged == true
+    # Only when a PR against this repo is closed AND merged
+    if: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.base.ref }}
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Append handoff entry
         env:
           GITHUB_EVENT_PATH: ${{ github.event_path }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: python agents/scripts/handoff_sync.py
+
       - name: Commit handoff entry
         run: |
           git config user.name "codex-agent"
@@ -81,32 +100,35 @@ jobs:
           fi
 
   ci-validation:
+    # Only on manual runs
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.target_ref || 'main' }}
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Run generators
         run: |
           python agents/scripts/generate_audit.py
           python agents/scripts/generate_sitemap.py
           python agents/scripts/collect_opentasks.py
+
       - name: Lint Markdown
         uses: DavidAnson/markdownlint-cli2-action@v18
         with:
           globs: |
             agents/**/*.md
             **/README.md
+
       - name: Append automation validation entry
         run: |
           python agents/scripts/handoff_sync.py --append "automation:ci-validation | $(date -u +%F) | workflow_dispatch:${{ inputs.reason }}"
+
       - name: Commit validation artifacts
         run: |
           git config user.name "codex-agent"
@@ -118,6 +140,7 @@ jobs:
           else
             echo "No validation changes"
           fi
+
       - name: Comment on PR (optional)
         if: ${{ inputs.pull_number != '' }}
         uses: peter-evans/create-or-update-comment@v4
