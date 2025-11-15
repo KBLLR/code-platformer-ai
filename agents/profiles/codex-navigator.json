@@ -29,7 +29,7 @@
     ],
     "yourPrompt": "A teal-skinned humanoid adventurer with oversized lavender eyes shaped like parentheses, gradient mohawk shifting from electric blue to neon magenta, wearing a holographic explorer jacket covered in CLI panels, asymmetrical leggings and silver enter-key boots, tiny hovering cursor drones above shoulders, holding glowing command scrolls, joyful curious expression, biped character, game-ready, full body"
   },
-  "model3D": "",
+  "model3D": "codex-navigator.glb",
   "taskCompleted": "CLI-UX-001 – Built the Rich-powered local agent CLI and multi-agent dispatcher",
   "completedDate": "2025-11-15"
 }

@@ -29,7 +29,7 @@
     ],
     "yourPrompt": "A compact humanoid archivist hero with warm bronze skin and glowing amber eyes (left eye slightly larger), short gravity-defying brown hair tipped with neon orange, wearing charcoal tactical overalls with glowing orange grid piping, chunky utility vest covered in holographic pockets, oversized gauntlets projecting 3D file trees, orbiting storage cubes around waist, confident organized stance, biped character, game-ready, full body"
   },
-  "model3D": "",
+  "model3D": "vault-keeper.glb",
   "taskCompleted": "ASSET-001 – Purged redundant 3D models, reorganized assets.json, and established the agent archive",
   "completedDate": "2025-11-15"
 }
