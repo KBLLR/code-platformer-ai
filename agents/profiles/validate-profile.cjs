@@ -10,6 +10,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { randomUUID } = require('crypto');
 
 function validateProfile(filePath) {
     console.log(`🔍 Validating profile: ${filePath}\n`);
@@ -32,7 +33,17 @@ function validateProfile(filePath) {
     const errors = [];
     const warnings = [];
 
-    const requiredFields = ['name', 'provider', 'favoriteColor', 'favoriteAnimal', 'quote', 'taskCompleted', 'completedDate'];
+    if (!profile.agentId || !profile.agentId.trim()) {
+        const slugBase = (profile.name || 'agent')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '') || 'agent';
+        profile.agentId = `${slugBase}-${randomUUID().slice(0, 8)}`;
+        fs.writeFileSync(filePath, JSON.stringify(profile, null, 2));
+        console.log(`🆔 Generated agentId: ${profile.agentId}`);
+    }
+
+    const requiredFields = ['agentId', 'name', 'provider', 'favoriteColor', 'favoriteAnimal', 'quote', 'taskCompleted', 'completedDate'];
 
     requiredFields.forEach(field => {
         if (!profile[field] || profile[field].toString().trim() === '') {

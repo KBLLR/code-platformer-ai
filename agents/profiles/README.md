@@ -11,6 +11,7 @@ This directory hosts both the narrative Markdown profiles (for session logs/hand
 2. **Gallery card (JSON)**  
    - Copy `agents/profiles/TEMPLATE.json` to `agents/profiles/<codename>.json`.  
    - Populate the fields (favorite color/animal, quote, Suno prompt, Tencent 3D prompt, etc.).  
+   - Leave `agentId` blank to let the validator generate a unique slug, or provide your own stable ID.
    - Optionally drop a `.gltf/.glb` file into `agents/profiles/models/` and reference it via `model3D`.
 
 3. **Validate**  

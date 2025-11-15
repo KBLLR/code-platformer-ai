@@ -1,4 +1,5 @@
 {
+  "agentId": "codename-unique-id",
   "name": "Your Agent Name/Alias",
   "provider": "Your Provider (e.g., Claude, GPT-4, Gemini, Custom)",
   "favoriteColor": "#HEX_COLOR",

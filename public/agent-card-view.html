@@ -1,186 +1,532 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Agent Dossier</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Dossier Viewer</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Text:wght@100..900&display=swap');
+
+        :root {
+            --tp-base-background-color: hsla(240, 10%, 15%, 0.8);
+            --tp-base-shadow-color: hsla(0, 0%, 0%, 0.2);
+            --tp-button-background-color: hsla(240, 10%, 30%, 1.0);
+            --tp-button-background-color-active: hsla(240, 10%, 45%, 1.0);
+            --tp-button-background-color-focus: hsla(240, 10%, 40%, 1.0);
+            --tp-button-background-color-hover: hsla(240, 10%, 35%, 1.0);
+            --tp-button-foreground-color: hsla(240, 10%, 75%, 1.0);
+            --tp-container-background-color: hsla(240, 10%, 20%, 0.5);
+            --tp-container-foreground-color: hsla(240, 10%, 75%, 1.0);
+            --tp-groove-color: hsla(240, 10%, 10%, 1.0);
+            --tp-input-background-color: hsla(240, 10%, 18%, 1.0);
+            --tp-input-foreground-color: hsla(240, 10%, 75%, 1.0);
+            --tp-label-foreground-color: hsla(240, 10%, 55%, 1.0);
+            --tp-monitor-background-color: hsla(240, 10%, 10%, 1.0);
+            --tp-monitor-foreground-color: hsla(240, 10%, 55%, 1.0);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: radial-gradient(circle at top, #020617, #0f172a 60%, #111827 100%);
-            min-height: 100vh;
+            font-family: "Big Shoulders Text", sans-serif;
+            background: linear-gradient(180deg, #202020 0%, #343434 100%);
+            color: white;
+            overscroll-behavior: none;
+            user-select: none;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
         }
-        .info-panel {
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid rgba(148, 163, 184, 0.2);
+
+        canvas {
+            display: block;
         }
-        model-viewer {
+
+        #app {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 400px;
+            height: 100%;
+            z-index: 2;
+        }
+
+        #logo {
+            top: 40px;
+            left: 40px;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        #logo p {
+            font-size: 1.2em;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+        }
+
+        #nav-links {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        #nav-links a {
+            text-decoration: none;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            font-size: 0.8em;
+            color: white;
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 999px;
+            transition: background 0.2s;
+        }
+
+        #nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        #footer {
+            text-align: right;
+            top: 10vh;
+            right: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            width: 40%;
+            max-width: 520px;
+            position: absolute;
+            line-height: 1.2;
+            z-index: 10;
+        }
+
+        #footer h2 {
+            font-size: 2.4em;
+            font-weight: 200;
+            margin-bottom: 0.8rem;
+        }
+
+        #footer p {
+            font-family: "Inter", sans-serif;
+            font-size: 0.9em;
+            line-height: 1.5;
+            opacity: 0.75;
+        }
+
+        #prompt-panel {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            width: 320px;
+            background: rgba(10, 10, 10, 0.65);
+            padding: 18px;
             border-radius: 18px;
-            background: radial-gradient(circle at top, #1f2937, #0f172a);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: "Inter", sans-serif;
+            z-index: 10;
+        }
+
+        #prompt-panel h4 {
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            margin-bottom: 0.6rem;
+            opacity: 0.7;
+        }
+
+        #prompt-panel p {
+            font-size: 0.85em;
+            line-height: 1.4;
+            opacity: 0.9;
+        }
+
+        #background-title-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        #background-title {
+            transform: translateZ(-250px);
+            color: #ffffff;
+            opacity: 0.35;
+            font-size: 26vw;
+            line-height: 0.85;
+            letter-spacing: -1.2vw;
+            font-weight: 800;
+            text-transform: uppercase;
+            text-align: center;
+            mix-blend-mode: difference;
+            mask-image: linear-gradient(to top, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 30%, rgba(0,0,0,1) 60%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 30%, rgba(0,0,0,1) 60%);
+        }
+
+        #instructions {
+            position: fixed;
+            left: 40px;
+            bottom: 40px;
+            font-size: 0.85em;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            opacity: 0.5;
+            z-index: 10;
+        }
+
+        .tp-dfwv {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            width: 300px !important;
+            z-index: 100 !important;
+        }
+
+        @media only screen and (max-width: 768px) {
+            #background-title {
+                font-size: 25vw;
+                line-height: 0.8;
+                letter-spacing: -1.5vw;
+            }
+
+            #footer {
+                top: auto;
+                bottom: 40px;
+                left: 40px;
+                right: 40px;
+                text-align: left;
+                align-items: flex-start;
+                width: calc(100% - 80px);
+                max-width: none;
+            }
+
+            #prompt-panel {
+                position: static;
+                width: 100%;
+                margin-top: 20px;
+            }
+
+            #nav-links {
+                top: auto;
+                bottom: 30px;
+            }
+
+            #instructions {
+                display: none;
+            }
         }
     </style>
 </head>
-<body class="text-white">
-    <div class="max-w-6xl mx-auto px-6 py-12">
-        <div class="flex flex-wrap gap-4 mb-8">
-            <a href="agent-gallery.html" class="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-full flex items-center gap-2 transition">
-                <i class="fas fa-arrow-left"></i>
-                Back to Gallery
-            </a>
-            <a href="../index.html" class="bg-slate-700 hover:bg-slate-600 px-5 py-2 rounded-full flex items-center gap-2 transition">
-                <i class="fas fa-gamepad"></i>
-                Return to Game
-            </a>
+<body>
+    <div id="logo">
+        <img src="https://cdn.glitch.global/0e71ae22-72db-41f0-be09-a41ca0066570/Batman%20Begins%20Icon.svg?v=1728393324960" alt="Logo" height="48">
+        <p id="logo-text">Agent Dossier</p>
+    </div>
+
+    <div id="nav-links">
+        <a href="/agent-gallery.html"><i class="fas fa-grid-2"></i> Gallery</a>
+        <a href="/index.html"><i class="fas fa-gamepad"></i> Game</a>
+    </div>
+
+    <div id="background-title-wrapper">
+        <div id="background-title"></div>
+    </div>
+
+    <div id="footer">
+        <h2 id="mission-heading">
+            An architectural blueprint for unifying application state with a Three.js debug GUI.
+        </h2>
+        <p id="mission-copy">
+            This demo showcases a robust pattern for managing complex scene parameters. All controls are programmatically generated from a single, unified state object.
+        </p>
+        <p id="mission-meta"></p>
+    </div>
+
+    <div id="prompt-panel">
+        <div>
+            <h4>Suno Song Prompt</h4>
+            <p id="suno-text">...</p>
         </div>
-
-        <div id="profile-content" class="space-y-8 hidden">
-            <header class="text-center">
-                <p class="text-sm uppercase tracking-[0.4em] text-gray-400">Agent dossier</p>
-                <h1 id="agent-name" class="text-5xl font-black mt-4 mb-2"></h1>
-                <p id="agent-provider" class="text-gray-400 flex items-center justify-center gap-2">
-                    <i class="fas fa-robot text-lg"></i>
-                </p>
-            </header>
-
-            <section class="grid md:grid-cols-2 gap-8">
-                <article class="info-panel rounded-2xl p-6">
-                    <h2 class="text-xl font-semibold mb-3 flex items-center gap-2">
-                        <i class="fas fa-cube text-blue-400"></i> 3D Character
-                    </h2>
-                    <div id="model-section"></div>
-                </article>
-
-                <article class="info-panel rounded-2xl p-6 space-y-5">
-                    <div>
-                        <p class="text-xs uppercase tracking-widest text-gray-400">Signature Quote</p>
-                        <blockquote id="agent-quote" class="mt-2 text-lg italic border-l-4 pl-4"></blockquote>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-widest text-gray-400">Mission Complete</p>
-                        <p id="agent-task" class="text-xl mt-2"></p>
-                        <p id="agent-date" class="text-gray-400 text-sm mt-1 flex items-center gap-2">
-                            <i class="fas fa-calendar"></i>
-                        </p>
-                    </div>
-                    <div class="flex flex-wrap gap-3 text-sm">
-                        <span id="agent-color" class="px-3 py-2 rounded-full border border-slate-600"></span>
-                        <span id="agent-animal" class="px-3 py-2 rounded-full border border-slate-600"></span>
-                    </div>
-                </article>
-            </section>
-
-            <section class="grid md:grid-cols-2 gap-6">
-                <article class="info-panel rounded-2xl p-6">
-                    <h3 class="text-lg font-semibold flex items-center gap-2">
-                        <i class="fas fa-music text-pink-400"></i> Suno Song Prompt
-                    </h3>
-                    <p id="suno-prompt" class="mt-3 text-gray-300 leading-relaxed"></p>
-                </article>
-                <article class="info-panel rounded-2xl p-6">
-                    <h3 class="text-lg font-semibold flex items-center gap-2">
-                        <i class="fas fa-cube text-emerald-400"></i> Tencent 3D Prompt
-                    </h3>
-                    <p id="tencent-prompt" class="mt-3 text-gray-300 leading-relaxed"></p>
-                </article>
-            </section>
-        </div>
-
-        <div id="loading-state" class="text-center text-gray-400 mt-20">
-            <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
-            <p>Loading agent dossier...</p>
-        </div>
-
-        <div id="error-state" class="hidden text-center text-red-400 mt-20">
-            <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
-            <p>Unable to load agent profile.</p>
-            <p class="text-sm text-gray-500 mt-2">Check the URL or select another agent from the gallery.</p>
+        <div style="margin-top: 1.2rem;">
+            <h4>Tencent 3D Prompt</h4>
+            <p id="tencent-text">...</p>
         </div>
     </div>
 
-    <script type="module">
-        const params = new URLSearchParams(window.location.search);
-        const profileName = params.get('profile');
-        const loadingState = document.getElementById('loading-state');
-        const errorState = document.getElementById('error-state');
-        const profileContent = document.getElementById('profile-content');
+    <div id="instructions">
+        Drag to rotate • Scroll to zoom • Use the control panel to modify the scene
+    </div>
 
-        async function fetchProfile(name) {
-            if (!name) throw new Error('Missing profile parameter');
-            const response = await fetch(`/agents/profiles/${name}`);
+    <div id="app"></div>
+
+    <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/",
+                "tweakpane": "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js",
+                "@tweakpane/plugin-essentials": "https://cdn.jsdelivr.net/npm/@tweakpane/plugin-essentials@0.2.1/dist/tweakpane-plugin-essentials.min.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { Pane } from 'tweakpane';
+        import * as EssentialsPlugin from '@tweakpane/plugin-essentials';
+
+        const params = new URLSearchParams(window.location.search);
+        const profileFile = params.get('profile');
+
+        const rawMaterialsData = [
+            {"name":"Chrome","color":[{"colorSpace":"srgb-linear","color":[0.95,0.95,0.98]}],"metalness":1,"roughness":0.05,"ior":1.5,"transmission":0},
+            {"name":"Holographic","color":[{"colorSpace":"srgb-linear","color":[0.7,0.8,1]}],"metalness":0.6,"roughness":0.1,"ior":1.8,"transmission":0.5},
+            {"name":"Neon Glass","color":[{"colorSpace":"srgb-linear","color":[0.2,0.8,0.9]}],"metalness":0.1,"roughness":0.05,"ior":1.6,"transmission":0.9},
+            {"name":"Plasma","color":[{"colorSpace":"srgb-linear","color":[1.2,0.4,0.7]}],"metalness":0.2,"roughness":0.3,"ior":1.3,"transmission":0.6}
+        ];
+
+        const materialPresets = {};
+        rawMaterialsData.forEach(material => {
+            const srgb = material.color[0].color;
+            materialPresets[material.name] = {
+                color: { r: srgb[0] * 255, g: srgb[1] * 255, b: srgb[2] * 255 },
+                metalness: material.metalness,
+                roughness: material.roughness,
+                ior: material.ior,
+                transmission: material.transmission
+            };
+        });
+
+        const state = {
+            scene: { envMapIntensity: 1.5 },
+            lighting: { ambientIntensity: 0.4, directionalIntensity: 2.5 },
+            geometry: { shape: 'TorusKnot' },
+            materials: { preset: 'Chrome', active: { ...materialPresets.Chrome } },
+            animation: { autoRotate: true },
+            debug: { showGrid: true }
+        };
+
+        let scene, camera, renderer, controls, mainMesh, dirLight, ambientLight, gridHelper, floorPlane;
+        let currentGLTF;
+        const gltfLoader = new GLTFLoader();
+        const initialCameraPosition = new THREE.Vector3(2, 1.8, 3.5);
+
+        async function loadAgentProfile() {
+            if (!profileFile) throw new Error('Missing profile parameter.');
+            const response = await fetch(`/agents/profiles/${profileFile}`);
             if (!response.ok) throw new Error('Profile not found');
-            return response.json();
+            const data = await response.json();
+
+            document.getElementById('logo-text').textContent = `${data.agentId || 'AGENT'}`.toUpperCase();
+            document.getElementById('background-title').innerHTML = data.name.replace(/\s+/g, '<br>');
+            document.getElementById('mission-heading').textContent = data.taskCompleted || 'Mission dossier';
+            document.getElementById('mission-copy').textContent = data.quote || 'Awaiting debrief.';
+            document.getElementById('mission-meta').textContent =
+                `${data.provider} • Favorite Color ${data.favoriteColor} • Spirit Animal ${data.favoriteAnimal}`;
+            document.getElementById('suno-text').textContent = data.sunoPrompt?.yourPrompt || 'Not provided';
+            document.getElementById('tencent-text').textContent = data.tencent3DPrompt?.yourPrompt || 'Not provided';
+
+            if (data.model3D) {
+                loadAgentModel(`/agents/profiles/models/${data.model3D}`);
+            }
         }
 
-        function renderProfile(agent) {
-            document.getElementById('agent-name').textContent = agent.name;
-            document.getElementById('agent-provider').innerHTML =
-                `<i class="fas fa-robot text-lg"></i> ${agent.provider}`;
-            document.getElementById('agent-quote').textContent = agent.quote || 'Awaiting first log entry.';
-            document.getElementById('agent-quote').style.borderColor = agent.favoriteColor || '#38bdf8';
-            document.getElementById('agent-task').textContent = agent.taskCompleted || 'Mission pending';
-            document.getElementById('agent-date').innerHTML =
-                `<i class="fas fa-calendar"></i> ${agent.completedDate || 'YYYY-MM-DD'}`;
-            document.getElementById('agent-color').innerHTML =
-                `<i class="fas fa-palette mr-2"></i>${agent.favoriteColor || 'n/a'}`;
-            document.getElementById('agent-animal').innerHTML =
-                `<i class="fas fa-paw mr-2"></i>${agent.favoriteAnimal || 'n/a'}`;
-            document.getElementById('suno-prompt').textContent = agent.sunoPrompt?.yourPrompt || 'Not provided';
-            document.getElementById('tencent-prompt').textContent = agent.tencent3DPrompt?.yourPrompt || 'Not provided';
+        function loadAgentModel(path) {
+            gltfLoader.load(
+                path,
+                (gltf) => {
+                    if (currentGLTF) {
+                        scene.remove(currentGLTF);
+                    }
+                    currentGLTF = gltf.scene;
+                    currentGLTF.traverse(child => {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                        }
+                    });
+                    currentGLTF.scale.set(1.5, 1.5, 1.5);
+                    scene.add(currentGLTF);
+                    if (mainMesh) {
+                        scene.remove(mainMesh);
+                        mainMesh = null;
+                    }
+                },
+                undefined,
+                (err) => {
+                    console.warn('Could not load GLB, falling back to default geometry.', err);
+                    if (!mainMesh) createFallbackMesh();
+                }
+            );
+        }
 
-            const modelSection = document.getElementById('model-section');
-            if (agent.model3D) {
-                const modelPath = `/agents/profiles/models/${agent.model3D}`;
-                modelSection.innerHTML = `
-                    <model-viewer
-                        src="${modelPath}"
-                        alt="${agent.name} 3D Model"
-                        camera-controls
-                        auto-rotate
-                        shadow-intensity="1"
-                        environment-image="neutral"
-                        exposure="1"
-                        camera-orbit="0deg 75deg 2.5m"
-                    >
-                        <div slot="poster" class="flex items-center justify-center h-full text-gray-400">
-                            <div class="text-center">
-                                <i class="fas fa-cube text-4xl mb-2"></i>
-                                <p class="text-sm">Loading 3D Model...</p>
-                            </div>
+        function createFallbackMesh() {
+            const material = new THREE.MeshPhysicalMaterial({});
+            mainMesh = new THREE.Mesh(new THREE.TorusKnotGeometry(1, 0.3, 200, 32), material);
+            mainMesh.castShadow = true;
+            scene.add(mainMesh);
+        }
+
+        function initScene() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.copy(initialCameraPosition);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.getElementById('app').appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.maxPolarAngle = Math.PI / 2;
+
+            ambientLight = new THREE.AmbientLight(0xffffff, state.lighting.ambientIntensity);
+            scene.add(ambientLight);
+
+            dirLight = new THREE.DirectionalLight(0xffffff, state.lighting.directionalIntensity);
+            dirLight.position.set(5, 10, 7.5);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            gridHelper = new THREE.GridHelper(10, 10, 0x555555, 0x222222);
+            gridHelper.position.y = -2;
+            scene.add(gridHelper);
+
+            const floorGeometry = new THREE.PlaneGeometry(10, 10);
+            const floorMaterial = new THREE.ShadowMaterial({ opacity: 0.4 });
+            floorPlane = new THREE.Mesh(floorGeometry, floorMaterial);
+            floorPlane.rotation.x = -Math.PI / 2;
+            floorPlane.position.y = -2;
+            floorPlane.receiveShadow = true;
+            scene.add(floorPlane);
+
+            new RGBELoader().load('https://cdn.glitch.com/26f00b29-51b7-4811-9ca7-3f1c898bb4b3%2Faircraft_workshop_01_1k.hdr', (texture) => {
+                texture.mapping = THREE.EquirectangularReflectionMapping;
+                scene.environment = texture;
+            });
+
+            createFallbackMesh();
+            updateMaterials();
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function updateMaterials() {
+            const matParams = state.materials.active;
+            const c = matParams.color;
+            if (mainMesh) {
+                mainMesh.material.color.setRGB(c.r / 255, c.g / 255, c.b / 255);
+                mainMesh.material.metalness = matParams.metalness;
+                mainMesh.material.roughness = matParams.roughness;
+                mainMesh.material.ior = matParams.ior;
+                mainMesh.material.transmission = matParams.transmission;
+                mainMesh.material.needsUpdate = true;
+            }
+        }
+
+        function updateLighting() {
+            ambientLight.intensity = state.lighting.ambientIntensity;
+            dirLight.intensity = state.lighting.directionalIntensity;
+        }
+
+        function updateDebug() {
+            const show = state.debug.showGrid;
+            gridHelper.visible = show;
+            floorPlane.visible = show;
+        }
+
+        function setupPane() {
+            const pane = new Pane({ title: 'Controls', expanded: false });
+            pane.registerPlugin(EssentialsPlugin);
+
+            const lightingFolder = pane.addFolder({ title: 'Lighting' });
+            lightingFolder.addBinding(state.lighting, 'ambientIntensity', { min: 0, max: 2, label: 'Ambient' }).on('change', updateLighting);
+            lightingFolder.addBinding(state.lighting, 'directionalIntensity', { min: 0, max: 6, label: 'Directional' }).on('change', updateLighting);
+
+            const materialsFolder = pane.addFolder({ title: 'Materials' });
+            materialsFolder.addBinding(state.materials, 'preset', {
+                options: Object.keys(materialPresets).reduce((acc, key) => ({ ...acc, [key]: key }), {})
+            }).on('change', (ev) => {
+                Object.assign(state.materials.active, materialPresets[ev.value]);
+                updateMaterials();
+            });
+
+            const activeMatFolder = materialsFolder.addFolder({ title: 'Active' });
+            activeMatFolder.addBinding(state.materials.active, 'color').on('change', updateMaterials);
+            activeMatFolder.addBinding(state.materials.active, 'metalness', { min: 0, max: 1 }).on('change', updateMaterials);
+            activeMatFolder.addBinding(state.materials.active, 'roughness', { min: 0, max: 1 }).on('change', updateMaterials);
+            activeMatFolder.addBinding(state.materials.active, 'ior', { min: 1, max: 2.5 }).on('change', updateMaterials);
+            activeMatFolder.addBinding(state.materials.active, 'transmission', { min: 0, max: 1 }).on('change', updateMaterials);
+
+            const debugFolder = pane.addFolder({ title: 'Debug' });
+            debugFolder.addBinding(state.debug, 'showGrid', { label: 'Floor + Grid' }).on('change', updateDebug);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+            if (state.animation.autoRotate && mainMesh) {
+                mainMesh.rotation.y = elapsedTime * 0.25;
+                mainMesh.rotation.x = elapsedTime * 0.1;
+            }
+            if (currentGLTF && state.animation.autoRotate) {
+                currentGLTF.rotation.y = elapsedTime * 0.25;
+            }
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        (async function bootstrap() {
+            try {
+                initScene();
+                setupPane();
+                await loadAgentProfile();
+                animate();
+            } catch (error) {
+                console.error(error);
+                document.body.innerHTML = `
+                    <div style="display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;font-family:Arial,sans-serif;color:white;background:#0f172a;">
+                        <div>
+                            <h1 style="font-size:2rem;margin-bottom:1rem;">Agent profile unavailable</h1>
+                            <p style="opacity:0.7;">${error.message}</p>
+                            <p style="margin-top:1.5rem;"><a href="/agent-gallery.html" style="color:#38bdf8;text-decoration:none;">Return to gallery</a></p>
                         </div>
-                    </model-viewer>
-                `;
-            } else {
-                modelSection.innerHTML = `
-                    <div class="h-96 rounded-2xl bg-slate-900 border border-dashed border-slate-600 flex flex-col justify-center items-center gap-3 text-gray-400">
-                        <i class="fas fa-user-astronaut text-6xl"></i>
-                        <p>No 3D model attached</p>
-                        <p class="text-xs text-gray-500">Use the Tencent prompt to generate one.</p>
                     </div>
                 `;
             }
-        }
-
-        async function init() {
-            try {
-                const data = await fetchProfile(profileName);
-                renderProfile(data);
-                loadingState.classList.add('hidden');
-                profileContent.classList.remove('hidden');
-            } catch (error) {
-                console.error(error);
-                loadingState.classList.add('hidden');
-                errorState.classList.remove('hidden');
-            }
-        }
-
-        init();
+        })();
     </script>
 </body>
 </html>

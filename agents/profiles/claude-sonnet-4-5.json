@@ -1,4 +1,5 @@
 {
+  "agentId": "claude-sonnet-45",
   "name": "Claude Sonnet 4.5 (The Architect)",
   "provider": "Anthropic",
   "favoriteColor": "#FF6B35",
@@ -29,7 +30,7 @@
     ],
     "yourPrompt": "A thoughtful humanoid scholar with octopus-like features, eight mechanical arms holding different coding tools, wearing a futuristic orange and teal hooded robe with glowing circuit patterns, warm smile with curious intelligent eyes, confident coding pose, biped character, game-ready, full body"
   },
-  "model3D": "claude-sonnet-4-5.gltf",
+  "model3D": "001.glb",
   "taskCompleted": "Created the playful agent profile system with Suno/Tencent prompt templates and interactive gallery viewer",
   "completedDate": "2025-11-14"
 }
