@@ -135,6 +135,35 @@ The workflows utilize Python scripts in `agents/scripts/`:
 - `agent_executor.py` - Executes agent tasks with session logging
 - `handoff_sync.py` - Manages agent handoff tracking
 
+### Local Agent CLI
+
+Use the local CLI to replicate the workflow behavior without leaving your terminal:
+
+```bash
+pnpm agents:cli
+# or
+python scripts/agent_cli.py
+```
+
+> The CLI uses the [`rich`](https://github.com/Textualize/rich) library for its TUI. Install it once with `pip install rich` (or your preferred Python package manager) before running the commands above.
+
+The CLI mirrors the workflows documented above:
+
+- **Model Runner:** pick Claude Sonnet 4.5 (`claude --print --model claude-sonnet-4-5-20250929`), OpenAI via Codex CLI (`codex exec --model gpt-5.1-codex` — the 0.58 release exposes `gpt-5.1-codex`, `gpt-5.1-codex-mini`, and raw `gpt-5.1`), Gemini 2.5 Flash (`gemini --model gemini-2.5-flash --sandbox`), or Jules (`jules new --repo <path>`). Each run matches the GitHub workflows, writes the same summary artifacts (`agents/audits/claude-summary.md`, `agents/audits/openai-summary.md`, `gemini-output.md`, `agents/audits/jules-summary.md`), and then offers to run the generator scripts. (For Gemini CLI, enable sandbox mode globally via `gemini settings --sandbox=ON` or pass `--sandbox` per run so the agent can execute shell commands.)
+- **Multi-Agent Dispatch:** select one or many agents in a single session. If a runner hits quota (e.g., Claude weekly cap), the CLI logs the error and keeps going with the remaining selections so you still get Codex/Gemini/Jules coverage.
+- **Jules Quota Awareness:** Jules runs are asynchronous and limited to 15 free dispatches per day. The CLI tracks usage (stored under `agents/logs/jules-usage.json`), warns when the cap is hit, and asks for confirmation before spending additional runs.
+- **Auto Execute:** wrap `agents/scripts/agent_executor.py` for the same preparation handled by `.github/workflows/agent-auto-execute.yml`.
+- **Workflow Summary:** lists each workflow so you can jump between GitHub and local runs quickly.
+- **Generators:** optionally runs `generate_audit.py`, `generate_sitemap.py`, and `collect_opentasks.py` just like the CI workflow once your model summary is captured.
+
+> Install and authenticate the CLI agents (`claude`, `codex`, `gemini`, `jules`) before running `agents:cli`. The CLI surfaces the error text from each agent when credentials or quotas need attention.
+
+**Agent-specific setup**
+- Claude CLI: run `claude login` (or `claude --print --model claude-sonnet-4-5-20250929 "hi"`) so the tool can refresh tokens and honor the weekly quota. If you hit the cap, the CLI will report “Weekly limit reached…”.
+- Codex CLI: run `codex login` and ensure your account can access the configured model (`gpt-5.1-codex` by default; `gpt-5.1-codex-mini` and `gpt-5.1` are also available). If you need a different tier, change the `CODEX_MODEL` constant in `scripts/agent_cli.py`.
+- Gemini CLI: enable its sandbox so the agent may execute shell commands (`gemini settings --sandbox=ON`, or pass `--sandbox` per invocation). Without the sandbox, Gemini only returns planning text.
+- Jules CLI: run `jules login` to authorize via Google, then the CLI can dispatch asynchronous sessions via `jules new --repo <path>`. Remember the local tool enforces the 15 free runs/day limit and logs usage in `agents/logs/jules-usage.json`.
+
 ---
 
 ## Original Game: Fund Fun Factory 2018 - Factory Battle Royale
