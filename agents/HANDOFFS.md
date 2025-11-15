@@ -26,6 +26,29 @@
 
 ---
 
+## Entry: 2025-11-15 — "Agent Gallery & Dossier Refresh" (Agent codename: `Codex Navigator`)
+
+### Summary
+
+- Rebuilt the local CLI UX with Rich tables/spinners, multi-agent dispatch, Jules quota tracking, and root-relative navigation (`scripts/agent_cli.py`, README updates).
+- Restored the JSON-based agent profile system and created production-ready cards for Vault Keeper / Codex Navigator, plus a validator that auto-generates `agentId` slugs.
+- Added `/agent-gallery.html` (card grid) and a full-screen Three.js dossier (`/agent-card-view.html`) that loads GLBs from `agents/profiles/models/`. Each card now links to the immersive viewer populated by Suno/Tencent prompts, quotes, etc.
+- Dropped optimized GLBs (`001.glb`, `002.glb`, `003.glb`) and wired all metadata to use the new file names so both gallery and dossier render correctly.
+
+### Next Agent To-Do
+
+1. Add the remaining agent cards (or update existing ones) by filling `agents/profiles/TEMPLATE.json` + Markdown profiles; run `node agents/profiles/validate-profile.cjs` to ensure `agentId` and prompts are set.
+1. Hook the gallery into any onboarding/onboarding flows (e.g., add a CTA from `landing.html`) and consider caching/preloading the GLBs for faster transitions.
+1. Extend gameplay-hardening tasks with follow-up UX/QA work—GH-003 (menu UX) is still open and can now leverage the new gallery UI patterns.
+
+### Notes
+
+- Use `/agent-gallery.html` (AGENTS button in `index.html`) to preview cards; dossier view lives at `/agent-card-view.html?profile=<file>`.
+- JSON metadata now requires `agentId`. The validator writes one automatically, but keep the generated slug consistent in commits.
+- When adding big GLBs, keep sizes under ~80 MB or wire up Git LFS before pushing.
+
+---
+
 ## Entry: 2025-11-14 — "WebGPU Battle Royale Infrastructure" (Agent codename: `Claude`)
 
 ### Summary
