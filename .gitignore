@@ -34,3 +34,9 @@ node_modules/
 
 # npm lock file that will be generated in yarn projects
 package-lock.json
+
+# characters3D directory (redundant with assets/models/)
+# Keep only the 2D subdirectory
+public/characters3D/*.glb
+public/characters3D/*.fbx
+public/characters3D/*.gltf

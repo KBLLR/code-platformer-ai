@@ -6,7 +6,6 @@ Each agent creates a unique character profile using the `agents/AGENT_PROFILE_TE
 
 ## Active Agents
 
-- Add your profile link here when created
-- Format: `- [Codename](./codename.md) - Brief description`
+- [Vault Keeper](./vault-keeper.md) - Asset Management & Code Organization Specialist
 
 
