@@ -16,31 +16,72 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run Claude Code Base Action
-        id: claude
-        uses: anthropics/claude-code-base-action@v0.6.6
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt: |
-            Read agents/OPENTASKS.md. Execute the task: "${{ github.event.inputs.task }}".
-            Only modify files under agents/**. If scripts are needed, run:
-              - python agents/scripts/generate_audit.py
-              - python agents/scripts/generate_sitemap.py
-              - python agents/scripts/collect_opentasks.py
-            Summarize changes in 5 lines.
-          allowed_tools: |
-            Bash(git:*)
-            View
-            GlobTool
-            ReadFile
-            WriteFile
-          include_globs: |
-            agents/**
+          python-version: "3.11"
 
-      - name: Commit or PR
+      - name: Install dependencies
         run: |
-          git config user.name "codex-agent"
-          git config user.email "codex@agents.local"
-          git add agents/** || true
-          git commit -m "claude: ${{ github.event.inputs.task }}" || echo "no changes"
-          git push || true
+          pip install anthropic
+
+      - name: Execute task with Claude
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python - <<'PYTHON'
+          import os
+          from anthropic import Anthropic
+          from pathlib import Path
+
+          client = Anthropic(api_key=os.environ['ANTHROPIC_API_KEY'])
+
+          task = "${{ github.event.inputs.task }}"
+          opentasks = Path("agents/OPENTASKS.md").read_text()
+
+          message = client.messages.create(
+              model="claude-3-5-sonnet-20241022",
+              max_tokens=4096,
+              messages=[
+                  {"role": "user", "content": f"""Execute this task: {task}
+
+          Available OPENTASKS:
+          {opentasks}
+
+          Execute the task by:
+          1. Understanding what needs to be done
+          2. Suggesting changes to files under agents/**
+          3. Providing a concise 5-line summary
+
+          Available scripts to reference:
+          - agents/scripts/generate_audit.py
+          - agents/scripts/generate_sitemap.py
+          - agents/scripts/collect_opentasks.py
+
+          Return a brief summary of what should be done."""}
+              ]
+          )
+
+          summary = message.content[0].text
+          print(summary)
+          Path("agents/audits/claude-summary.md").write_text(f"# Claude Task: {task}\n\n{summary}")
+          PYTHON
+
+      - name: Run agent scripts
+        run: |
+          python agents/scripts/generate_audit.py
+          python agents/scripts/generate_sitemap.py
+          python agents/scripts/collect_opentasks.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "claude-agent"
+          git config user.email "claude@agents.local"
+          if [ -n "$(git status --porcelain agents/)" ]; then
+            git add agents/
+            git commit -m "claude: ${{ github.event.inputs.task }}"
+            git push
+          else
+            echo "No changes to commit"
+            exit 0
+          fi

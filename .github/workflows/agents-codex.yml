@@ -1,4 +1,4 @@
-name: Agents - Codex Runner
+name: Agents - OpenAI Runner
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ on:
         required: true
 
 jobs:
-  codex:
+  openai:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -16,25 +16,72 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Execute Codex session
-        id: codex
-        uses: openai/codex-action@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
-          prompt: |
-            Execute "${{ github.event.inputs.task }}". Use repo context to run:
-              - python agents/scripts/generate_audit.py
-              - python agents/scripts/generate_sitemap.py
-              - python agents/scripts/collect_opentasks.py
-            Restrict changes to agents/**. Return a 5-line summary.
+          python-version: "3.11"
 
-      - name: Save output
+      - name: Install dependencies
         run: |
-          if [ -n "${{ steps.codex.outputs.final-message }}" ]; then
-            echo "${{ steps.codex.outputs.final-message }}" > agents/audits/codex-summary.md
+          pip install openai
+
+      - name: Execute task with OpenAI
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python - <<'PYTHON'
+          import os
+          from openai import OpenAI
+          from pathlib import Path
+
+          client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
+
+          task = "${{ github.event.inputs.task }}"
+          opentasks = Path("agents/OPENTASKS.md").read_text()
+
+          response = client.chat.completions.create(
+              model="gpt-4",
+              messages=[
+                  {"role": "system", "content": "You are a code agent helping execute tasks in a repository."},
+                  {"role": "user", "content": f"""Execute this task: {task}
+
+          Available OPENTASKS:
+          {opentasks}
+
+          Execute the task by:
+          1. Understanding what needs to be done
+          2. Suggesting changes to files under agents/**
+          3. Providing a concise 5-line summary
+
+          Available scripts to reference:
+          - agents/scripts/generate_audit.py
+          - agents/scripts/generate_sitemap.py
+          - agents/scripts/collect_opentasks.py
+
+          Return a brief summary of what should be done."""}
+              ]
+          )
+
+          summary = response.choices[0].message.content
+          print(summary)
+          Path("agents/audits/openai-summary.md").write_text(f"# OpenAI Task: {task}\n\n{summary}")
+          PYTHON
+
+      - name: Run agent scripts
+        run: |
+          python agents/scripts/generate_audit.py
+          python agents/scripts/generate_sitemap.py
+          python agents/scripts/collect_opentasks.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "openai-agent"
+          git config user.email "openai@agents.local"
+          if [ -n "$(git status --porcelain agents/)" ]; then
+            git add agents/
+            git commit -m "openai: ${{ github.event.inputs.task }}"
+            git push
+          else
+            echo "No changes to commit"
+            exit 0
           fi
-          git config user.name "codex-agent"
-          git config user.email "codex@agents.local"
-          git add agents/** || true
-          git commit -m "codex: ${{ github.event.inputs.task }}" || echo "no changes"
-          git push || true

@@ -45,9 +45,13 @@ jobs:
         run: |
           git config user.name "codex-agent"
           git config user.email "codex@agents.local"
-          git add agents/HANDOFFS.md agents/audits/** agents/SITEMAP*.md agents/OPENTASKS.md agents/AUDIT-log.md || true
-          git commit -m "ci: auto-update agent docs" || echo "No changes to commit"
-          git push || echo "No changes to push"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add agents/HANDOFFS.md agents/audits/** agents/SITEMAP*.md agents/OPENTASKS.md agents/AUDIT-log.md
+            git commit -m "ci: auto-update agent docs"
+            git push
+          else
+            echo "No changes to commit"
+          fi
 
   handoff-entry:
     if: github.event_name == 'pull_request_target' && github.event.pull_request.merged == true
@@ -68,9 +72,13 @@ jobs:
         run: |
           git config user.name "codex-agent"
           git config user.email "codex@agents.local"
-          git add agents/HANDOFFS.md
-          git commit -m "ci: append handoff entry" || echo "No handoff updates"
-          git push || echo "No changes to push"
+          if [ -n "$(git status --porcelain agents/HANDOFFS.md)" ]; then
+            git add agents/HANDOFFS.md
+            git commit -m "ci: append handoff entry"
+            git push
+          else
+            echo "No handoff updates"
+          fi
 
   ci-validation:
     if: github.event_name == 'workflow_dispatch'
@@ -103,9 +111,13 @@ jobs:
         run: |
           git config user.name "codex-agent"
           git config user.email "codex@agents.local"
-          git add agents/HANDOFFS.md agents/audits/** agents/SITEMAP*.md agents/OPENTASKS.md
-          git commit -m "ci: automation validation sweep" || echo "No validation changes"
-          git push || echo "No changes to push"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add agents/HANDOFFS.md agents/audits/** agents/SITEMAP*.md agents/OPENTASKS.md
+            git commit -m "ci: automation validation sweep"
+            git push
+          else
+            echo "No validation changes"
+          fi
       - name: Comment on PR (optional)
         if: ${{ inputs.pull_number != '' }}
         uses: peter-evans/create-or-update-comment@v4

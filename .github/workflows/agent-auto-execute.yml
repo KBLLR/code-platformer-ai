@@ -84,6 +84,7 @@ jobs:
           fi
 
       - name: Create branch for task
+        id: branch
         if: steps.execute.outputs.task_id != ''
         run: |
           TASK_ID="${{ steps.execute.outputs.task_id }}"
@@ -94,7 +95,6 @@ jobs:
 
           git checkout -b "$BRANCH_NAME"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-        id: branch
 
       - name: Commit task preparation
         if: steps.execute.outputs.task_id != ''
