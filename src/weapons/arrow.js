@@ -1,6 +1,6 @@
 // src/weapons/arrow.js
 
-import { Projectile } from "./projectile.js";
+import { Projectile } from "./Projectile.js";
 import { Weapons } from "../Weapons.js"; // Import Weapons utility
 
 /**
