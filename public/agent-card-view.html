@@ -100,12 +100,12 @@
 
         #footer {
             text-align: right;
-            top: 10vh;
+            top: 12vh;
             right: 40px;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            width: 40%;
+            width: 38%;
             max-width: 520px;
             position: absolute;
             line-height: 1.2;
@@ -113,9 +113,9 @@
         }
 
         #footer h2 {
-            font-size: 2.4em;
-            font-weight: 200;
-            margin-bottom: 0.8rem;
+            font-size: 2.2em;
+            font-weight: 300;
+            margin-bottom: 0.7rem;
         }
 
         #footer p {
@@ -125,31 +125,64 @@
             opacity: 0.75;
         }
 
+        #quote-panel {
+            position: absolute;
+            left: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: min(32%, 420px);
+            backdrop-filter: blur(6px);
+            border-left: 4px solid rgba(56, 189, 248, 0.8);
+            padding: 2rem 1.5rem 2rem 2.5rem;
+            line-height: 1.4;
+            font-size: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-weight: 400;
+            z-index: 10;
+            background: rgba(2, 6, 23, 0.5);
+        }
+
+        #quote-panel span {
+            font-size: 0.8rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: rgba(148, 163, 184, 0.8);
+        }
+
         #prompt-panel {
             position: absolute;
-            bottom: 40px;
+            bottom: 30px;
+            left: 40px;
             right: 40px;
-            width: 320px;
-            background: rgba(10, 10, 10, 0.65);
-            padding: 18px;
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            font-family: "Inter", sans-serif;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
             z-index: 10;
         }
 
-        #prompt-panel h4 {
-            font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 0.25em;
-            margin-bottom: 0.6rem;
-            opacity: 0.7;
+        .prompt-box {
+            background: rgba(10, 10, 10, 0.65);
+            padding: 18px 22px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: "Inter", sans-serif;
+            min-height: 150px;
         }
 
-        #prompt-panel p {
+        .prompt-box h4 {
             font-size: 0.85em;
-            line-height: 1.4;
-            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.35em;
+            margin-bottom: 0.6rem;
+            opacity: 0.65;
+        }
+
+        .prompt-box p {
+            font-size: 0.85em;
+            line-height: 1.5;
+            opacity: 0.92;
         }
 
         #background-title-wrapper {
@@ -217,11 +250,11 @@
                 max-width: none;
             }
 
-            #prompt-panel {
-                position: static;
-                width: 100%;
-                margin-top: 20px;
-            }
+        #prompt-panel {
+            position: static;
+            width: 100%;
+            margin-top: 20px;
+        }
 
             #nav-links {
                 top: auto;
@@ -259,12 +292,17 @@
         <p id="mission-meta"></p>
     </div>
 
+    <div id="quote-panel">
+        <span>Testimonial</span>
+        <p id="quote-text">Awaiting execution logs.</p>
+    </div>
+
     <div id="prompt-panel">
-        <div>
+        <div class="prompt-box">
             <h4>Suno Song Prompt</h4>
             <p id="suno-text">...</p>
         </div>
-        <div style="margin-top: 1.2rem;">
+        <div class="prompt-box">
             <h4>Tencent 3D Prompt</h4>
             <p id="tencent-text">...</p>
         </div>
@@ -341,9 +379,10 @@
             document.getElementById('logo-text').textContent = `${data.agentId || 'AGENT'}`.toUpperCase();
             document.getElementById('background-title').innerHTML = data.name.replace(/\s+/g, '<br>');
             document.getElementById('mission-heading').textContent = data.taskCompleted || 'Mission dossier';
-            document.getElementById('mission-copy').textContent = data.quote || 'Awaiting debrief.';
+            document.getElementById('mission-copy').textContent = data.provider;
             document.getElementById('mission-meta').textContent =
                 `${data.provider} • Favorite Color ${data.favoriteColor} • Spirit Animal ${data.favoriteAnimal}`;
+            document.getElementById('quote-text').textContent = data.quote || 'Awaiting debrief.';
             document.getElementById('suno-text').textContent = data.sunoPrompt?.yourPrompt || 'Not provided';
             document.getElementById('tencent-text').textContent = data.tencent3DPrompt?.yourPrompt || 'Not provided';
 
@@ -360,13 +399,7 @@
                         scene.remove(currentGLTF);
                     }
                     currentGLTF = gltf.scene;
-                    currentGLTF.traverse(child => {
-                        if (child.isMesh) {
-                            child.castShadow = true;
-                            child.receiveShadow = true;
-                        }
-                    });
-                    currentGLTF.scale.set(1.5, 1.5, 1.5);
+                    adjustModel(currentGLTF);
                     scene.add(currentGLTF);
                     if (mainMesh) {
                         scene.remove(mainMesh);
@@ -383,9 +416,30 @@
 
         function createFallbackMesh() {
             const material = new THREE.MeshPhysicalMaterial({});
-            mainMesh = new THREE.Mesh(new THREE.TorusKnotGeometry(1, 0.3, 200, 32), material);
+            const geometry = new THREE.TorusKnotGeometry(1, 0.3, 200, 32);
+            mainMesh = new THREE.Mesh(geometry, material);
             mainMesh.castShadow = true;
+            mainMesh.position.y = 0.5;
             scene.add(mainMesh);
+        }
+
+        function adjustModel(model) {
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = new THREE.Vector3();
+            box.getSize(size);
+            model.position.x -= center.x;
+            model.position.z -= center.z;
+            model.position.y -= box.min.y;
+            const maxDim = Math.max(size.x, size.y, size.z);
+            if (maxDim > 2.5) {
+                const scale = 2.5 / maxDim;
+                model.scale.multiplyScalar(scale);
+            }
+            let longestAxis = 'z';
+            if (size.x >= size.y && size.x >= size.z) longestAxis = 'x';
+            if (size.y >= size.x && size.y >= size.z) longestAxis = 'y';
+            state.geometry.shape = longestAxis === 'y' ? 'Box' : 'TorusKnot';
         }
 
         function initScene() {
@@ -404,6 +458,8 @@
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.maxPolarAngle = Math.PI / 2;
+            controls.minDistance = 1.2;
+            controls.maxDistance = 6;
 
             ambientLight = new THREE.AmbientLight(0xffffff, state.lighting.ambientIntensity);
             scene.add(ambientLight);

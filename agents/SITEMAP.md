@@ -7,7 +7,7 @@ _Last generated: 2025-11-15_
 - `.github/`
   - workflows/
 - `agents/`
-  - audits/, profiles/, projects/, scripts/, templates/
+  - audits/, logs/, profiles/, projects/, scripts/, templates/
 - `public/`
   - assets/, characters3D/, data/
 - `scripts/`

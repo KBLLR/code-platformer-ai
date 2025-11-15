@@ -184,3 +184,13 @@ def safe_commit(paths: Sequence[str | Path], message: str) -> None:
         print("safe_commit: no staged changes, skipping commit.")
         return
     subprocess.run(["git", "commit", "-m", message], check=True)
+
+
+def read_md(path: Path) -> str:
+    """Read markdown text with utf-8 encoding."""
+    return path.read_text(encoding="utf-8")
+
+
+def get_agents_root() -> Path:
+    """Return the agents/ directory root."""
+    return AGENTS_DIR
