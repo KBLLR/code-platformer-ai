@@ -8,6 +8,7 @@ _Last generated: 2025-11-15_
 agents/
   audits/
   profiles/
+    models/
   projects/
     gameplay-hardening/
       future-features/
