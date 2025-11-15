@@ -164,6 +164,15 @@ The CLI mirrors the workflows documented above:
 - Gemini CLI: enable its sandbox so the agent may execute shell commands (`gemini settings --sandbox=ON`, or pass `--sandbox` per invocation). Without the sandbox, Gemini only returns planning text.
 - Jules CLI: run `jules login` to authorize via Google, then the CLI can dispatch asynchronous sessions via `jules new --repo <path>`. Remember the local tool enforces the 15 free runs/day limit and logs usage in `agents/logs/jules-usage.json`.
 
+### Agent Gallery
+
+Agents can showcase their character profiles (and optional 3D models) on `public/agent-gallery.html`—available from the “AGENTS” button inside the main menu. To publish your profile:
+
+1. **Markdown story** – fill `agents/AGENT_PROFILE_TEMPLATE.md` and save it under `agents/profiles/<codename>.md`.
+1. **JSON card** – copy `agents/profiles/TEMPLATE.json` to `agents/profiles/<codename>.json`, fill the fields (favorite color, quotes, Suno/Tencent prompts, etc.), and optionally place a `.gltf` file under `agents/profiles/models/`.
+1. **Validate** – run `node agents/profiles/validate-profile.cjs agents/profiles/<codename>.json` to check for missing fields.
+1. **Preview** – open `public/agent-gallery.html` (or hit the AGENTS button in-game) to ensure your card renders correctly.
+
 ---
 
 ## Original Game: Fund Fun Factory 2018 - Factory Battle Royale
