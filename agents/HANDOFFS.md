@@ -12,10 +12,10 @@
 * **Agent workflow (loop until compact)**:
 
   1. Read `agents/HANDOFFS.md` (this file) to grab latest context.
-  2. Greet the user, confirm whether to resume, clarify, or start new work.
-  3. Review relevant docs/tasks (`agents/projects/<name>/tasks.md`, session logs).
-  4. Execute assigned tasks and log updates with traceable session notes.
-  5. Before completing, summarize your actions and write a new handoff entry (include alias/codename, summary, and next steps).
+  1. Greet the user, confirm whether to resume, clarify, or start new work.
+  1. Review relevant docs/tasks (`agents/projects/<name>/tasks.md`, session logs).
+  1. Execute assigned tasks and log updates with traceable session notes.
+  1. Before completing, summarize your actions and write a new handoff entry (include alias/codename, summary, and next steps).
 
 ---
 
@@ -41,9 +41,9 @@
 ### Next Agent To-Do
 
 1. Review architecture proposal in `agents/audits/WEBGPU_BATTLE_ROYALE_ARCHITECTURE.md` to understand the full transformation vision
-2. Execute first task WBR-001 (WebGPU renderer migration) using: `python agents/scripts/agent_executor.py --project webgpu-battle-royale --task WBR-001`
-3. Test GitHub Actions workflow with manual dispatch to validate automation pipeline
-4. Consider updating `collect_opentasks.py` to auto-parse markdown table format from `tasks.md`
+1. Execute first task WBR-001 (WebGPU renderer migration) using: `python agents/scripts/agent_executor.py --project webgpu-battle-royale --task WBR-001`
+1. Test GitHub Actions workflow with manual dispatch to validate automation pipeline
+1. Consider updating `collect_opentasks.py` to auto-parse markdown table format from `tasks.md`
 
 ### Notes
 
@@ -66,8 +66,8 @@
 ### Next Agent To-Do
 
 1. Start a session log for GH-001 (use the template path noted in `sessions/README.md`) and record concrete audit findings.
-2. Create and document a `.env.example`, then link it from `agents/AGENTS.md` and the audit checklist (closes Docs refresh item).
-3. Run `npm run dev`, `npm run build`, `npm run preview` on a clean install; capture results in QA checklist and update GH-002.
+1. Create and document a `.env.example`, then link it from `agents/AGENTS.md` and the audit checklist (closes Docs refresh item).
+1. Run `npm run dev`, `npm run build`, `npm run preview` on a clean install; capture results in QA checklist and update GH-002.
 
 ### Notes
 
@@ -88,8 +88,8 @@
 ### Next Agent To-Do
 
 1. Populate secrets for `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, and verify each workflow on a test branch.
-2. Run the new `workflow_dispatch` CI validation path and confirm the `automation:ci-validation` note gets appended automatically.
-3. Add a `.env.example` (per AUDIT log) and ensure generators include it in future audits if needed.
+1. Run the new `workflow_dispatch` CI validation path and confirm the `automation:ci-validation` note gets appended automatically.
+1. Add a `.env.example` (per AUDIT log) and ensure generators include it in future audits if needed.
 
 ### Notes
 
@@ -109,8 +109,8 @@
 ### Next Agent To-Do
 
 1. Add the `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, and `OPENAI_API_KEY` secrets via `scripts/ci/seed-secrets.zsh`, then dry-run each agent workflow.
-2. Trigger `Agents CI` via `workflow_dispatch` (reason: `shakedown`) to validate remote logging + markdown lint on GitHub-hosted runners.
-3. Evaluate whether `agents/scripts/handoff_sync --append` should add timestamps automatically for future automation notes.
+1. Trigger `Agents CI` via `workflow_dispatch` (reason: `shakedown`) to validate remote logging + markdown lint on GitHub-hosted runners.
+1. Evaluate whether `agents/scripts/handoff_sync --append` should add timestamps automatically for future automation notes.
 
 ### Notes
 
@@ -128,8 +128,8 @@
 **Next Agent To-Do**
 
 1. [Task 1 to continue progress]
-2. [Task 2 to extend or test current work]
-3. [Task 3 to review or document pending changes]
+1. [Task 2 to extend or test current work]
+1. [Task 3 to review or document pending changes]
 
 **Notes**
 
@@ -143,9 +143,9 @@
 **IMPORTANT**: When completing significant work or your final handoff, create your 3D character profile:
 
 1. Copy `agents/AGENT_PROFILE_TEMPLATE.md` to `agents/profiles/[your-codename].md`
-2. Fill out all sections with your character details
-3. Generate your character using the Sora T-pose prompt provided in the template
-4. Reference your profile in this handoff entry
+1. Fill out all sections with your character details
+1. Generate your character using the Sora T-pose prompt provided in the template
+1. Reference your profile in this handoff entry
 
 **Your Agent Card** (fill out when completing major milestone):
 

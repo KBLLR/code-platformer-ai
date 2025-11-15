@@ -15,12 +15,12 @@ The project is in a **good state** when it can be safely resumed, handed off, or
 ### Criteria
 
 1. **Code quality** — [Describe status]
-2. **Testing** — [Unit/integration/E2E results or summary]
-3. **Dependencies** — [Up-to-date status, audits done]
-4. **Documentation** — [Setup/API/operator notes status]
-5. **Environments** — [Dev/stage/prod reproducibility]
-6. **Version control** — [Branching, PR status]
-7. **Stakeholders** — [Awareness of current state & next steps]
+1. **Testing** — [Unit/integration/E2E results or summary]
+1. **Dependencies** — [Up-to-date status, audits done]
+1. **Documentation** — [Setup/API/operator notes status]
+1. **Environments** — [Dev/stage/prod reproducibility]
+1. **Version control** — [Branching, PR status]
+1. **Stakeholders** — [Awareness of current state & next steps]
 
 ---
 
@@ -31,28 +31,28 @@ The project is in a **good state** when it can be safely resumed, handed off, or
    - [ ] Review changed modules
    - [ ] Normalize formatting
 
-2. **Test pass**
+1. **Test pass**
 
    - [ ] Run CI locally (`npm test`, `npm run build`, etc.)
    - [ ] Fix or quarantine flaky tests
 
-3. **Deps sweep**
+1. **Deps sweep**
 
    - [ ] Run audits (`npm audit`, `pip audit`, etc.)
    - [ ] Upgrade minor/patch versions
    - [ ] Document major updates
 
-4. **Docs refresh**
+1. **Docs refresh**
 
    - [ ] Update `README.project.md`, `tasks.md`, session logs
    - [ ] Confirm env vars, tokens, external services
 
-5. **Infra check**
+1. **Infra check**
 
    - [ ] Verify integrations (WebSocket, Home Assistant, etc.)
    - [ ] Confirm URLs, ports, and secrets
 
-6. **VC hygiene**
+1. **VC hygiene**
 
    - [ ] Ensure PRs link to tasks
    - [ ] Reference session logs in PRs

@@ -116,9 +116,9 @@ GEMINI_API_KEY      # For Gemini Runner
 ### Workflow Best Practices
 
 1. **Task Execution:** Use the AI runners to execute specific tasks from `agents/OPENTASKS.md`
-2. **Auto-Execute:** The daily auto-execute workflow handles high-priority tasks automatically
-3. **CI Validation:** The CI workflow ensures documentation stays synchronized
-4. **Handoffs:** Use Jules Bridge to create trackable GitHub issues for complex tasks
+1. **Auto-Execute:** The daily auto-execute workflow handles high-priority tasks automatically
+1. **CI Validation:** The CI workflow ensures documentation stays synchronized
+1. **Handoffs:** Use Jules Bridge to create trackable GitHub issues for complex tasks
 
 ### Agent Scripts
 
