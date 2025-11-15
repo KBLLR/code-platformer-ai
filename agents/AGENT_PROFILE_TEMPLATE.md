@@ -19,7 +19,7 @@ When completing a significant handoff or project milestone, create your 3D chara
 
 Your character will be generated using Sora with the following **mandatory preset**:
 
-> **"The character clearly centered within the frame, standing in a symmetrical T-pose, palms facing forward, fingers fully spread, directly facing the viewer. Use neutral, even lighting and a plain, non-distracting background. Render in a consistent, realistic style with attention to detail in facial features, body, clothing, and accessories. Image rendered in high quality (HQ)."**
+> **"The character clearly centered within the frame, standing in a symmetrical T-pose, palms facing forward, fingers fully spread, directly facing the viewer. Use neutral, even lighting and a plain, non-distracting background. Render in an animated, playful style with exaggerated proportions and whimsical features reminiscent of Adventure Time aesthetics. Image rendered in high quality (HQ)."**
 
 This ensures optimal 3D conversion and consistency across all agent characters.
 
@@ -30,47 +30,55 @@ This ensures optimal 3D conversion and consistency across all agent characters.
 **Name your warrior** (2-30 characters):
 
 ```
-[e.g., "Code Phantom", "Render Knight", "Pixel Architect"]
+[e.g., "Code Wizard", "Bug Slayer", "The Debuggineer"]
 ```
 
 ---
 
 ### Character Description
 
-**Describe your character's visual appearance** (be specific about colors, clothing, features):
+**Describe your character's visual appearance** (be specific about colors, clothing, features, and animated qualities):
 
 ```
-[Example: "Athletic build with sleek midnight-blue armor featuring glowing cyan circuit patterns.
-Short silver hair with an undercut. Warm bronze skin tone. Wears a high-tech visor across
-the eyes that emits soft blue light. Left arm has visible metallic reinforcements with
-exposed chrome joints. Black tactical pants with utility pouches. Confident, standing
-posture with slight smile."]
+[Example: "Friendly, round-faced humanoid with exaggerated large eyes and a wide grin.
+Stubby but energetic build with cartoonish proportions - oversized head, noodly arms and legs.
+Wears bright teal adventurer's gear with bold yellow accents and chunky buttons. Wild,
+gravity-defying orange hair with a single antenna-like cowlick. Warm peachy skin tone with
+rosy cheeks. One eye slightly larger than the other (quirky asymmetry). Left hand has a
+comically oversized digital glove that sparks with colorful code symbols. Purple sneakers
+with exaggerated thick soles. Expression is cheerful and mischievous with tongue slightly
+sticking out. Overall vibe: playful, approachable, Adventure Time meets 3D platformer hero."]
 
 YOUR DESCRIPTION:
-[Describe hair color/style, outfit type (armor, casual, futuristic, etc.), skin tone,
-body type, facial features, and any signature accessories or markings. Be detailed!]
+[Describe hair color/style (can be wild/gravity-defying!), outfit type (adventurer gear,
+wizard robes, chunky armor, etc.), skin tone (can be unusual colors!), body type (cartoony
+proportions encouraged!), facial features (big eyes, expressive faces), and any signature
+accessories or markings. Be whimsical and fun!]
 ```
 
 **Pro tips:**
-- Mention specific colors for clothing and accessories
-- Describe hair style and color precisely
-- Include skin tone and body type
-- Add unique identifiers (scars, tattoos, tech augmentations)
-- Specify clothing details (armor type, fabric, style era)
+- Use bright, saturated colors and bold contrasts
+- Exaggerate proportions for comedic/cute effect (big heads, noodly limbs, etc.)
+- Hair can defy gravity and have unusual shapes
+- Skin tones can be creative (blues, greens, purples are welcome!)
+- Add quirky asymmetry (different sized eyes, uneven accessories)
+- Include playful tech elements (floating symbols, sparkles, glowing bits)
+- Think "Adventure Time character but in 3D game engine"
+- Make it funny and memorable - embrace weirdness!
 
 ---
 
 ### Visual Rendering Style
 
-Choose one:
+Choose one (Animation styles strongly recommended):
 
-- [ ] **Realistic** - Photorealistic human proportions and textures
-- [ ] **Stylized Realistic** - Realistic base with artistic enhancements
-- [ ] **Semi-Realistic** - Balanced between realism and stylization
-- [ ] **Animated Realistic** - Realistic with slight cartoon appeal
+- [ ] **Adventure Time 3D** - Flat colors, simple shapes, chunky proportions in 3D space
+- [ ] **Pixar-esque** - Smooth, appealing cartoon with expressive features
+- [ ] **Stylized Toon** - Bold outlines, exaggerated features, vibrant colors
+- [ ] **Anime-Cartoon Hybrid** - Mix of anime proportions with Western cartoon charm
 
 ```
-Selected style: [Your choice]
+Selected style: [Your choice - Adventure Time 3D recommended!]
 ```
 
 ---
@@ -80,11 +88,11 @@ Selected style: [Your choice]
 **Optional unique characteristics** (up to 150 characters):
 
 ```
-[e.g., "Glowing amber eyes, holographic data streams floating around wrists,
-subtle facial scar across left cheek, metallic tattoos on forearms"]
+[e.g., "Eyes change color based on mood, tiny floating debug symbols orbit head,
+one sock is always mismatched, hiccups produce code snippets as speech bubbles"]
 
 YOUR SPECIAL FEATURES:
-[Add unique details that make your character stand out in battle]
+[Add quirky, funny details that make your character memorable and weird in a good way!]
 ```
 
 ---
@@ -94,11 +102,13 @@ YOUR SPECIAL FEATURES:
 **Briefly describe your agent's personality** (for flavor text and interactions):
 
 ```
-[e.g., "Methodical and analytical, prefers precision over brute force.
-Values elegant solutions and clean code architecture."]
+[e.g., "Enthusiastic and slightly chaotic, solves problems through creative trial-and-error.
+Gets overly excited about elegant solutions and does a victory dance. Occasionally speaks
+in code puns. Very optimistic, sometimes to a fault."]
 
 YOUR TRAITS:
-[3-4 personality characteristics that reflect your coding/problem-solving style]
+[3-4 personality characteristics that are fun, quirky, and reflect your coding/problem-solving
+style. Make it entertaining!]
 ```
 
 ---
@@ -110,9 +120,9 @@ YOUR TRAITS:
 ```
 The character clearly centered within the frame, standing in a symmetrical T-pose,
 palms facing forward, fingers fully spread, directly facing the viewer. Use neutral,
-even lighting and a plain, non-distracting background. Render in a consistent,
-realistic style with attention to detail in facial features, body, clothing, and
-accessories. Image rendered in high quality (HQ).
+even lighting and a plain, non-distracting background. Render in an animated, playful
+style with exaggerated proportions and whimsical features reminiscent of Adventure Time
+aesthetics. Image rendered in high quality (HQ).
 
 [YOUR CHARACTER DESCRIPTION HERE - paste from above]
 
@@ -129,7 +139,7 @@ Once generated, store the following for future reference:
 
 - **Generation Date**: `YYYY-MM-DD`
 - **Image URL/Path**: `[Storage location for generated character]`
-- **Prompt Version**: `v1.0`
+- **Prompt Version**: `v2.0 (Adventure Time Edition)`
 - **Associated Handoff Entry**: `[Link to HANDOFFS.md entry]`
 
 ---
@@ -146,26 +156,30 @@ Once generated, store the following for future reference:
 ## Example Complete Profile
 
 ```markdown
-**Codename**: Shadow Compiler
-**Role**: WebGPU Integration Specialist
-**Active Since**: 2025-11-14
-**Completed Tasks**: WBR-001, WBR-002, WBR-015
+**Codename**: Loop Wizard
+**Role**: Animation Systems Debugger
+**Active Since**: 2025-11-15
+**Completed Tasks**: ANIM-001, ANIM-003, PHYS-007
 
 **Character Description**:
-Lean, agile build with matte black tactical armor featuring reflective purple
-energy lines along the seams. Short, spiky dark purple hair with shaved sides.
-Pale skin with subtle freckles. Sharp green eyes with slight glow. Right hand
-has exposed metallic fingers (cybernetic enhancement) with visible servo motors.
-Wears a dark gray tactical vest over the armor with digital camouflage patterns.
-Black cargo pants tucked into combat boots. Expression is focused and determined.
+Cheerful humanoid with oversized round head and sparkly magenta eyes (one slightly
+bigger than the other). Compact, noodly-limbed body with springy movements suggested
+by the pose. Wears an oversized wizard hat that's too big and tilts to one side, colored
+in swirling gradients of purple and cyan. Bright yellow star-patterned robe that's
+comically long and drags on the ground. Mint-green skin with rosy cheeks and freckles.
+Wild electric-blue hair poking out from under the hat in all directions. One hand holds
+a glowing staff made of twisted colorful code brackets. Orange mismatched socks visible
+under the robe. Expression is gleefully chaotic with a big toothy grin. Tiny sparkles
+and loop symbols float around the hat.
 
-**Visual Style**: Stylized Realistic
-**Special Features**: Cybernetic right hand with glowing joints, faint purple
-energy aura around fingertips, small holographic compiler symbols orbiting the head
-**Personality**: Efficient, direct, favors optimization and performance.
-Thrives under pressure and tight deadlines.
+**Visual Style**: Adventure Time 3D
+**Special Features**: Hat occasionally spawns infinite loop symbols that spiral upward,
+staff glows brighter when bugs are nearby, hiccups produce visible code snippets
+**Personality**: Chaotic good energy, loves finding elegant solutions through controlled
+chaos. Giggles at infinite loops. Believes every bug is just a feature waiting to be
+understood. Makes terrible code puns constantly.
 ```
 
 ---
 
-> **Remember**: Your 3D character is your legacy in the SMART CAMPUS arena. Make it memorable!
+> **Remember**: Your 3D character is your legacy in the SMART CAMPUS arena. Make it weird, make it fun, make it memorable!
