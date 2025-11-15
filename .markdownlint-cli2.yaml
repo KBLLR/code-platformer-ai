@@ -15,3 +15,5 @@ config:
   MD058: false
   MD025: false
   MD034: false
+  MD029:
+    style: one
