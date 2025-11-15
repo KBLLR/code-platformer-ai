@@ -1,19 +1,19 @@
 # SITEMAP_DETAILED — Directory Tree
 
-_Last generated: 2025-11-14_
+_Last generated: 2025-11-15_
 
 ```
 .github/
   workflows/
 agents/
   audits/
+  profiles/
   projects/
     gameplay-hardening/
       future-features/
       qa/
       sessions/
     webgpu-battle-royale/
-      future-features/
       qa/
       sessions/
   scripts/

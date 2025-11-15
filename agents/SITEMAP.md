@@ -1,13 +1,13 @@
 # SITEMAP — Source Overview
 
-_Last generated: 2025-11-14_
+_Last generated: 2025-11-15_
 
 ## Top-Level Directories
 
 - `.github/`
   - workflows/
 - `agents/`
-  - audits/, projects/, scripts/, templates/
+  - audits/, profiles/, projects/, scripts/, templates/
 - `public/`
   - assets/, characters3D/, data/
 - `scripts/`
