@@ -1,7 +1,7 @@
 // src/weapons/bullet.js
 
 import * as THREE from "three";
-import { Projectile } from "./projectile.js";
+import { Projectile } from "./Projectile.js";
 
 class Bullet extends Projectile {
   /**
