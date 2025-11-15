@@ -7,7 +7,6 @@ _Last generated: 2025-11-15_
   workflows/
 agents/
   audits/
-  logs/
   profiles/
     models/
   projects/
