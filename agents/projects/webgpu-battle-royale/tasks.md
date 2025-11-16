@@ -20,7 +20,7 @@
 
 | ID | Title | Description | Priority | Status | Dependencies | Estimate |
 |----|-------|-------------|----------|--------|--------------|----------|
-| WBR-001 | Replace WebGLRenderer with WebGPURenderer | Migrate src/Game.js to use THREE.WebGPURenderer with WebGPU availability check and WebGL fallback | Critical | Ready | - | 2 days |
+| WBR-001 | Replace WebGLRenderer with WebGPURenderer | Migrate src/Game.js to use THREE.WebGPURenderer with WebGPU availability check and WebGL fallback | Critical | In Progress | - | 2 days |
 | WBR-002 | Test shader compatibility | Verify all existing shaders work with WebGPU, update materials if needed | High | Backlog | WBR-001 | 1 day |
 | WBR-003 | Implement browser fallback system | Create graceful degradation for browsers without WebGPU support | High | Backlog | WBR-001 | 1 day |
 | WBR-004 | Benchmark WebGPU performance | Measure FPS improvements and create performance comparison report | Medium | Backlog | WBR-001, WBR-002 | 1 day |
