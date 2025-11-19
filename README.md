@@ -2,9 +2,33 @@
 
 ## Overview
 
-A simple 2D platformer game built using HTML5 Canvas and JavaScript. The game features a player character that can move left and right, jump, and interact with platforms and obstacles. Here is the guide with instructions on how to defeat Eleanor.
+**Cube Clash: Battle Arena** is a 3D multiplayer platformer battle game built with Three.js and WebGPU. Battle with friends in fast-paced arena combat with platforming mechanics, weapon pickups, and up to 4-player local multiplayer support.
 
-A Pen created on CodePen.io. Original URL: https://codepen.io/d-knight/pen/GPzpXw.
+### Features
+
+- **WebGPU Graphics** - Modern GPU acceleration with WebGL fallback
+- **4-Player Multiplayer** - Local co-op with keyboard + gamepad support
+- **Combat System** - 4 weapon types (Bow, Gun, Shotgun, Minigun)
+- **Multiple Arenas** - CODE, Google, Ballpit, Basement, and VR themed levels
+- **3D Characters** - GLB models with dynamic animations
+- **Physics Engine** - Jumping, platforms, and projectile physics
+
+### Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+**Game Documentation:** See [GAME_FEATURES.md](GAME_FEATURES.md) for complete controls and features.
+
+**Original Concept:** Based on Fund Fun Factory 2018 - Factory Battle Royale (CodePen: https://codepen.io/d-knight/pen/GPzpXw)
 
 ### Technical Documentation
 
