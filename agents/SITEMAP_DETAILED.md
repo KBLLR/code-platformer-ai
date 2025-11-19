@@ -1,6 +1,6 @@
 # SITEMAP_DETAILED — Directory Tree
 
-_Last generated: 2025-11-17_
+_Last generated: 2025-11-19_
 
 ```
 .github/
@@ -54,6 +54,8 @@ public/
 scripts/
   ci/
 src/
+  data/
+    level/
   styles/
   ui/
   utils/

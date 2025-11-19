@@ -1,6 +1,6 @@
 # SITEMAP — Source Overview
 
-_Last generated: 2025-11-17_
+_Last generated: 2025-11-19_
 
 ## Top-Level Directories
 
@@ -13,6 +13,6 @@ _Last generated: 2025-11-17_
 - `scripts/`
   - ci/
 - `src/`
-  - styles/, ui/, utils/, weapon_spawns/, weapons/
+  - data/, styles/, ui/, utils/, weapon_spawns/, weapons/
 
 > Generated via `agents/scripts/generate_sitemap.py`.
