@@ -132,15 +132,37 @@ npm run preview
 7. **Victory Screen** - Winner announcement
 8. **Return to Menu** - Play again or quit
 
+## New Game Systems
+
+### 3D Generative Stage Module (`src/StageGenerator.js`)
+- **Dynamic level generation** from JSON configuration
+- **Procedural arena creation** instead of static files
+- **Theme support** (CODE, Google, Ballpit, Basement)
+- **Custom platforms, spawns, lighting**
+- **Built-in templates** (simple, complex)
+
+See `GAME_SYSTEMS.md` for full documentation and usage examples.
+
+### Game Rules & Victory System (`src/GameRules.js`)
+- **Victory conditions**: Money ($10k), Elimination, Time limit, Kill count
+- **Automatic respawning** with configurable delay
+- **Kill/death tracking** per player
+- **Match statistics** (duration, kills, deaths, money)
+- **Victory screen** integration
+- **Pause/resume** functionality
+
+See `GAME_SYSTEMS.md` for integration guide.
+
 ## Future Enhancements
 
+- ⚠️ **Victory system integration** - Ready, needs Game.js integration
+- ⚠️ **Collision detection** - Add projectile → player collisions
 - AI opponents for single-player mode
 - Network multiplayer (battle royale vision)
 - Power-ups and special abilities
 - More weapons and customization
 - Tournament mode
 - Replay system
-- Custom level editor
 
 ## Credits
 
