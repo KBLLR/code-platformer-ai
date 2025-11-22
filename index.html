@@ -45,7 +45,22 @@
         <script type="module" src="/src/main.js"></script>
         <link rel="stylesheet" href="/src/styles/index.css" />
         <script src="https://cdn.tailwindcss.com"></script>
-        <!-- THIS IS THE LINE TO ADD -->
+        <style>
+            @keyframes fade-in {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes scale-in {
+                from { transform: scale(0.8); opacity: 0; }
+                to { transform: scale(1); opacity: 1; }
+            }
+            .animate-fade-in {
+                animation: fade-in 0.5s ease-out;
+            }
+            .animate-scale-in {
+                animation: scale-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+        </style>
     </head>
     <body>
         <!-- NEW: Added #game-wrap container -->
@@ -104,16 +119,8 @@
                     </button>
                 </div>
 
-                <div id="game-hud" class="hidden w-full h-full">
-                    <!-- Add game HUD contents -->
-                </div>
-
-                <div id="player-hud">
-                    <div class="player-ui" id="player-0-ui"></div>
-                    <div class="player-ui" id="player-1-ui"></div>
-                    <div class="player-ui" id="player-2-ui"></div>
-                    <div class="player-ui" id="player-3-ui"></div>
-                </div>
+                <!-- Modern Game HUD (populated by ModernGameHUD.js) -->
+                <div id="game-hud" class="hidden"></div>
             </div>
         </div>
         <!-- END NEW: #game-wrap -->
