@@ -1,5 +1,6 @@
 import "./styles/index.css";
 import { initGame } from "@/Game.js";
+import { initGameViverse } from "@/GameViverse.js"; // <--- NEW: Import VIVERSE game
 import { GetUrlParam } from "@/util.js";
 import { Mainmenu, LvlSelect, CharSelect } from "@/menus.js";
 import { loadGameConfig } from "@/game_config.js";
@@ -36,20 +37,20 @@ async function startGame(lvl = 0, characterCount = 0, humanPlayerCount = 1) {
     const initAudio = () => {
       if (window.AudioContext || window.webkitAudioContext) {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
+
         // Resume audio context if suspended
         if (audioContext.state === 'suspended') {
           audioContext.resume();
         }
-        
+
         console.log("[main.js] Audio context initialized:", audioContext.state);
       }
     };
-    
+
     // Initialize audio on first user interaction
     document.addEventListener('click', initAudio, { once: true });
     document.addEventListener('keydown', initAudio, { once: true });
-    
+
     // Load and play background music
     await Sounds.LoadSounds(() => {
       console.log("[main.js] All sounds initialized.");
@@ -63,12 +64,26 @@ async function startGame(lvl = 0, characterCount = 0, humanPlayerCount = 1) {
     console.warn("[main.js] Sound system failed to initialize:", error);
   }
 
-  initGame(canvas, { 
-    lvl, 
-    character: characterCount > 0 ? characterCount : 1,
-    humanPlayers: humanPlayerCount || 1
-  });
-  console.log("[main.js] initGame initiated.");
+  // Check if VIVERSE mode should be used (URL param or default for this branch)
+  const useViverse = GetUrlParam("viverse") !== "false"; // Default to VIVERSE on this branch
+
+  if (useViverse) {
+    console.log("[main.js] Starting VIVERSE 3D Arena mode...");
+    initGameViverse(canvas, {
+      lvl,
+      character: characterCount > 0 ? characterCount : 1,
+      humanPlayers: humanPlayerCount || 1
+    });
+    console.log("[main.js] initGameViverse initiated.");
+  } else {
+    console.log("[main.js] Starting classic 2.5D platformer mode...");
+    initGame(canvas, {
+      lvl,
+      character: characterCount > 0 ? characterCount : 1,
+      humanPlayers: humanPlayerCount || 1
+    });
+    console.log("[main.js] initGame initiated.");
+  }
 }
 
 // Wait for DOM to be ready

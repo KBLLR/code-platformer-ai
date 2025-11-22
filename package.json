@@ -15,6 +15,7 @@
     "lab:api": "cd /Users/davidcaballero/htdi-agentic-lab && npm run api:start"
   },
   "dependencies": {
+    "@pmndrs/viverse": "^0.2.6",
     "gsap": "^3.12.7",
     "three": "^0.181.0"
   },
