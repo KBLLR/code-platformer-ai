@@ -1,11 +1,11 @@
 # SITEMAP_DETAILED — Directory Tree
 
-_Last generated: 2025-11-19_
+_Last generated: 2025-11-22_
 
 ```
 .github/
   workflows/
-agents/
+agentship-x-htdi/
   audits/
   profiles/
     models/
@@ -18,6 +18,7 @@ agents/
     webgpu-battle-royale/
       qa/
       sessions/
+  prompts/
   scripts/
   templates/
     project-template/
@@ -45,6 +46,7 @@ public/
       win/
     mainmenu/
     models/
+      assets/
     sounds/
     videos/
   characters3D/
