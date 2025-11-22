@@ -22,14 +22,36 @@ async function startGame(lvl = 0, characterCount = 0, humanPlayerCount = 1) {
   await loadGameConfig();
   console.log("[main.js] Game config loaded.");
 
-  // Hide UI containers
-  const uiContainer = document.getElementById("ui-container");
-  if (uiContainer) {
-    // Only hide if you want the canvas to be the primary view
-    // Or manage specific menu/HUD visibility through their classes.
-    // For now, let's just make sure gameHud is visible
-    if (gameHud) gameHud.classList.remove("hidden");
+  // Hide all menus and show game HUD
+  const menuWrap = document.getElementsByClassName("menu-wrap")[0];
+  const lvlSelectWrap = document.getElementsByClassName("lvl-select-wrap")[0];
+  const charSelect = document.getElementById("character-select");
+
+  if (menuWrap) menuWrap.style.display = "none";
+  if (lvlSelectWrap) lvlSelectWrap.style.display = "none";
+  if (charSelect) {
+    charSelect.style.display = "none";
+    charSelect.classList.add("hidden");
   }
+
+  // Show game HUD and ensure canvas is visible
+  if (gameHud) {
+    gameHud.classList.remove("hidden");
+    gameHud.style.display = "block";
+  }
+
+  // Make sure canvas is visible and in front
+  if (canvas) {
+    canvas.style.display = "block";
+    canvas.style.position = "fixed";
+    canvas.style.top = "0";
+    canvas.style.left = "0";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvas.style.zIndex = "1";
+  }
+
+  console.log("[main.js] All menus hidden, game starting...");
 
   // Initialize audio context and load sounds
   try {
@@ -167,15 +189,13 @@ async function setupMenuFlow() {
       await charSelect.Show(); // Will set character-select to 'flex' and load assets
       console.log("[main.js] CharSelect.Show() called.");
 
-      charSelect.OnStartGame(() => {
-        // This callback now explicitly receives the character count.
-        // It's up to CharSelect to manage how this count is determined (e.g., from UI selection).
-        // For debugging, we'll hardcode it for now.
-        selectedCharacterCount = 2; // Hardcode 2 players for testing via menu flow
+      charSelect.OnStartGame((characterCount) => {
+        // CharSelect passes the selected character count
+        selectedCharacterCount = characterCount || 2;
         console.log(
           `[main.js] CharSelect 'START' button clicked. Starting game with level ${selectedLevel}, characters ${selectedCharacterCount}.`,
         );
-        startGame(selectedLevel, selectedCharacterCount);
+        startGame(selectedLevel, selectedCharacterCount, 1); // humanPlayers = 1 for now
       });
     });
   });
