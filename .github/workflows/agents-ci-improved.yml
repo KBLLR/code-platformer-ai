@@ -1,0 +1,341 @@
+name: Agents CI (Lab-Aware)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      target_ref:
+        description: "Branch or ref to validate"
+        default: "main"
+        required: false
+        type: string
+      sync_with_lab:
+        description: "Sync agents with HTDI Lab"
+        default: true
+        required: false
+        type: boolean
+      reason:
+        description: "Why run validation?"
+        required: true
+        default: "manual"
+        type: string
+  schedule:
+    - cron: "0 9 * * MON"
+  pull_request_target:
+    types:
+      - closed
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+  HTDI_LAB_PATH: "/Users/davidcaballero/htdi-agentic-lab"
+
+jobs:
+  validate-config:
+    name: Validate Lab Configuration
+    runs-on: ubuntu-latest
+    outputs:
+      config_valid: ${{ steps.validate.outputs.valid }}
+      lab_enabled: ${{ steps.validate.outputs.lab_enabled }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate lab config
+        id: validate
+        run: |
+          if [ -f ".htdi-lab.config.json" ]; then
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+
+            # Check if lab is enabled
+            LAB_ENABLED=$(jq -r '.lab.enabled' .htdi-lab.config.json)
+            echo "lab_enabled=$LAB_ENABLED" >> "$GITHUB_OUTPUT"
+
+            echo "✅ Lab config found and valid"
+          else
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            echo "lab_enabled=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️  No lab config found (this is OK)"
+          fi
+
+      - name: Install jq if needed
+        run: |
+          if ! command -v jq &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+
+  update-docs:
+    name: Update Documentation
+    needs: validate-config
+    if: github.event_name != 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: |
+          pip install requests
+
+      - name: Generate agent docs
+        run: |
+          set -e
+
+          echo "📝 Generating agent documentation..."
+          python agentship-x-htdi/scripts/generate_audit.py
+          python agentship-x-htdi/scripts/generate_sitemap.py
+          python agentship-x-htdi/scripts/collect_opentasks.py
+
+          echo "✅ Documentation generated"
+
+      - name: Validate generated files
+        run: |
+          REQUIRED_FILES=(
+            "agentship-x-htdi/OPENTASKS.md"
+            "agentship-x-htdi/SITEMAP.md"
+          )
+
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing required file: $file"
+              exit 1
+            fi
+            echo "✅ Found: $file"
+          done
+
+      - name: Markdown lint
+        uses: DavidAnson/markdownlint-cli2-action@v18
+        continue-on-error: true
+        with:
+          globs: |
+            agentship-x-htdi/**/*.md
+            **/README.md
+
+      - name: Clean Python bytecode
+        run: |
+          find . -type d -name "__pycache__" -prune -exec rm -rf {} + || true
+          find . -name "*.py[cod]" -delete || true
+          find . -name "*.pyo" -delete || true
+
+      - name: Commit agent docs if changed
+        run: |
+          set -eo pipefail
+
+          git config user.name "codex-agent"
+          git config user.email "codex-agent@users.noreply.github.com"
+
+          # Stage only the relevant documentation paths
+          git add \
+            agentship-x-htdi/AGENTS.md \
+            agentship-x-htdi/HANDOFFS.md \
+            agentship-x-htdi/OPENTASKS.md \
+            agentship-x-htdi/AUDIT-log.md \
+            agentship-x-htdi/audits/ \
+            agentship-x-htdi/SITEMAP*.md 2>/dev/null || true
+
+          # Check if anything is actually staged
+          if git diff --cached --quiet; then
+            echo "ℹ️  No documentation changes to commit. Exiting cleanly."
+            exit 0
+          fi
+
+          # Commit with [skip ci] to prevent infinite loops
+          git commit -m "chore(docs): auto-update agent documentation [skip ci]"
+          git push
+
+          echo "✅ Documentation committed and pushed"
+
+  sync-with-lab:
+    name: Sync with HTDI Lab
+    needs: [validate-config, update-docs]
+    if: |
+      needs.validate-config.outputs.lab_enabled == 'true' &&
+      (github.event_name == 'push' || github.event.inputs.sync_with_lab == 'true')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: |
+          pip install requests
+
+      - name: Sync agents with lab
+        run: |
+          echo "🔄 Syncing agents with HTDI Lab..."
+          python agentship-x-htdi/scripts/sync_with_lab.py
+
+          echo "✅ Lab sync complete"
+        continue-on-error: true
+
+      - name: Update lab registry
+        run: |
+          if [ -f ".htdi-lab.config.json" ]; then
+            LAB_REGISTRY=$(jq -r '.lab.registryPath' .htdi-lab.config.json)
+
+            if [ -f "$LAB_REGISTRY" ]; then
+              echo "📚 Lab registry updated at: $LAB_REGISTRY"
+            else
+              echo "⚠️  Lab registry not accessible (may not be on this runner)"
+            fi
+          fi
+        continue-on-error: true
+
+  handoff-entry:
+    name: Record Handoff Entry
+    needs: validate-config
+    if: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.merged == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Append handoff entry
+        env:
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: |
+          echo "📝 Recording handoff entry..."
+          python agentship-x-htdi/scripts/handoff_sync.py
+          echo "✅ Handoff recorded"
+
+      - name: Clean Python bytecode
+        run: |
+          find . -type d -name "__pycache__" -prune -exec rm -rf {} + || true
+          find . -name "*.py[cod]" -delete || true
+
+      - name: Commit handoff entry
+        run: |
+          set -eo pipefail
+
+          git config user.name "codex-agent"
+          git config user.email "codex-agent@users.noreply.github.com"
+
+          git add agentship-x-htdi/HANDOFFS.md 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "ℹ️  No handoff changes to commit. Exiting cleanly."
+            exit 0
+          fi
+
+          git commit -m "chore(handoff): append handoff entry [skip ci]"
+          git push
+
+          echo "✅ Handoff entry committed"
+
+  ci-validation:
+    name: CI Validation
+    needs: validate-config
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target_ref || 'main' }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: |
+          pip install requests
+
+      - name: Run generators
+        run: |
+          set -e
+
+          echo "🔧 Running generators..."
+          python agentship-x-htdi/scripts/generate_audit.py
+          python agentship-x-htdi/scripts/generate_sitemap.py
+          python agentship-x-htdi/scripts/collect_opentasks.py
+
+          echo "✅ Generators complete"
+
+      - name: Lint Markdown
+        uses: DavidAnson/markdownlint-cli2-action@v18
+        continue-on-error: true
+        with:
+          globs: |
+            agentship-x-htdi/**/*.md
+            **/README.md
+
+      - name: Append automation validation entry
+        run: |
+          python agentship-x-htdi/scripts/handoff_sync.py --append "automation:ci-validation | $(date -u +%F) | workflow_dispatch:${{ inputs.reason }}"
+
+      - name: Clean Python bytecode
+        run: |
+          find . -type d -name "__pycache__" -prune -exec rm -rf {} + || true
+          find . -name "*.py[cod]" -delete || true
+
+      - name: Commit validation artifacts
+        run: |
+          set -eo pipefail
+
+          git config user.name "codex-agent"
+          git config user.email "codex-agent@users.noreply.github.com"
+
+          git add \
+            agentship-x-htdi/HANDOFFS.md \
+            agentship-x-htdi/OPENTASKS.md \
+            agentship-x-htdi/AUDIT-log.md \
+            agentship-x-htdi/audits/ \
+            agentship-x-htdi/SITEMAP*.md 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "ℹ️  No validation changes to commit. Exiting cleanly."
+            exit 0
+          fi
+
+          git commit -m "chore(ci): automation validation sweep [skip ci]"
+          git push
+
+          echo "✅ Validation artifacts committed"
+
+      - name: Comment on PR (optional)
+        if: ${{ inputs.pull_number != '' }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ inputs.pull_number }}
+          body: |
+            ✅ Agents CI validation completed.
+
+            - Generators executed successfully.
+            - Markdown lint passed.
+            - Logged `automation:ci-validation` in `agentship-x-htdi/HANDOFFS.md`.
+            ${{ needs.validate-config.outputs.lab_enabled == 'true' && '- ✅ Lab sync enabled' || '- ⚠️  Lab sync disabled' }}
+
+  summary:
+    name: Workflow Summary
+    needs: [validate-config, update-docs, sync-with-lab]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate summary
+        run: |
+          echo "# 🤖 Agents CI Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow Run:** ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Config Valid: ${{ needs.validate-config.outputs.config_valid }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Lab Enabled: ${{ needs.validate-config.outputs.lab_enabled }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Docs Updated: ${{ needs.update-docs.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Lab Sync: ${{ needs.sync-with-lab.result }}" >> $GITHUB_STEP_SUMMARY

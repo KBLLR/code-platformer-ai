@@ -152,15 +152,13 @@ async function setupMenuFlow() {
       await charSelect.Show(); // Will set character-select to 'flex' and load assets
       console.log("[main.js] CharSelect.Show() called.");
 
-      charSelect.OnStartGame(() => {
-        // This callback now explicitly receives the character count.
-        // It's up to CharSelect to manage how this count is determined (e.g., from UI selection).
-        // For debugging, we'll hardcode it for now.
-        selectedCharacterCount = 2; // Hardcode 2 players for testing via menu flow
+      charSelect.OnStartGame((humanPlayerCount) => {
+        // Receive the actual player count from CharSelect
+        selectedCharacterCount = humanPlayerCount || 2;
         console.log(
-          `[main.js] CharSelect 'START' button clicked. Starting game with level ${selectedLevel}, characters ${selectedCharacterCount}.`,
+          `[main.js] CharSelect 'START' button clicked. Starting game with level ${selectedLevel}, ${selectedCharacterCount} human players.`,
         );
-        startGame(selectedLevel, selectedCharacterCount);
+        startGame(selectedLevel, selectedCharacterCount, humanPlayerCount);
       });
     });
   });

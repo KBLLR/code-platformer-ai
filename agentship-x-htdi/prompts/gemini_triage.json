@@ -1,0 +1,50 @@
+[
+  {
+    "key": "incident-triage",
+    "title": "Incident / Crashline Sweep",
+    "description": "Triage fresh bug reports or crash logs, capture repro steps, and recommend containment actions.",
+    "script": "Treat this as an incident-response engagement. Identify the impacted feature flag, summarize the failure signature, inspect the relevant source files, and propose immediate mitigations before suggesting larger refactors. Close with a go/no-go recommendation for shipping.",
+    "checklist": [
+      "Summarize the failing subsystem, stack trace, or telemetry signal you inspected.",
+      "List deterministic repro steps (or the closest approximation) referencing concrete assets/files.",
+      "Call out severity, scope/blast radius, and the fastest mitigation path (hotfix, feature flag, or rollback)."
+    ],
+    "references": [
+      "agents/AUDIT-log.md",
+      "agents/SITEMAP.md",
+      "src/"
+    ]
+  },
+  {
+    "key": "bundle-sanity",
+    "title": "Build / Bundle Sanity Sweep",
+    "description": "Use when Gemini needs to verify a release candidate bundle, asset pipeline, or CI failure.",
+    "script": "Work through the bundle like a release engineer. Start with npm scripts, confirm the Vite build succeeds, inspect the dist/ artifacts, and flag any mismatched asset paths or environment variables. Finish by outlining QA smoke tests the team should run.",
+    "checklist": [
+      "Document which npm/pnpm commands were evaluated and their outcomes.",
+      "Highlight any missing environment variables, secrets, or build-time flags.",
+      "List the manual QA or automated checks required before merging."
+    ],
+    "references": [
+      "package.json",
+      "vite.config.js",
+      "agents/SITEMAP_DETAILED.md"
+    ]
+  },
+  {
+    "key": "performance-watch",
+    "title": "Performance Watch / Frame Pacing",
+    "description": "Baseline render + physics hot paths, locate regressions, and propose targeted instrumentation.",
+    "script": "Audit render, physics, and AI ticks. Identify functions with heavy allocations, recommend profiling hooks, and propose low-risk guardrails (e.g., frame budget counters). Tie every observation back to concrete files.",
+    "checklist": [
+      "Call out the critical loops inspected (render, physics, AI, networking).",
+      "Quantify the suspected regression (frame time delta, memory churn, etc.).",
+      "Recommend at least one instrumentation or benchmarking approach."
+    ],
+    "references": [
+      "src/engine/",
+      "src/systems/",
+      "agents/audits/REPOSITORY_AUDIT.md"
+    ]
+  }
+]

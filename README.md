@@ -34,11 +34,12 @@ npm run build
 
 For comprehensive technical documentation, architecture proposals, and agent workflows, see:
 
-- **[WebGPU Battle Royale Architecture](agents/audits/WEBGPU_BATTLE_ROYALE_ARCHITECTURE.md)** - Complete transformation roadmap
-- **[Repository Audit](agents/audits/REPOSITORY_AUDIT.md)** - Current codebase analysis
-- **[Agent Documentation](agents/AGENTS.md)** - Agent workflow and automation
-- **[Open Tasks](agents/OPENTASKS.md)** - Active task ledger
-- **[WebGPU Project](agents/projects/webgpu-battle-royale/)** - Battle royale transformation project (104 tasks)
+- **[WebGPU Battle Royale Architecture](agentship-x-htdi/audits/WEBGPU_BATTLE_ROYALE_ARCHITECTURE.md)** - Complete transformation roadmap
+- **[Repository Audit](agentship-x-htdi/audits/REPOSITORY_AUDIT.md)** - Current codebase analysis
+- **[Agent Documentation](agentship-x-htdi/AGENTS.md)** - Agent workflow and automation
+- **[Open Tasks](agentship-x-htdi/OPENTASKS.md)** - Active task ledger
+- **[Agent & Automation Overview](agentship-x-htdi/AUTOMATION_OVERVIEW.md)** - Runner matrix, automation stack, and local dev flow
+- **[WebGPU Project](agentship-x-htdi/projects/webgpu-battle-royale/)** - Battle royale transformation project (104 tasks)
 
 ---
 
@@ -67,7 +68,7 @@ Automated continuous integration for agent documentation and validation.
 - **Idempotent:** The workflow passes cleanly when there are no documentation changes to commit
 - **Bytecode handling:** Python bytecode (`.pyc`, `__pycache__`) files are automatically cleaned and ignored to prevent spurious failures
 - **Loop prevention:** Auto-commits include `[skip ci]` to avoid infinite workflow re-triggering
-- **Scoped commits:** Only stages and commits files in `agents/` documentation paths, not accidental artifacts
+- **Scoped commits:** Only stages and commits files in `agentship-x-htdi/` documentation paths, not accidental artifacts
 
 #### 2. **Claude Runner** (`.github/workflows/agents-claude.yml`)
 Execute tasks using Claude AI (Anthropic).
@@ -77,8 +78,8 @@ Execute tasks using Claude AI (Anthropic).
 **Actions:**
 - Uses Claude 3.5 Sonnet to analyze and plan task execution
 - Runs agent Python scripts
-- Commits changes to `agents/` directory
-- Creates `agents/audits/claude-summary.md` with task summary
+- Commits changes to `agentship-x-htdi/` directory
+- Creates `agentship-x-htdi/audits/claude-summary.md` with task summary
 
 **Required Secret:** `ANTHROPIC_API_KEY`
 
@@ -90,8 +91,8 @@ Execute tasks using OpenAI GPT-4.
 **Actions:**
 - Uses GPT-4 to analyze and plan task execution
 - Runs agent Python scripts
-- Commits changes to `agents/` directory
-- Creates `agents/audits/openai-summary.md` with task summary
+- Commits changes to `agentship-x-htdi/` directory
+- Creates `agentship-x-htdi/audits/openai-summary.md` with task summary
 
 **Required Secret:** `OPENAI_API_KEY`
 
@@ -103,7 +104,7 @@ Execute tasks using Google Gemini AI.
 **Actions:**
 - Uses Gemini 1.5 Pro to analyze and plan task execution
 - Runs agent Python scripts
-- Commits changes to `agents/` directory
+- Commits changes to `agentship-x-htdi/` directory
 - Creates `gemini-output.md` with task summary
 
 **Required Secret:** `GEMINI_API_KEY`
@@ -114,7 +115,7 @@ Creates GitHub issues from OPENTASKS for Jules agent handoffs.
 **Trigger:** Manual dispatch with task ID
 
 **Actions:**
-- Parses `agents/OPENTASKS.md` to find task details
+- Parses `agentship-x-htdi/OPENTASKS.md` to find task details
 - Creates or updates GitHub issue with task brief
 - Labels issue with `jules` and `handoff`
 
@@ -145,14 +146,14 @@ GEMINI_API_KEY      # For Gemini Runner
 
 ### Workflow Best Practices
 
-1. **Task Execution:** Use the AI runners to execute specific tasks from `agents/OPENTASKS.md`
+1. **Task Execution:** Use the AI runners to execute specific tasks from `agentship-x-htdi/OPENTASKS.md`
 1. **Auto-Execute:** The daily auto-execute workflow handles high-priority tasks automatically
 1. **CI Validation:** The CI workflow ensures documentation stays synchronized
 1. **Handoffs:** Use Jules Bridge to create trackable GitHub issues for complex tasks
 
 ### Agent Scripts
 
-The workflows utilize Python scripts in `agents/scripts/`:
+The workflows utilize Python scripts in `agentship-x-htdi/scripts/`:
 - `generate_audit.py` - Creates repository audit documentation
 - `generate_sitemap.py` - Generates codebase sitemap
 - `collect_opentasks.py` - Aggregates open tasks from projects
@@ -173,10 +174,12 @@ python scripts/agent_cli.py
 
 The CLI mirrors the workflows documented above:
 
-- **Model Runner:** pick Claude Sonnet 4.5 (`claude --print --model claude-sonnet-4-5-20250929`), OpenAI via Codex CLI (`codex exec --model gpt-5.1-codex` — the 0.58 release exposes `gpt-5.1-codex`, `gpt-5.1-codex-mini`, and raw `gpt-5.1`), Gemini 2.5 Flash (`gemini --model gemini-2.5-flash --sandbox`), or Jules (`jules new --repo <path>`). Each run matches the GitHub workflows, writes the same summary artifacts (`agents/audits/claude-summary.md`, `agents/audits/openai-summary.md`, `gemini-output.md`, `agents/audits/jules-summary.md`), and then offers to run the generator scripts. (For Gemini CLI, enable sandbox mode globally via `gemini settings --sandbox=ON` or pass `--sandbox` per run so the agent can execute shell commands.)
+- **Model Runner:** pick Claude Sonnet 4.5 (`claude --print --model claude-sonnet-4-5-20250929`), OpenAI via Codex CLI (`codex exec --model gpt-5.1-codex` — the 0.58 release exposes `gpt-5.1-codex`, `gpt-5.1-codex-mini`, and raw `gpt-5.1`), Gemini 2.5 Flash (`gemini --model gemini-2.5-flash --sandbox`), or Jules (`jules new --repo <path>`). Each run matches the GitHub workflows, writes the same summary artifacts (`agentship-x-htdi/audits/claude-summary.md`, `agentship-x-htdi/audits/openai-summary.md`, `gemini-output.md`, `agentship-x-htdi/audits/jules-summary.md`), and then offers to run the generator scripts. (For Gemini CLI, enable sandbox mode globally via `gemini settings --sandbox=ON` or pass `--sandbox` per run so the agent can execute shell commands.)
 - **Multi-Agent Dispatch:** select one or many agents in a single session. If a runner hits quota (e.g., Claude weekly cap), the CLI logs the error and keeps going with the remaining selections so you still get Codex/Gemini/Jules coverage.
-- **Jules Quota Awareness:** Jules runs are asynchronous and limited to 15 free dispatches per day. The CLI tracks usage (stored under `agents/logs/jules-usage.json`), warns when the cap is hit, and asks for confirmation before spending additional runs.
-- **Auto Execute:** wrap `agents/scripts/agent_executor.py` for the same preparation handled by `.github/workflows/agent-auto-execute.yml`.
+- **Gemini Triage Library:** when Gemini is selected you can choose a template from `agentship-x-htdi/prompts/gemini_triage.json` (incident triage, bundle sanity, performance watch, etc.) to prepend workflow-specific instructions automatically.
+- **Runner Fallbacks:** missing CLIs or quota/auth failures are downgraded to warnings so the next agent in the chain continues running without manual edits.
+- **Jules Quota Awareness:** Jules runs are asynchronous and limited to 15 free dispatches per day. The CLI tracks usage (stored under `agentship-x-htdi/logs/jules-usage.json`), warns when the cap is hit, and asks for confirmation before spending additional runs.
+- **Auto Execute:** wrap `agentship-x-htdi/scripts/agent_executor.py` for the same preparation handled by `.github/workflows/agent-auto-execute.yml`.
 - **Workflow Summary:** lists each workflow so you can jump between GitHub and local runs quickly.
 - **Generators:** optionally runs `generate_audit.py`, `generate_sitemap.py`, and `collect_opentasks.py` just like the CI workflow once your model summary is captured.
 
@@ -186,16 +189,16 @@ The CLI mirrors the workflows documented above:
 - Claude CLI: run `claude login` (or `claude --print --model claude-sonnet-4-5-20250929 "hi"`) so the tool can refresh tokens and honor the weekly quota. If you hit the cap, the CLI will report “Weekly limit reached…”.
 - Codex CLI: run `codex login` and ensure your account can access the configured model (`gpt-5.1-codex` by default; `gpt-5.1-codex-mini` and `gpt-5.1` are also available). If you need a different tier, change the `CODEX_MODEL` constant in `scripts/agent_cli.py`.
 - Gemini CLI: enable its sandbox so the agent may execute shell commands (`gemini settings --sandbox=ON`, or pass `--sandbox` per invocation). Without the sandbox, Gemini only returns planning text.
-- Jules CLI: run `jules login` to authorize via Google, then the CLI can dispatch asynchronous sessions via `jules new --repo <path>`. Remember the local tool enforces the 15 free runs/day limit and logs usage in `agents/logs/jules-usage.json`.
+- Jules CLI: run `jules login` to authorize via Google, then the CLI can dispatch asynchronous sessions via `jules new --repo <path>`. Remember the local tool enforces the 15 free runs/day limit and logs usage in `agentship-x-htdi/logs/jules-usage.json`.
 
 ### Agent Gallery & Dossier
 
 Agents can showcase their character profiles (and optional 3D models) on `public/agent-gallery.html`—available from the “AGENTS” button inside the main menu. Clicking a card opens the full-screen Three.js dossier powered by your metadata and GLB model. To publish:
 
-1. **Markdown story** – fill `agents/AGENT_PROFILE_TEMPLATE.md` and save it under `agents/profiles/<codename>.md`.
-1. **JSON card** – copy `agents/profiles/TEMPLATE.json` to `agents/profiles/<codename>.json`, fill the fields (favorite color, quotes, prompts, etc.), and point `model3D` to a `.glb/.gltf` stored under `agents/profiles/models/`.
+1. **Markdown story** – fill `agentship-x-htdi/AGENT_PROFILE_TEMPLATE.md` and save it under `agentship-x-htdi/profiles/<codename>.md`.
+1. **JSON card** – copy `agentship-x-htdi/profiles/TEMPLATE.json` to `agentship-x-htdi/profiles/<codename>.json`, fill the fields (favorite color, quotes, prompts, etc.), and point `model3D` to a `.glb/.gltf` stored under `agentship-x-htdi/profiles/models/`.
 1. **Generate agentId** – `validate-profile.cjs` now creates a slugged `agentId` automatically when missing; keep it unique per agent.
-1. **Validate** – run `node agents/profiles/validate-profile.cjs agents/profiles/<codename>.json` to ensure all fields (including `agentId`) are populated.
+1. **Validate** – run `node agentship-x-htdi/profiles/validate-profile.cjs agentship-x-htdi/profiles/<codename>.json` to ensure all fields (including `agentId`) are populated.
 1. **Preview** – open `/agent-gallery.html` and click your card to load `/agent-card-view.html?profile=<file>`.
 
 ---

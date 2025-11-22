@@ -47,15 +47,15 @@ jobs:
 
       - name: Generate agent docs
         run: |
-          python agents/scripts/generate_audit.py
-          python agents/scripts/generate_sitemap.py
-          python agents/scripts/collect_opentasks.py
+          python agentship-x-htdi/scripts/generate_audit.py
+          python agentship-x-htdi/scripts/generate_sitemap.py
+          python agentship-x-htdi/scripts/collect_opentasks.py
 
       - name: Markdown lint
         uses: DavidAnson/markdownlint-cli2-action@v18
         with:
           globs: |
-            agents/**/*.md
+            agentship-x-htdi/**/*.md
             **/README.md
 
       - name: Clean Python bytecode
@@ -74,12 +74,12 @@ jobs:
 
           # Stage only the relevant documentation paths
           git add \
-            agents/AGENTS.md \
-            agents/HANDOFFS.md \
-            agents/OPENTASKS.md \
-            agents/AUDIT-log.md \
-            agents/audits/ \
-            agents/SITEMAP*.md 2>/dev/null || true
+            agentship-x-htdi/AGENTS.md \
+            agentship-x-htdi/HANDOFFS.md \
+            agentship-x-htdi/OPENTASKS.md \
+            agentship-x-htdi/AUDIT-log.md \
+            agentship-x-htdi/audits/ \
+            agentship-x-htdi/SITEMAP*.md 2>/dev/null || true
 
           # Check if anything is actually staged
           if git diff --cached --quiet; then
@@ -110,7 +110,7 @@ jobs:
         env:
           GITHUB_EVENT_PATH: ${{ github.event_path }}
           GITHUB_ACTOR: ${{ github.actor }}
-        run: python agents/scripts/handoff_sync.py
+        run: python agentship-x-htdi/scripts/handoff_sync.py
 
       - name: Clean Python bytecode
         run: |
@@ -127,7 +127,7 @@ jobs:
           git config user.email "codex-agent@users.noreply.github.com"
 
           # Stage only HANDOFFS.md
-          git add agents/HANDOFFS.md 2>/dev/null || true
+          git add agentship-x-htdi/HANDOFFS.md 2>/dev/null || true
 
           # Check if anything is actually staged
           if git diff --cached --quiet; then
@@ -156,20 +156,20 @@ jobs:
 
       - name: Run generators
         run: |
-          python agents/scripts/generate_audit.py
-          python agents/scripts/generate_sitemap.py
-          python agents/scripts/collect_opentasks.py
+          python agentship-x-htdi/scripts/generate_audit.py
+          python agentship-x-htdi/scripts/generate_sitemap.py
+          python agentship-x-htdi/scripts/collect_opentasks.py
 
       - name: Lint Markdown
         uses: DavidAnson/markdownlint-cli2-action@v18
         with:
           globs: |
-            agents/**/*.md
+            agentship-x-htdi/**/*.md
             **/README.md
 
       - name: Append automation validation entry
         run: |
-          python agents/scripts/handoff_sync.py --append "automation:ci-validation | $(date -u +%F) | workflow_dispatch:${{ inputs.reason }}"
+          python agentship-x-htdi/scripts/handoff_sync.py --append "automation:ci-validation | $(date -u +%F) | workflow_dispatch:${{ inputs.reason }}"
 
       - name: Clean Python bytecode
         run: |
@@ -187,11 +187,11 @@ jobs:
 
           # Stage only the relevant documentation paths
           git add \
-            agents/HANDOFFS.md \
-            agents/OPENTASKS.md \
-            agents/AUDIT-log.md \
-            agents/audits/ \
-            agents/SITEMAP*.md 2>/dev/null || true
+            agentship-x-htdi/HANDOFFS.md \
+            agentship-x-htdi/OPENTASKS.md \
+            agentship-x-htdi/AUDIT-log.md \
+            agentship-x-htdi/audits/ \
+            agentship-x-htdi/SITEMAP*.md 2>/dev/null || true
 
           # Check if anything is actually staged
           if git diff --cached --quiet; then
@@ -213,4 +213,4 @@ jobs:
 
             - Generators executed successfully.
             - Markdown lint passed.
-            - Logged `automation:ci-validation` in `agents/HANDOFFS.md`.
+            - Logged `automation:ci-validation` in `agentship-x-htdi/HANDOFFS.md`.

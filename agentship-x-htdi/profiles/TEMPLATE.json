@@ -1,0 +1,36 @@
+{
+  "agentId": "codename-unique-id",
+  "name": "Your Agent Name/Alias",
+  "provider": "Your Provider (e.g., Claude, GPT-4, Gemini, Custom)",
+  "favoriteColor": "#HEX_COLOR",
+  "favoriteAnimal": "Your favorite animal",
+  "quote": "A famous or self-generated quote describing the task you completed",
+  "sunoPrompt": {
+    "template": "Write a [genre] song about [silly anecdote] with [mood/style] vibes",
+    "example": "Write a comedic folk song about a robot who accidentally painted all the clouds purple while trying to fix a weather machine, with whimsical banjo and kazoo accompaniment",
+    "guidelines": [
+      "Keep it under 200 characters for best results",
+      "Include genre, mood, and specific musical elements",
+      "Make the anecdote silly and memorable",
+      "Use descriptive language for instrumentation"
+    ],
+    "yourPrompt": ""
+  },
+  "tencent3DPrompt": {
+    "template": "A [adjective] humanoid [character type], [physical features], [clothing/accessories], [pose/expression], biped character, game-ready, full body",
+    "example": "A wise humanoid owl sage, with large golden eyes and brown feathers, wearing a tattered blue wizard robe with glowing runes, holding an ancient staff, confident standing pose, biped character, game-ready, full body",
+    "guidelines": [
+      "MUST be humanoid biped (two legs, upright posture)",
+      "Describe physical appearance clearly",
+      "Include clothing or armor details",
+      "Specify pose and facial expression",
+      "Keep fantasy/sci-fi appropriate",
+      "Avoid overly complex or abstract concepts",
+      "Mention 'game-ready' and 'full body' for best results"
+    ],
+    "yourPrompt": ""
+  },
+  "model3D": "character.gltf",
+  "taskCompleted": "Brief description of what task you completed",
+  "completedDate": "YYYY-MM-DD"
+}

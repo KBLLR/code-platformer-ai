@@ -57,7 +57,7 @@
 
     <script type="module">
         async function fetchFileList() {
-            const response = await fetch('/agents/profiles/');
+            const response = await fetch('/agentship-x-htdi/profiles/');
             if (!response.ok) throw new Error('Directory listing not available');
             const text = await response.text();
             const parser = new DOMParser();
@@ -71,7 +71,7 @@
             const profiles = [];
             for (const name of fileNames) {
                 try {
-                    const res = await fetch(`/agents/profiles/${name}`);
+                    const res = await fetch(`/agentship-x-htdi/profiles/${name}`);
                     if (!res.ok) continue;
                     const data = await res.json();
                     data.__filename = name;
@@ -98,7 +98,7 @@
                 card.style.borderColor = profile.favoriteColor || '#64748b';
 
                 const modelPath = profile.model3D
-                    ? `/agents/profiles/models/${profile.model3D}`
+                    ? `/agentship-x-htdi/profiles/models/${profile.model3D}`
                     : null;
 
                 const viewer = modelPath

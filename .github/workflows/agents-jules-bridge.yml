@@ -35,7 +35,7 @@ jobs:
           # Single source of truth for the input, works for both workflow_dispatch and workflow_call
           task_id = "${{ inputs.task }}".strip()
 
-          lines = Path("agents/OPENTASKS.md").read_text(encoding="utf-8").splitlines()
+          lines = Path("agentship-x-htdi/OPENTASKS.md").read_text(encoding="utf-8").splitlines()
           selected = None
 
           for line in lines:
@@ -62,7 +62,7 @@ jobs:
                   break
 
           if selected is None:
-              raise SystemExit(f"Task {task_id} not found in agents/OPENTASKS.md")
+              raise SystemExit(f"Task {task_id} not found in agentship-x-htdi/OPENTASKS.md")
 
           content = f"""# Jules Task: {selected['ID']}
 
@@ -76,9 +76,9 @@ jobs:
           {selected['Priority']}
 
           ## References
-          - agents/AGENTS.md
-          - agents/HANDOFFS.md
-          - agents/projects/{selected['Project'].lower().replace(' ', '-')}/
+          - agentship-x-htdi/AGENTS.md
+          - agentship-x-htdi/HANDOFFS.md
+          - agentship-x-htdi/projects/{selected['Project'].lower().replace(' ', '-')}/
 
           ## Notes
           {selected['Notes'] or 'None'}

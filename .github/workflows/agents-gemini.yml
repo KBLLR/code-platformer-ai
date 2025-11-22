@@ -38,7 +38,7 @@ jobs:
           model = genai.GenerativeModel('gemini-1.5-pro')
 
           task = "${{ github.event.inputs.task }}"
-          opentasks = Path("agents/OPENTASKS.md").read_text()
+          opentasks = Path("agentship-x-htdi/OPENTASKS.md").read_text()
 
           prompt = f"""You are a code agent. Execute this task: {task}
 
@@ -47,13 +47,13 @@ jobs:
 
           Execute the task by:
           1. Understanding what needs to be done
-          2. Modify files under agents/** as needed
+          2. Modify files under agentship-x-htdi/** as needed
           3. Provide a concise summary of changes
 
           Available scripts to reference:
-          - agents/scripts/generate_audit.py
-          - agents/scripts/generate_sitemap.py
-          - agents/scripts/collect_opentasks.py
+          - agentship-x-htdi/scripts/generate_audit.py
+          - agentship-x-htdi/scripts/generate_sitemap.py
+          - agentship-x-htdi/scripts/collect_opentasks.py
 
           Return a brief summary of what should be done."""
 
@@ -64,16 +64,16 @@ jobs:
 
       - name: Run agent scripts
         run: |
-          python agents/scripts/generate_audit.py
-          python agents/scripts/generate_sitemap.py
-          python agents/scripts/collect_opentasks.py
+          python agentship-x-htdi/scripts/generate_audit.py
+          python agentship-x-htdi/scripts/generate_sitemap.py
+          python agentship-x-htdi/scripts/collect_opentasks.py
 
       - name: Commit changes
         run: |
           git config user.name "gemini-agent"
           git config user.email "gemini@agents.local"
-          if [ -n "$(git status --porcelain agents/)" ]; then
-            git add agents/
+          if [ -n "$(git status --porcelain agentship-x-htdi/)" ]; then
+            git add agentship-x-htdi/
             git add gemini-output.md
             git commit -m "gemini: ${{ github.event.inputs.task }}"
             git push
