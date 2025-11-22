@@ -6,8 +6,7 @@ import { WebGPURenderer } from "three/webgpu";
 import { BvhPhysicsWorld } from "@pmndrs/viverse";
 
 import { CharacterController } from "./CharacterController.js";
-import { initPlayerUI, updatePlayerUI } from "./ui/player_ui.js";
-import { UI } from "./ui/user_interface.js";
+import { ModernGameHUD } from "./ui/ModernGameHUD.js";
 import { game_config } from "./game_config.js";
 import { Trophy } from "./Trophy.js";
 import { Bow } from "./weapons/bow.js";
@@ -16,7 +15,7 @@ import { Level } from "./Level.js";
 import { LoaderManager } from "./LoaderManager.js";
 
 // Global game state
-let renderer, camera, scene, gameUI;
+let renderer, camera, scene, modernHUD;
 let physicsWorld;
 let players = [];
 let trophy;
@@ -486,8 +485,8 @@ export async function initGameViverse(canvas, { lvl = 0, character = 0, humanPla
   console.log("[GameViverse] Trophy initialized");
 
   // --- UI Initialization ---
-  initPlayerUI(players);
-  gameUI = new UI();
+  modernHUD = new ModernGameHUD("game-hud");
+  modernHUD.initialize(players);
   updateControllerStatusUI();
 
   // --- Event Listeners ---
@@ -593,8 +592,7 @@ function animate() {
 
   // Update UI
   updateControllerStatusUI();
-  if (gameUI) gameUI.Update();
-  updatePlayerUI(players);
+  if (modernHUD) modernHUD.update(players);
 
   // Update players
   for (let i = 0; i < players.length; i++) {
