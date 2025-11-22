@@ -189,13 +189,13 @@ async function setupMenuFlow() {
       await charSelect.Show(); // Will set character-select to 'flex' and load assets
       console.log("[main.js] CharSelect.Show() called.");
 
-      charSelect.OnStartGame((characterCount) => {
-        // CharSelect passes the selected character count
-        selectedCharacterCount = characterCount || 2;
+      charSelect.OnStartGame((humanPlayerCount) => {
+        // Receive the actual player count from CharSelect
+        selectedCharacterCount = humanPlayerCount || 2;
         console.log(
-          `[main.js] CharSelect 'START' button clicked. Starting game with level ${selectedLevel}, characters ${selectedCharacterCount}.`,
+          `[main.js] CharSelect 'START' button clicked. Starting game with level ${selectedLevel}, ${selectedCharacterCount} human players.`,
         );
-        startGame(selectedLevel, selectedCharacterCount, 1); // humanPlayers = 1 for now
+        startGame(selectedLevel, selectedCharacterCount, humanPlayerCount);
       });
     });
   });

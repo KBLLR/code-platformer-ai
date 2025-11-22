@@ -41,6 +41,17 @@ __pycache__/
 *.py[cod]
 *.pyo
 
+# Genkit framework
+.genkit/
+
+# Debug/temporary files
+bypass-auth.js
+debug.js
+
+# Agent logs
+agentship-x-htdi/logs/*.json
+!agentship-x-htdi/logs/.gitkeep
+
 # characters3D directory (redundant with assets/models/)
 # Keep only the 2D subdirectory
 public/characters3D/*.glb

@@ -37,7 +37,7 @@ jobs:
           client = Anthropic(api_key=os.environ['ANTHROPIC_API_KEY'])
 
           task = "${{ github.event.inputs.task }}"
-          opentasks = Path("agents/OPENTASKS.md").read_text()
+          opentasks = Path("agentship-x-htdi/OPENTASKS.md").read_text()
 
           message = client.messages.create(
               model="claude-3-5-sonnet-20241022",
@@ -50,13 +50,13 @@ jobs:
 
           Execute the task by:
           1. Understanding what needs to be done
-          2. Suggesting changes to files under agents/**
+          2. Suggesting changes to files under agentship-x-htdi/**
           3. Providing a concise 5-line summary
 
           Available scripts to reference:
-          - agents/scripts/generate_audit.py
-          - agents/scripts/generate_sitemap.py
-          - agents/scripts/collect_opentasks.py
+          - agentship-x-htdi/scripts/generate_audit.py
+          - agentship-x-htdi/scripts/generate_sitemap.py
+          - agentship-x-htdi/scripts/collect_opentasks.py
 
           Return a brief summary of what should be done."""}
               ]
@@ -64,21 +64,21 @@ jobs:
 
           summary = message.content[0].text
           print(summary)
-          Path("agents/audits/claude-summary.md").write_text(f"# Claude Task: {task}\n\n{summary}")
+          Path("agentship-x-htdi/audits/claude-summary.md").write_text(f"# Claude Task: {task}\n\n{summary}")
           PYTHON
 
       - name: Run agent scripts
         run: |
-          python agents/scripts/generate_audit.py
-          python agents/scripts/generate_sitemap.py
-          python agents/scripts/collect_opentasks.py
+          python agentship-x-htdi/scripts/generate_audit.py
+          python agentship-x-htdi/scripts/generate_sitemap.py
+          python agentship-x-htdi/scripts/collect_opentasks.py
 
       - name: Commit changes
         run: |
           git config user.name "claude-agent"
           git config user.email "claude@agents.local"
-          if [ -n "$(git status --porcelain agents/)" ]; then
-            git add agents/
+          if [ -n "$(git status --porcelain agentship-x-htdi/)" ]; then
+            git add agentship-x-htdi/
             git commit -m "claude: ${{ github.event.inputs.task }}"
             git push
           else

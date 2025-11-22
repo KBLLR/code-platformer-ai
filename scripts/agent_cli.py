@@ -35,7 +35,9 @@ except ImportError as exc:
 
 
 ROOT = Path(__file__).resolve().parent.parent
-AGENTS_DIR = ROOT / "agents"
+AGENTS_DIR = ROOT / "agentship-x-htdi"
+PROMPTS_DIR = AGENTS_DIR / "prompts"
+GEMINI_TRIAGE_LIBRARY = PROMPTS_DIR / "gemini_triage.json"
 WORKFLOWS_DIR = ROOT / ".github" / "workflows"
 PYTHON = os.environ.get("PYTHON", sys.executable)
 CLAUDE_MODEL = "claude-sonnet-4-5-20250929"
@@ -196,6 +198,16 @@ class OpenTask:
         return f"[{self.priority or 'n/a'}] {self.task_id}: {self.title}{note_suffix}"
 
 
+@dataclass
+class GeminiTriageTemplate:
+    key: str
+    title: str
+    description: str
+    script: str
+    checklist: List[str]
+    references: List[str]
+
+
 def read_opentasks() -> List[OpenTask]:
     path = AGENTS_DIR / "OPENTASKS.md"
     if not path.exists():
@@ -253,6 +265,114 @@ def select_from_list(prompt: str, options: List[str]) -> Optional[int]:
 
 def select_task(tasks: List[OpenTask]) -> Optional[OpenTask]:
     return select_task_with_projects(tasks)
+
+
+def load_gemini_triage_templates() -> List[GeminiTriageTemplate]:
+    if not GEMINI_TRIAGE_LIBRARY.exists():
+        return []
+    try:
+        data = json.loads(GEMINI_TRIAGE_LIBRARY.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        console.print(
+            Panel(
+                f"Could not parse {GEMINI_TRIAGE_LIBRARY.relative_to(ROOT)}:\n{exc}",
+                title="Gemini triage library error",
+                border_style="red",
+            )
+        )
+        return []
+    templates: List[GeminiTriageTemplate] = []
+    for entry in data:
+        if not isinstance(entry, dict):
+            continue
+        key = entry.get("key", "").strip()
+        title = entry.get("title", "").strip()
+        script = entry.get("script", "").strip()
+        if not key or not title or not script:
+            continue
+        templates.append(
+            GeminiTriageTemplate(
+                key=key,
+                title=title,
+                description=entry.get("description", "").strip(),
+                script=script,
+                checklist=[item.strip() for item in entry.get("checklist", []) if item.strip()],
+                references=[item.strip() for item in entry.get("references", []) if item.strip()],
+            )
+        )
+    return templates
+
+
+def select_gemini_triage_template(templates: List[GeminiTriageTemplate]) -> Optional[GeminiTriageTemplate]:
+    if not templates:
+        console.print(
+            "[yellow]Gemini triage library not found (agents/prompts/gemini_triage.json). "
+            "Create it to enable predefined flows.[/]"
+        )
+        return None
+    table = Table(
+        title="Gemini triage workflows",
+        header_style="bold magenta",
+        box=box.SIMPLE_HEAVY,
+        border_style="magenta",
+    )
+    table.add_column("#", justify="right", style="cyan", width=3)
+    table.add_column("Key", style="bold")
+    table.add_column("Title")
+    table.add_column("Description")
+    for idx, template in enumerate(templates, 1):
+        table.add_row(str(idx), template.key, template.title, template.description or "n/a")
+    table.caption = "Enter a number to apply a workflow or press Enter to skip."
+    console.print(table)
+
+    while True:
+        choice = console.input("Gemini triage selection: ").strip()
+        if not choice:
+            return None
+        if choice.isdigit():
+            idx = int(choice)
+            if 1 <= idx <= len(templates):
+                return templates[idx - 1]
+        console.print("[red]Invalid selection. Try again.[/]")
+
+
+def describe_gemini_template(template: GeminiTriageTemplate) -> None:
+    checklist = "\n".join(f"- {item}" for item in template.checklist) if template.checklist else "n/a"
+    references = "\n".join(f"- {item}" for item in template.references) if template.references else "n/a"
+    body = textwrap.dedent(
+        f"""\
+        [bold]{template.title}[/] ({template.key})
+
+        {template.description or 'No description provided.'}
+
+        [bold]Workflow Script[/]
+        {template.script}
+
+        [bold]Checklist[/]
+        {checklist}
+
+        [bold]References[/]
+        {references}
+        """
+    ).strip()
+    console.print(Panel(body, title="Gemini triage workflow applied", border_style="cyan"))
+
+
+def prepend_gemini_triage_prompt(base_prompt: str, template: GeminiTriageTemplate) -> str:
+    sections = [
+        f"### Gemini Triage Workflow: {template.title}",
+        f"Scenario: {template.description or 'n/a'}",
+        "Workflow Script:",
+        textwrap.dedent(template.script).strip(),
+    ]
+    if template.checklist:
+        sections.append("Checklist:")
+        sections.extend(f"- {item}" for item in template.checklist)
+    if template.references:
+        sections.append("References to consult:")
+        sections.extend(f"- {item}" for item in template.references)
+    triage_block = "\n".join(sections)
+    return f"{base_prompt.rstrip()}\n\n---\n{triage_block}\n"
 
 
 def select_models(model_options: Dict[str, Dict[str, str]]) -> List[str]:
@@ -430,13 +550,20 @@ def save_summary(path: Path, agent_label: str, task: OpenTask, summary: str) -> 
 
 def _run_cli(command: List[str], agent_label: str, *, input_text: str | None = None) -> str:
     """Execute an agent CLI command and return its stdout."""
-    result = subprocess.run(
-        command,
-        input=input_text,
-        capture_output=True,
-        text=True,
-        cwd=ROOT,
-    )
+    try:
+        result = subprocess.run(
+            command,
+            input=input_text,
+            capture_output=True,
+            text=True,
+            cwd=ROOT,
+        )
+    except FileNotFoundError as exc:
+        missing = Path(exc.filename or "")
+        raise RuntimeError(
+            f"{agent_label} CLI not found ({missing.name if missing.name else exc.filename}). "
+            "Install the CLI or ensure it is on PATH."
+        ) from exc
     if result.returncode != 0:
         stderr = result.stderr.strip()
         stdout = result.stdout.strip()
@@ -552,7 +679,23 @@ def run_model_mode(tasks: List[OpenTask]) -> None:
             border_style="cyan",
         )
     )
-    prompt = compose_prompt(task, table_text)
+    base_prompt = compose_prompt(task, table_text)
+    prompts_by_runner: Dict[str, str] = {key: base_prompt for key in model_keys}
+
+    if "gemini" in model_keys:
+        templates = load_gemini_triage_templates()
+        if not templates:
+            console.print(
+                "[yellow]No Gemini triage templates found (agents/prompts/gemini_triage.json). Using base prompt.[/]"
+            )
+        else:
+            selection = select_gemini_triage_template(templates)
+            if selection:
+                describe_gemini_template(selection)
+                prompts_by_runner["gemini"] = prepend_gemini_triage_prompt(base_prompt, selection)
+            else:
+                console.print("[yellow]Gemini triage workflow skipped.[/]")
+
     successes = 0
     for model_key in model_keys:
         runner = MODEL_RUNNERS[model_key]
@@ -566,7 +709,8 @@ def run_model_mode(tasks: List[OpenTask]) -> None:
         ) as progress:
             task_id_prog = progress.add_task(f"[cyan]Running {runner['label']}[/]", total=None)
             try:
-                handler(task, prompt, output_path)
+                prompt_for_runner = prompts_by_runner.get(model_key, base_prompt)
+                handler(task, prompt_for_runner, output_path)
                 successes += 1
                 progress.update(task_id_prog, description=f"[green]Finished {runner['label']}[/]")
             except RuntimeError as exc:

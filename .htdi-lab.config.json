@@ -1,0 +1,37 @@
+{
+  "house": {
+    "id": "code-platformer-ai",
+    "name": "CODE Platformer AI",
+    "type": "house",
+    "description": "3D multiplayer platformer battle game with AI-powered development workflows",
+    "agentshipVersion": "2.0",
+    "repository": {
+      "url": "https://github.com/KBLLR/code-platformer-AI",
+      "path": "/Users/davidcaballero/code-platformer-AI"
+    }
+  },
+  "lab": {
+    "enabled": true,
+    "apiUrl": "http://localhost:3000",
+    "registryPath": "/Users/davidcaballero/htdi-agentic-lab/var/agents.registry.json",
+    "syncProfiles": true,
+    "syncDiary": true
+  },
+  "agents": {
+    "profilesPath": "agentship-x-htdi/profiles",
+    "modelsPath": "agentship-x-htdi/profiles/models",
+    "promptsPath": "agentship-x-htdi/prompts",
+    "sessionsPath": "agentship-x-htdi/projects",
+    "opentasksPath": "agentship-x-htdi/OPENTASKS.md"
+  },
+  "automation": {
+    "githubWorkflows": true,
+    "localCLI": true,
+    "diaryParsing": true,
+    "autopilot": false
+  },
+  "collectives": {
+    "primary": "builders",
+    "secondary": ["qa", "docs"]
+  }
+}
