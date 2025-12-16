@@ -1,10 +1,13 @@
 # SITEMAP_DETAILED — Directory Tree
 
-_Last generated: 2025-12-15_
+_Last generated: 2025-12-16_
 
 ```
 .github/
   workflows/
+agents/
+  profiles/
+    models/
 agentship-x-htdi/
   audits/
   profiles/
