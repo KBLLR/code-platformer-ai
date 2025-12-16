@@ -12,6 +12,7 @@ export default defineConfig({
     open: true,
   },
   build: {
+    target: "esnext", // Support top-level await for WebGPU
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, "index.html"),

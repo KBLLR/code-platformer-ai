@@ -127,43 +127,47 @@
     "mainmenu/players_1.png"
   ],
 
-  "models": [
-    {
-      "file": "models/player_001-v1.glb",
-      "displayName": "Player 1",
-      "tags": ["player"]
-    },
-    {
-      "file": "models/player_002-v1.glb",
-      "displayName": "Player 2",
-      "tags": ["player"]
-    },
-    {
-      "file": "models/player_003-v1.glb",
-      "displayName": "Player 3",
-      "tags": ["player"]
-    },
-    {
-      "file": "models/player_004-v1.glb",
-      "displayName": "Player 4",
-      "tags": ["player"]
-    },
-    {
-      "file": "models/bow-v1.glb",
-      "displayName": "Bow",
-      "tags": ["weapon", "bow"]
-    },
-    {
-      "file": "models/mini-gun-v1.glb",
-      "displayName": "Mini Gun",
-      "tags": ["weapon", "gun"]
-    },
-    {
-      "file": "models/shotgun-v1.glb",
-      "displayName": "Shotgun",
-      "tags": ["weapon", "shotgun"]
-    }
-  ],
+  "models": {
+    "players": [
+      {
+        "file": "models/player_001-v1.glb",
+        "displayName": "Player 1",
+        "tags": ["player"]
+      },
+      {
+        "file": "models/player_002-v1.glb",
+        "displayName": "Player 2",
+        "tags": ["player"]
+      },
+      {
+        "file": "models/player_003-v1.glb",
+        "displayName": "Player 3",
+        "tags": ["player"]
+      },
+      {
+        "file": "models/player_004-v1.glb",
+        "displayName": "Player 4",
+        "tags": ["player"]
+      }
+    ],
+    "weapons": [
+      {
+        "file": "models/bow-v1.glb",
+        "displayName": "Bow",
+        "tags": ["weapon", "bow"]
+      },
+      {
+        "file": "models/mini-gun-v1.glb",
+        "displayName": "Mini Gun",
+        "tags": ["weapon", "gun"]
+      },
+      {
+        "file": "models/shotgun-v1.glb",
+        "displayName": "Shotgun",
+        "tags": ["weapon", "shotgun"]
+      }
+    ]
+  },
 
   "sounds": [
     { "file": "sounds/bow.wav", "type": "sfx", "label": "Bow" },

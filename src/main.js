@@ -1,5 +1,6 @@
 import "./styles/index.css";
 import { initGame } from "@/Game.js";
+import { initGameViverse } from "@/GameViverse.js"; // <--- NEW: Import VIVERSE game
 import { GetUrlParam } from "@/util.js";
 import { Mainmenu, LvlSelect, CharSelect } from "@/menus.js";
 import { loadGameConfig } from "@/game_config.js";
@@ -21,14 +22,36 @@ async function startGame(lvl = 0, characterCount = 0, humanPlayerCount = 1) {
   await loadGameConfig();
   console.log("[main.js] Game config loaded.");
 
-  // Hide UI containers
-  const uiContainer = document.getElementById("ui-container");
-  if (uiContainer) {
-    // Only hide if you want the canvas to be the primary view
-    // Or manage specific menu/HUD visibility through their classes.
-    // For now, let's just make sure gameHud is visible
-    if (gameHud) gameHud.classList.remove("hidden");
+  // Hide all menus and show game HUD
+  const menuWrap = document.getElementsByClassName("menu-wrap")[0];
+  const lvlSelectWrap = document.getElementsByClassName("lvl-select-wrap")[0];
+  const charSelect = document.getElementById("character-select");
+
+  if (menuWrap) menuWrap.style.display = "none";
+  if (lvlSelectWrap) lvlSelectWrap.style.display = "none";
+  if (charSelect) {
+    charSelect.style.display = "none";
+    charSelect.classList.add("hidden");
   }
+
+  // Show game HUD and ensure canvas is visible
+  if (gameHud) {
+    gameHud.classList.remove("hidden");
+    gameHud.style.display = "block";
+  }
+
+  // Make sure canvas is visible and in front
+  if (canvas) {
+    canvas.style.display = "block";
+    canvas.style.position = "fixed";
+    canvas.style.top = "0";
+    canvas.style.left = "0";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvas.style.zIndex = "1";
+  }
+
+  console.log("[main.js] All menus hidden, game starting...");
 
   // Initialize audio context and load sounds
   try {
@@ -36,20 +59,20 @@ async function startGame(lvl = 0, characterCount = 0, humanPlayerCount = 1) {
     const initAudio = () => {
       if (window.AudioContext || window.webkitAudioContext) {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
+
         // Resume audio context if suspended
         if (audioContext.state === 'suspended') {
           audioContext.resume();
         }
-        
+
         console.log("[main.js] Audio context initialized:", audioContext.state);
       }
     };
-    
+
     // Initialize audio on first user interaction
     document.addEventListener('click', initAudio, { once: true });
     document.addEventListener('keydown', initAudio, { once: true });
-    
+
     // Load and play background music
     await Sounds.LoadSounds(() => {
       console.log("[main.js] All sounds initialized.");
@@ -63,12 +86,26 @@ async function startGame(lvl = 0, characterCount = 0, humanPlayerCount = 1) {
     console.warn("[main.js] Sound system failed to initialize:", error);
   }
 
-  initGame(canvas, { 
-    lvl, 
-    character: characterCount > 0 ? characterCount : 1,
-    humanPlayers: humanPlayerCount || 1
-  });
-  console.log("[main.js] initGame initiated.");
+  // Check if VIVERSE mode should be used (URL param or default for this branch)
+  const useViverse = GetUrlParam("viverse") !== "false"; // Default to VIVERSE on this branch
+
+  if (useViverse) {
+    console.log("[main.js] Starting VIVERSE 3D Arena mode...");
+    initGameViverse(canvas, {
+      lvl,
+      character: characterCount > 0 ? characterCount : 1,
+      humanPlayers: humanPlayerCount || 1
+    });
+    console.log("[main.js] initGameViverse initiated.");
+  } else {
+    console.log("[main.js] Starting classic 2.5D platformer mode...");
+    initGame(canvas, {
+      lvl,
+      character: characterCount > 0 ? characterCount : 1,
+      humanPlayers: humanPlayerCount || 1
+    });
+    console.log("[main.js] initGame initiated.");
+  }
 }
 
 // Wait for DOM to be ready
@@ -152,15 +189,13 @@ async function setupMenuFlow() {
       await charSelect.Show(); // Will set character-select to 'flex' and load assets
       console.log("[main.js] CharSelect.Show() called.");
 
-      charSelect.OnStartGame(() => {
-        // This callback now explicitly receives the character count.
-        // It's up to CharSelect to manage how this count is determined (e.g., from UI selection).
-        // For debugging, we'll hardcode it for now.
-        selectedCharacterCount = 2; // Hardcode 2 players for testing via menu flow
+      charSelect.OnStartGame((humanPlayerCount) => {
+        // Receive the actual player count from CharSelect
+        selectedCharacterCount = humanPlayerCount || 2;
         console.log(
-          `[main.js] CharSelect 'START' button clicked. Starting game with level ${selectedLevel}, characters ${selectedCharacterCount}.`,
+          `[main.js] CharSelect 'START' button clicked. Starting game with level ${selectedLevel}, ${selectedCharacterCount} human players.`,
         );
-        startGame(selectedLevel, selectedCharacterCount);
+        startGame(selectedLevel, selectedCharacterCount, humanPlayerCount);
       });
     });
   });

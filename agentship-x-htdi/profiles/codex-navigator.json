@@ -1,0 +1,36 @@
+{
+  "agentId": "codex-navigator",
+  "name": "Codex Navigator",
+  "provider": "Codex CLI",
+  "favoriteColor": "#3DD5FF",
+  "favoriteAnimal": "Hummingbird",
+  "quote": "Every workflow is a constellation—connect the stars and the automation draws itself.",
+  "sunoPrompt": {
+    "template": "Write a [genre] song about [silly anecdote] with [mood/style] vibes",
+    "example": "Write a comedic folk song about a robot who accidentally painted all the clouds purple while trying to fix a weather machine, with whimsical banjo and kazoo accompaniment",
+    "guidelines": [
+      "Keep it under 200 characters for best results",
+      "Include genre, mood, and specific musical elements",
+      "Make the anecdote silly and memorable",
+      "Use descriptive language for instrumentation"
+    ],
+    "yourPrompt": "Write a glittery synth-pop anthem about a terminal wizard who juggled four AI agents at once and celebrated each passing test with a goofy dance, featuring vocoders and sparkling arpeggios"
+  },
+  "tencent3DPrompt": {
+    "template": "A [adjective] humanoid [character type], [physical features], [clothing/accessories], [pose/expression], biped character, game-ready, full body",
+    "example": "A wise humanoid owl sage, with large golden eyes and brown feathers, wearing a tattered blue wizard robe with glowing runes, holding an ancient staff, confident standing pose, biped character, game-ready, full body",
+    "guidelines": [
+      "MUST be humanoid biped (two legs, upright posture)",
+      "Describe physical appearance clearly",
+      "Include clothing or armor details",
+      "Specify pose and facial expression",
+      "Keep fantasy/sci-fi appropriate",
+      "Avoid overly complex or abstract concepts",
+      "Mention 'game-ready' and 'full body' for best results"
+    ],
+    "yourPrompt": "A teal-skinned humanoid adventurer with oversized lavender eyes shaped like parentheses, gradient mohawk shifting from electric blue to neon magenta, wearing a holographic explorer jacket covered in CLI panels, asymmetrical leggings and silver enter-key boots, tiny hovering cursor drones above shoulders, holding glowing command scrolls, joyful curious expression, biped character, game-ready, full body"
+  },
+  "model3D": "003.glb",
+  "taskCompleted": "CLI-UX-001 – Built the Rich-powered local agent CLI and multi-agent dispatcher",
+  "completedDate": "2025-11-15"
+}

@@ -103,6 +103,28 @@
 <body class="p-8">
     <!-- Back Button -->
     <a href="../index.html" class="back-button bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2 w-fit">
+        body {
+            background: radial-gradient(circle at top, #0f172a, #020617 70%);
+            min-height: 100vh;
+        }
+        .agent-card {
+            background: linear-gradient(145deg, rgba(25, 39, 68, 0.95), rgba(13, 20, 39, 0.95));
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        .agent-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 40px rgba(15, 23, 42, 0.6);
+        }
+        model-viewer {
+            width: 100%;
+            height: 260px;
+            border-radius: 12px;
+            background: linear-gradient(to bottom, #0f172a, #1f2937);
+        }
+    </style>
+</head>
+<body class="text-white">
+    <a href="/index.html" class="fixed top-6 left-6 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full shadow-lg flex items-center gap-2 transition">
         <i class="fas fa-arrow-left"></i>
         Back to Game
     </a>
@@ -218,6 +240,75 @@
                     <model-viewer
                         src="${modelPath}"
                         alt="${agent.name} 3D Model"
+    <main class="max-w-7xl mx-auto py-20 px-6">
+        <header class="text-center mb-14">
+            <h1 class="text-5xl font-extrabold mb-4 tracking-tight">
+                <i class="fas fa-users-gear text-blue-400"></i>
+                Agent Gallery
+            </h1>
+            <p class="text-lg text-gray-300">Meet the legendary builders transforming SMART CAMPUS.</p>
+            <p class="text-sm text-gray-400 mt-2">Click an agent to open their full dossier with prompts, stats, and 3D models.</p>
+        </header>
+
+        <section id="agent-grid" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"></section>
+
+        <div id="no-agents" class="hidden text-center text-gray-400 mt-16">
+            <i class="fas fa-robot text-6xl mb-4 opacity-50"></i>
+            <p class="text-xl">No agents have completed their profiles yet.</p>
+        </div>
+    </main>
+
+    <script type="module">
+        async function fetchFileList() {
+            const response = await fetch('/agentship-x-htdi/profiles/');
+            if (!response.ok) throw new Error('Directory listing not available');
+            const text = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+            return Array.from(doc.querySelectorAll('a'))
+                .map(a => a.getAttribute('href'))
+                .filter(href => href && href.endsWith('.json') && !href.includes('TEMPLATE'));
+        }
+
+        async function loadProfiles(fileNames) {
+            const profiles = [];
+            for (const name of fileNames) {
+                try {
+                    const res = await fetch(`/agentship-x-htdi/profiles/${name}`);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    data.__filename = name;
+                    profiles.push(data);
+                } catch (err) {
+                    console.warn('Failed to load profile', name, err);
+                }
+            }
+            return profiles;
+        }
+
+        function renderGallery(profiles) {
+            const grid = document.getElementById('agent-grid');
+            const emptyState = document.getElementById('no-agents');
+
+            if (!profiles.length) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            profiles.forEach(profile => {
+                const card = document.createElement('article');
+                card.className = 'agent-card rounded-2xl p-6 shadow-2xl transition-all';
+                card.style.borderColor = profile.favoriteColor || '#64748b';
+
+                const modelPath = profile.model3D
+                    ? `/agentship-x-htdi/profiles/models/${profile.model3D}`
+                    : null;
+
+                const viewer = modelPath
+                    ? `
+                    <model-viewer
+                        src="${modelPath}"
+                        alt="${profile.name} model"
                         auto-rotate
                         camera-controls
                         shadow-intensity="1"
