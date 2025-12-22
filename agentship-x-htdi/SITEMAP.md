@@ -1,6 +1,6 @@
 # SITEMAP — Source Overview
 
-_Last generated: 2025-12-16_
+_Last generated: 2025-12-22_
 
 ## Top-Level Directories
 

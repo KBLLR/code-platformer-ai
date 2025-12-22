@@ -1,6 +1,6 @@
 # SITEMAP_DETAILED — Directory Tree
 
-_Last generated: 2025-12-16_
+_Last generated: 2025-12-22_
 
 ```
 .github/
