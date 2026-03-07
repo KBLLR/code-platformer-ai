@@ -1,351 +1,201 @@
-// src/StageGenerator.js
-// Dynamic 3D Stage Generation from JSON Configuration
-import * as THREE from "three";
-import { LoaderManager } from "./LoaderManager.js";
-import { Level } from "./Level.js";
+// src/StageGenerator.js  (Objective B — Arena Compiler)
+// Accepts an ArenaConfig and compiles it into optimised Three.js geometry.
+// No HTML/DOM output — pure 3D scene construction.
 
-/**
- * StageGenerator - Generates Three.js scenes dynamically from JSON configs
- *
- * Usage:
- *   const config = { ... stage configuration ... };
- *   const stage = await StageGenerator.generate(scene, config);
- */
+import * as THREE from 'three';
+
+// ── Materials ─────────────────────────────────────────────────────────────────
+
+const MAT = {
+  ground:    new THREE.MeshStandardMaterial({ color: 0x3d6b35, roughness: 0.9 }),
+  groundRim: new THREE.MeshStandardMaterial({ color: 0x2a4a25, roughness: 0.9 }),
+  cover:     new THREE.MeshStandardMaterial({ color: 0x6b5a3d, roughness: 0.8 }),
+  safeZone:  new THREE.MeshBasicMaterial({ color: 0x00aaff, transparent: true, opacity: 0.13, side: THREE.DoubleSide }),
+  safeRing:  new THREE.MeshBasicMaterial({ color: 0x00aaff, wireframe: true }),
+  spawnGlow: new THREE.MeshBasicMaterial({ color: 0xffee55, transparent: true, opacity: 0.35, side: THREE.DoubleSide }),
+};
+
 export class StageGenerator {
   /**
-   * Generate a complete 3D stage from JSON configuration
-   * @param {THREE.Scene} scene - The Three.js scene to add objects to
-   * @param {Object} config - Stage configuration object
-   * @returns {Promise<Level>} The generated Level object
+   * Build the full arena from an ArenaConfig.
+   * @param {import('./ArenaConfig.js').ArenaConfig} config
+   * @param {THREE.Scene} scene
+   * @returns {{ group: THREE.Group, safeZoneRing: THREE.Mesh, spawnMarkers: THREE.Mesh[] }}
    */
-  static async generate(scene, config) {
-    console.log(`[StageGenerator] Generating stage: ${config.name || 'Unnamed'}`);
+  static generate(config, scene) {
+    console.log(`[StageGenerator] Compiling arena (seed=${config.seed}, size=${config.size})`);
 
-    const loader = new LoaderManager();
-    await loader.loadManifest();
+    const group = new THREE.Group();
+    group.name = 'Arena';
 
-    // Create level instance
-    const levelData = this.configToLevelData(config);
-    const level = new Level(levelData);
-    level.setScene(scene);
+    StageGenerator._buildGround(config, group);
+    StageGenerator._buildBoundaryWall(config, group);
+    StageGenerator._buildTerrainBands(config, group);
+    const coverGroup  = StageGenerator._buildCoverClusters(config, group);
+    const spawnMarkers = StageGenerator._buildSpawnMarkers(config, group);
+    const safeZoneRing = StageGenerator._buildSafeZoneRing(config, group);
 
-    // Generate platforms
-    await this.generatePlatforms(scene, config.platforms || [], loader, config.theme);
+    StageGenerator._buildLighting(config, scene);
+    scene.add(group);
 
-    // Generate background
-    this.generateBackground(scene, config.background);
+    console.log(
+      `[StageGenerator] Done — ` +
+      `${config.coverClusters.length} cover clusters, ` +
+      `${config.spawnPoints.length} spawns`
+    );
 
-    // Generate lighting
-    this.generateLighting(scene, config.lighting);
-
-    // Optional: Generate decorations
-    if (config.decorations) {
-      await this.generateDecorations(scene, config.decorations, loader);
-    }
-
-    console.log(`[StageGenerator] Stage "${config.name}" generated successfully`);
-    return level;
+    return { group, safeZoneRing, spawnMarkers, coverGroup };
   }
 
-  /**
-   * Convert stage config to Tiled-style level data format
-   */
-  static configToLevelData(config) {
-    const { dimensions = { width: 34, height: 20 } } = config;
-    const { spawns = {} } = config;
+  static _buildGround(config, parent) {
+    const disc = new THREE.Mesh(
+      new THREE.CircleGeometry(config.size, 72),
+      MAT.ground
+    );
+    disc.rotation.x = -Math.PI / 2;
+    disc.receiveShadow = true;
+    disc.userData.isGround = true;
+    parent.add(disc);
 
-    // Create empty layer data arrays
-    const createEmptyData = () => new Array(dimensions.width * dimensions.height).fill(-1);
+    // Outer rim
+    const rim = new THREE.Mesh(
+      new THREE.RingGeometry(config.size, config.size * 1.12, 72),
+      MAT.groundRim
+    );
+    rim.rotation.x = -Math.PI / 2;
+    rim.position.y = -0.02;
+    parent.add(rim);
 
-    // Build spawn layers
-    const playerSpawnData = createEmptyData();
-    const weaponSpawnData = createEmptyData();
-    const moneySpawnData = createEmptyData();
-
-    // Fill spawn data
-    if (spawns.players) {
-      spawns.players.forEach(pos => {
-        const idx = pos.y * dimensions.width + pos.x;
-        if (idx >= 0 && idx < playerSpawnData.length) playerSpawnData[idx] = 1;
-      });
-    }
-
-    if (spawns.weapons) {
-      spawns.weapons.forEach(pos => {
-        const idx = pos.y * dimensions.width + pos.x;
-        if (idx >= 0 && idx < weaponSpawnData.length) weaponSpawnData[idx] = 1;
-      });
-    }
-
-    if (spawns.money) {
-      spawns.money.forEach(pos => {
-        const idx = pos.y * dimensions.width + pos.x;
-        if (idx >= 0 && idx < moneySpawnData.length) moneySpawnData[idx] = 1;
-      });
-    }
-
-    // Build platform layer from config.platforms
-    const platformData = createEmptyData();
-    if (config.platforms) {
-      config.platforms.forEach(platform => {
-        const { x, y, width, height, gid = 1 } = platform;
-        for (let py = 0; py < height; py++) {
-          for (let px = 0; px < width; px++) {
-            const idx = (y + py) * dimensions.width + (x + px);
-            if (idx >= 0 && idx < platformData.length) platformData[idx] = gid;
-          }
-        }
-      });
-    }
-
-    return {
-      name: config.name || "Generated Stage",
-      canvas: {
-        width: dimensions.width * 32,
-        height: dimensions.height * 32
-      },
-      tilesets: [{
-        name: "generated_tileset",
-        tilewidth: 32,
-        tileheight: 32
-      }],
-      layers: [
-        { name: "platforms", type: "tilelayer", width: dimensions.width, height: dimensions.height, data: platformData, visible: true, opacity: 1 },
-        { name: "player_sp", type: "tilelayer", width: dimensions.width, height: dimensions.height, data: playerSpawnData, visible: true, opacity: 1 },
-        { name: "weapon_sp", type: "tilelayer", width: dimensions.width, height: dimensions.height, data: weaponSpawnData, visible: true, opacity: 1 },
-        { name: "money_sp", type: "tilelayer", width: dimensions.width, height: dimensions.height, data: moneySpawnData, visible: true, opacity: 1 }
-      ]
-    };
+    // Invisible physics floor
+    const floor = new THREE.Mesh(
+      new THREE.BoxGeometry(config.size * 2, 1, config.size * 2),
+      MAT.ground
+    );
+    floor.position.y = -0.51;
+    floor.visible = false;
+    floor.userData.isTile = true;
+    parent.add(floor);
   }
 
-  /**
-   * Generate platform meshes from configuration
-   */
-  static async generatePlatforms(scene, platforms, loader, theme = "code") {
-    const textureMap = {
-      code: "/assets/images/levels/wall_code.png",
-      google: "/assets/images/levels/wall_google.png",
-      ballpit: "/assets/images/levels/wall_ballpit.png",
-      basement: "/assets/images/levels/wall_basement.png",
-      generic: "/assets/images/levels/wall.png"
-    };
-
-    const texturePath = textureMap[theme] || textureMap.generic;
-    let texture;
-
-    try {
-      const textureLoader = new THREE.TextureLoader();
-      texture = await textureLoader.loadAsync(texturePath);
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.wrapT = THREE.RepeatWrapping;
-    } catch (error) {
-      console.warn(`[StageGenerator] Failed to load texture: ${texturePath}`, error);
-      texture = null;
-    }
-
-    platforms.forEach((platform, index) => {
-      const { x, y, width = 1, height = 1, material = theme } = platform;
-
-      const geometry = new THREE.BoxGeometry(width, height, 1);
-      const mat = texture
-        ? new THREE.MeshStandardMaterial({
-            map: texture.clone(),
-            roughness: 0.8,
-            metalness: 0.1
-          })
-        : new THREE.MeshStandardMaterial({
-            color: 0x666666,
-            roughness: 0.8,
-            metalness: 0.1
-          });
-
-      const mesh = new THREE.Mesh(geometry, mat);
-
-      // Convert grid coordinates to world coordinates
-      // Assuming 34x20 grid centered at origin
-      const worldX = x - 17 + width / 2;  // Center horizontally
-      const worldY = y - 10 + height / 2; // Center vertically
-
-      mesh.position.set(worldX, worldY, 0);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      mesh.userData.isPlatform = true;
-      mesh.userData.platformIndex = index;
-
-      scene.add(mesh);
-    });
-
-    console.log(`[StageGenerator] Generated ${platforms.length} platforms`);
+  static _buildBoundaryWall(config, parent) {
+    const r = config.size * 1.05;
+    const wall = new THREE.Mesh(
+      new THREE.CylinderGeometry(r, r, 20, 72, 1, true),
+      new THREE.MeshStandardMaterial({ color: 0x0d0d1a, side: THREE.BackSide, transparent: true, opacity: 0.75 })
+    );
+    wall.position.y = 10;
+    parent.add(wall);
   }
 
-  /**
-   * Generate background (skybox, gradient, etc.)
-   */
-  static generateBackground(scene, bgConfig = {}) {
-    const { type = "gradient", colors = ["#87CEEB", "#F0F8FF"], image = null } = bgConfig;
-
-    if (type === "gradient" && colors.length >= 2) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 512;
-      canvas.height = 256;
-      const ctx = canvas.getContext('2d');
-
-      const gradient = ctx.createLinearGradient(0, 0, 0, 256);
-      colors.forEach((color, i) => {
-        gradient.addColorStop(i / (colors.length - 1), color);
-      });
-
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 512, 256);
-
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.mapping = THREE.EquirectangularReflectionMapping;
-      texture.colorSpace = THREE.SRGBColorSpace;
-
-      scene.background = texture;
-      scene.environment = texture;
-    } else if (type === "color") {
-      scene.background = new THREE.Color(colors[0] || "#87CEEB");
-    } else if (type === "image" && image) {
-      const textureLoader = new THREE.TextureLoader();
-      textureLoader.load(image, (texture) => {
-        scene.background = texture;
-      });
+  static _buildTerrainBands(config, parent) {
+    for (const band of config.terrainBands) {
+      if (Math.abs(band.elevationDelta) < 0.1) continue;
+      const mat = MAT.ground.clone();
+      mat.color.setHex(band.elevationDelta > 0 ? 0x4a7c3f : 0x355a2a);
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(band.innerR, band.outerR, 56),
+        mat
+      );
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.y = band.elevationDelta * 0.5;
+      ring.receiveShadow = true;
+      parent.add(ring);
     }
-
-    console.log(`[StageGenerator] Generated ${type} background`);
   }
 
-  /**
-   * Generate lighting setup
-   */
-  static generateLighting(scene, lightConfig = {}) {
-    const {
-      ambient = { color: 0xffffff, intensity: 0.6 },
-      directional = { color: 0xffffff, intensity: 0.8, position: [10, 15, 10], castShadow: true },
-      fill = { color: 0x87ceeb, intensity: 0.3, position: [-5, 8, -5] }
-    } = lightConfig;
-
-    // Ambient light
-    const ambientLight = new THREE.AmbientLight(ambient.color, ambient.intensity);
-    scene.add(ambientLight);
-
-    // Main directional light
-    const dirLight = new THREE.DirectionalLight(directional.color, directional.intensity);
-    dirLight.position.set(...directional.position);
-
-    if (directional.castShadow) {
-      dirLight.castShadow = true;
-      dirLight.shadow.mapSize.width = 2048;
-      dirLight.shadow.mapSize.height = 2048;
-      dirLight.shadow.camera.near = 0.5;
-      dirLight.shadow.camera.far = 50;
-      dirLight.shadow.camera.left = -25;
-      dirLight.shadow.camera.right = 25;
-      dirLight.shadow.camera.top = 25;
-      dirLight.shadow.camera.bottom = -25;
-      dirLight.shadow.bias = -0.0001;
-    }
-
-    scene.add(dirLight);
-
-    // Fill light
-    if (fill) {
-      const fillLight = new THREE.DirectionalLight(fill.color, fill.intensity);
-      fillLight.position.set(...fill.position);
-      scene.add(fillLight);
-    }
-
-    console.log(`[StageGenerator] Generated lighting setup`);
-  }
-
-  /**
-   * Generate decorative elements (props, particles, etc.)
-   */
-  static async generateDecorations(scene, decorations, loader) {
-    console.log(`[StageGenerator] Generating ${decorations.length} decorations`);
-
-    for (const deco of decorations) {
-      const { type, position, scale = [1, 1, 1], rotation = [0, 0, 0], model = null, color = 0xffffff } = deco;
-
-      let mesh;
-
-      if (type === "box") {
-        mesh = new THREE.Mesh(
-          new THREE.BoxGeometry(...scale),
-          new THREE.MeshStandardMaterial({ color })
+  static _buildCoverClusters(config, parent) {
+    const coverGroup = new THREE.Group();
+    coverGroup.name = 'Cover';
+    for (const cluster of config.coverClusters) {
+      for (const piece of cluster.pieces) {
+        const mesh = new THREE.Mesh(
+          new THREE.BoxGeometry(piece.width, piece.height, piece.depth),
+          MAT.cover
         );
-      } else if (type === "sphere") {
-        mesh = new THREE.Mesh(
-          new THREE.SphereGeometry(scale[0], 16, 16),
-          new THREE.MeshStandardMaterial({ color })
-        );
-      } else if (type === "model" && model) {
-        // Load GLB model (if provided)
-        try {
-          mesh = await loader.loadGLB(model);
-          mesh.scale.set(...scale);
-        } catch (error) {
-          console.warn(`[StageGenerator] Failed to load decoration model: ${model}`, error);
-          continue;
-        }
-      }
-
-      if (mesh) {
-        mesh.position.set(...position);
-        mesh.rotation.set(...rotation);
-        mesh.castShadow = true;
+        mesh.position.set(cluster.cx + piece.offsetX, piece.height / 2, cluster.cz + piece.offsetZ);
+        mesh.rotation.y = piece.rotation;
+        mesh.castShadow    = true;
         mesh.receiveShadow = true;
-        scene.add(mesh);
+        mesh.userData.isObstacle = true;
+        coverGroup.add(mesh);
       }
     }
+    parent.add(coverGroup);
+    return coverGroup;
+  }
+
+  static _buildSpawnMarkers(config, parent) {
+    return config.spawnPoints.map(spawn => {
+      const mesh = new THREE.Mesh(
+        new THREE.CircleGeometry(0.7, 12),
+        MAT.spawnGlow.clone()
+      );
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.set(spawn.x, 0.02, spawn.z);
+      mesh.userData.isSpawnMarker = true;
+      parent.add(mesh);
+      return mesh;
+    });
+  }
+
+  static _buildSafeZoneRing(config, parent) {
+    const r = config.safeZonePhases[0].radius;
+
+    const fill = new THREE.Mesh(new THREE.CircleGeometry(r, 72), MAT.safeZone.clone());
+    fill.rotation.x = -Math.PI / 2;
+    fill.position.y = 0.04;
+    fill.name = 'SafeZoneFill';
+    parent.add(fill);
+
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.25, 8, 72), MAT.safeRing.clone());
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.5;
+    ring.name = 'SafeZoneRing';
+    ring.userData.fill = fill;
+    parent.add(ring);
+
+    return ring;
+  }
+
+  static _buildLighting(config, scene) {
+    scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+
+    const sun = new THREE.DirectionalLight(0xfff5e0, 1.1);
+    sun.position.set(config.size * 0.4, config.size * 0.8, config.size * 0.3);
+    sun.castShadow = true;
+    sun.shadow.mapSize.setScalar(2048);
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far  = config.size * 4;
+    const sc = config.size * 1.2;
+    Object.assign(sun.shadow.camera, { left: -sc, right: sc, top: sc, bottom: -sc });
+    sun.shadow.bias = -0.0002;
+    scene.add(sun);
+
+    const fill = new THREE.DirectionalLight(0x8ab4f8, 0.25);
+    fill.position.set(-config.size * 0.4, config.size * 0.3, -config.size * 0.3);
+    scene.add(fill);
   }
 
   /**
-   * Generate a stage from a template name
+   * Call every frame to keep the safe-zone ring in sync with ArenaConfig.safeZone.
+   * @param {THREE.Mesh}  ring
+   * @param {import('./ArenaConfig.js').ArenaConfig} config
    */
-  static async generateFromTemplate(scene, templateName) {
-    const templates = {
-      simple: {
-        name: "Simple Arena",
-        dimensions: { width: 34, height: 20 },
-        theme: "code",
-        platforms: [
-          { x: 0, y: 0, width: 34, height: 2 }, // Floor
-          { x: 5, y: 8, width: 6, height: 1 },  // Left platform
-          { x: 23, y: 8, width: 6, height: 1 }, // Right platform
-          { x: 14, y: 12, width: 6, height: 1 } // Top platform
-        ],
-        spawns: {
-          players: [{ x: 8, y: 14 }, { x: 25, y: 14 }],
-          weapons: [{ x: 10, y: 10 }, { x: 23, y: 10 }, { x: 17, y: 14 }],
-          money: [{ x: 5, y: 10 }, { x: 28, y: 10 }, { x: 17, y: 6 }]
-        }
-      },
+  static updateSafeZone(ring, config) {
+    const { currentRadius, centerX, centerZ } = config.safeZone;
+    const initR = config.safeZonePhases[0].radius;
+    const scale = currentRadius / initR;
 
-      complex: {
-        name: "Complex Arena",
-        dimensions: { width: 34, height: 20 },
-        theme: "google",
-        platforms: [
-          { x: 0, y: 0, width: 34, height: 1 },   // Floor
-          { x: 2, y: 6, width: 5, height: 1 },    // Lower left
-          { x: 27, y: 6, width: 5, height: 1 },   // Lower right
-          { x: 8, y: 10, width: 4, height: 1 },   // Mid left
-          { x: 22, y: 10, width: 4, height: 1 },  // Mid right
-          { x: 14, y: 14, width: 6, height: 1 }   // Top center
-        ],
-        spawns: {
-          players: [{ x: 4, y: 8 }, { x: 29, y: 8 }, { x: 10, y: 12 }, { x: 22, y: 12 }],
-          weapons: [{ x: 10, y: 12 }, { x: 24, y: 12 }, { x: 17, y: 16 }],
-          money: [{ x: 4, y: 8 }, { x: 29, y: 8 }, { x: 17, y: 4 }]
-        }
-      }
-    };
+    ring.position.set(centerX, 0.5, centerZ);
+    ring.scale.setScalar(scale);
 
-    const config = templates[templateName] || templates.simple;
-    return this.generate(scene, config);
+    const fill = ring.userData.fill;
+    if (fill) {
+      fill.position.set(centerX, 0.04, centerZ);
+      fill.scale.setScalar(scale);
+    }
+
+    const pulse = 0.5 + Math.sin(performance.now() * 0.002) * 0.2;
+    ring.material.opacity = pulse;
   }
 }
-
-export default StageGenerator;
