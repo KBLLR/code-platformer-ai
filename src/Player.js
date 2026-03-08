@@ -5,6 +5,9 @@
 import * as THREE from 'three';
 import { game_config } from './game_config.js';
 import { CharacterController } from './CharacterController.js';
+import { LoaderManager } from './LoaderManager.js';
+import { Bow }     from './weapons/bow.js';
+import { Shotgun } from './weapons/shotgun.js';
 
 export const players = [];
 
@@ -198,10 +201,6 @@ export function killPlayer(p, onDie) {
 
 // ── Legacy shim for Game.js / GameViverse.js ───────────────────────────────────
 // The old 2D/VIVERSE entry points call loadPlayers(scene, n). Keep them working.
-
-import { LoaderManager } from './LoaderManager.js';
-import { Bow }     from './weapons/bow.js';
-import { Shotgun } from './weapons/shotgun.js';
 
 export async function loadPlayers(scene, numPlayers = 1) {
   console.log(`[Player] (legacy) loadPlayers called for ${numPlayers} players`);
