@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal Viverse Character Example</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+    #controls {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      max-width: 300px;
+      z-index: 100;
+    }
+    #controls h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    #controls p {
+      margin: 8px 0;
+      line-height: 1.6;
+    }
+    #controls .key {
+      display: inline-block;
+      padding: 2px 6px;
+      background: #333;
+      border-radius: 3px;
+      font-family: monospace;
+      font-weight: bold;
+    }
+    #status {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #0f0;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 100;
+    }
+    .error { color: #f00; }
+    .success { color: #0f0; }
+    .info { color: #0af; }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <div id="controls">
+    <h2>🎮 Viverse Character Demo</h2>
+    <p><span class="key">W/A/S/D</span> - Move</p>
+    <p><span class="key">Space</span> - Jump</p>
+    <p><span class="key">Shift</span> - Sprint</p>
+    <p><span class="key">C</span> - Crouch</p>
+    <p><span class="key">Click</span> - Shoot</p>
+    <p><span class="key">R</span> - Reload</p>
+    <p><span class="key">1/2/3</span> - Switch animation</p>
+  </div>
+
+  <div id="status">
+    <div id="status-text">Initializing...</div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CCDIKSolver } from 'three/addons/animation/CCDIKSolver.js';
+
+    // ============================================================================
+    // MINIMAL ANIMATION STATE MACHINE
+    // ============================================================================
+    class AnimationStateMachine {
+      constructor(mixer, actions) {
+        this.mixer = mixer;
+        this.actions = actions;
+        this.currentName = null;
+        this.currentAction = null;
+      }
+
+      play(name, fadeTime = 0.3) {
+        const action = this.actions.get(name);
+        if (!action) {
+          console.warn(`[AnimationStateMachine] No action "${name}"`);
+          return false;
+        }
+
+        if (this.currentAction && this.currentAction !== action) {
+          this.currentAction.fadeOut(fadeTime);
+        }
+
+        action.reset().fadeIn(fadeTime).play();
+        this.currentName = name;
+        this.currentAction = action;
+        return true;
+      }
+
+      update(delta) {
+        this.mixer.update(delta);
+      }
+    }
+
+    // ============================================================================
+    // CHARACTER LOADER (SIMPLIFIED)
+    // ============================================================================
+    async function loadCharacter(glbUrl) {
+      const loader = new GLTFLoader();
+
+      try {
+        const gltf = await loader.loadAsync(glbUrl);
+        const root = gltf.scene;
+
+        // Setup animation mixer
+        const mixer = new THREE.AnimationMixer(root);
+        const rawClips = gltf.animations || [];
+
+        // Create actions for all animations
+        const actions = new Map();
+        const clipNames = ['idle', 'walk', 'run', 'jump', 'fall', 'land', 'shoot', 'reload', 'death'];
+
+        for (const clipName of clipNames) {
+          const clip = findClip(rawClips, clipName);
+          if (clip) {
+            const action = mixer.clipAction(clip);
+            action.setLoop(
+              ['idle', 'walk', 'run', 'fall'].includes(clipName)
+                ? THREE.LoopRepeat
+                : THREE.LoopOnce
+            );
+            actions.set(clipName, action);
+            console.log(`[CharacterLoader] Found clip: ${clipName}`);
+          }
+        }
+
+        // Find weapon socket
+        const weaponSocket = root.getObjectByName('weapon_socket_r')
+          || root.getObjectByName('RightHand')
+          || root.getObjectByName('mixamorigRightHand');
+
+        return {
+          root,
+          mixer,
+          anim: new AnimationStateMachine(mixer, actions),
+          weaponSocket,
+          clips: rawClips
+        };
+      } catch (error) {
+        console.error('[CharacterLoader] Failed to load character:', error);
+        throw error;
+      }
+    }
+
+    function findClip(clips, logicalName) {
+      // Try exact match
+      let clip = clips.find(c => c.name.toLowerCase() === logicalName);
+      if (clip) return clip;
+
+      // Try partial match
+      clip = clips.find(c => c.name.toLowerCase().includes(logicalName));
+      if (clip) return clip;
+
+      // Try with "Armature|" prefix
+      clip = clips.find(c => c.name.toLowerCase().includes(`armature|${logicalName}`));
+      return clip;
+    }
+
+    // ============================================================================
+    // SIMPLE CHARACTER CONTROLLER
+    // ============================================================================
+    class CharacterController {
+      constructor(character) {
+        this.character = character;
+        this.velocity = new THREE.Vector3();
+        this.isGrounded = true;
+        this.speed = 5.0;
+        this.jumpForce = 8.0;
+        this.gravity = -20.0;
+
+        // Input state
+        this.keys = {
+          forward: false,
+          backward: false,
+          left: false,
+          right: false,
+          jump: false,
+          sprint: false,
+          crouch: false,
+          shoot: false,
+          reload: false
+        };
+
+        this.setupInput();
+      }
+
+      setupInput() {
+        window.addEventListener('keydown', (e) => {
+          switch (e.key.toLowerCase()) {
+            case 'w': this.keys.forward = true; break;
+            case 's': this.keys.backward = true; break;
+            case 'a': this.keys.left = true; break;
+            case 'd': this.keys.right = true; break;
+            case ' ': this.keys.jump = true; break;
+            case 'shift': this.keys.sprint = true; break;
+            case 'c': this.keys.crouch = true; break;
+            case 'r': this.keys.reload = true; break;
+            case '1': this.character.anim.play('idle'); break;
+            case '2': this.character.anim.play('walk'); break;
+            case '3': this.character.anim.play('run'); break;
+          }
+        });
+
+        window.addEventListener('keyup', (e) => {
+          switch (e.key.toLowerCase()) {
+            case 'w': this.keys.forward = false; break;
+            case 's': this.keys.backward = false; break;
+            case 'a': this.keys.left = false; break;
+            case 'd': this.keys.right = false; break;
+            case ' ': this.keys.jump = false; break;
+            case 'shift': this.keys.sprint = false; break;
+            case 'c': this.keys.crouch = false; break;
+            case 'r': this.keys.reload = false; break;
+          }
+        });
+
+        window.addEventListener('mousedown', () => {
+          this.keys.shoot = true;
+        });
+
+        window.addEventListener('mouseup', () => {
+          this.keys.shoot = false;
+        });
+      }
+
+      update(delta) {
+        // Calculate movement direction
+        const direction = new THREE.Vector3();
+        if (this.keys.forward) direction.z -= 1;
+        if (this.keys.backward) direction.z += 1;
+        if (this.keys.left) direction.x -= 1;
+        if (this.keys.right) direction.x += 1;
+        direction.normalize();
+
+        // Apply speed modifiers
+        let currentSpeed = this.speed;
+        if (this.keys.sprint) currentSpeed *= 2.0;
+        if (this.keys.crouch) currentSpeed *= 0.5;
+
+        // Update velocity
+        this.velocity.x = direction.x * currentSpeed;
+        this.velocity.z = direction.z * currentSpeed;
+
+        // Apply gravity
+        if (!this.isGrounded) {
+          this.velocity.y += this.gravity * delta;
+        } else {
+          this.velocity.y = 0;
+        }
+
+        // Jump
+        if (this.keys.jump && this.isGrounded) {
+          this.velocity.y = this.jumpForce;
+          this.isGrounded = false;
+          this.character.anim.play('jump', 0.1);
+        }
+
+        // Update position
+        this.character.root.position.x += this.velocity.x * delta;
+        this.character.root.position.y += this.velocity.y * delta;
+        this.character.root.position.z += this.velocity.z * delta;
+
+        // Ground check (simple)
+        if (this.character.root.position.y <= 0) {
+          this.character.root.position.y = 0;
+          this.isGrounded = true;
+          if (this.velocity.y < -0.1) {
+            this.character.anim.play('land', 0.1);
+          }
+        }
+
+        // Update animation state
+        this.updateAnimationState();
+
+        // Rotate character to face movement direction
+        if (direction.length() > 0.1) {
+          const angle = Math.atan2(direction.x, direction.z);
+          this.character.root.rotation.y = angle;
+        }
+      }
+
+      updateAnimationState() {
+        // Priority system
+        if (this.keys.shoot) {
+          this.character.anim.play('shoot', 0.1);
+          return;
+        }
+
+        if (this.keys.reload) {
+          this.character.anim.play('reload', 0.2);
+          this.keys.reload = false;
+          return;
+        }
+
+        if (!this.isGrounded) {
+          if (this.velocity.y < -0.1) {
+            this.character.anim.play('fall', 0.2);
+          }
+          return;
+        }
+
+        if (this.keys.crouch) {
+          this.character.anim.play('crouch', 0.3);
+          return;
+        }
+
+        // Locomotion
+        const moveSpeed = Math.sqrt(this.velocity.x ** 2 + this.velocity.z ** 2);
+        if (moveSpeed > 0.1) {
+          if (this.keys.sprint) {
+            this.character.anim.play('run', 0.3);
+          } else {
+            this.character.anim.play('walk', 0.3);
+          }
+        } else {
+          this.character.anim.play('idle', 0.3);
+        }
+      }
+
+      getCurrentState() {
+        return {
+          animation: this.character.anim.currentName || 'none',
+          position: this.character.root.position,
+          velocity: this.velocity,
+          isGrounded: this.isGrounded,
+          speed: Math.sqrt(this.velocity.x ** 2 + this.velocity.z ** 2).toFixed(2)
+        };
+      }
+    }
+
+    // ============================================================================
+    // MAIN SCENE SETUP
+    // ============================================================================
+    async function init() {
+      const canvas = document.getElementById('canvas');
+      const statusEl = document.getElementById('status-text');
+
+      // Scene
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x87CEEB); // Sky blue
+      scene.fog = new THREE.Fog(0x87CEEB, 50, 200);
+
+      // Camera
+      const camera = new THREE.PerspectiveCamera(
+        60,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.set(0, 5, 10);
+
+      // Renderer
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        powerPreference: 'high-performance'
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+      // Orbit Controls
+      const controls = new OrbitControls(camera, canvas);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.target.set(0, 1, 0);
+      controls.minDistance = 5;
+      controls.maxDistance = 50;
+      controls.maxPolarAngle = Math.PI / 2;
+
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(10, 20, 10);
+      dirLight.castShadow = true;
+      dirLight.shadow.camera.left = -20;
+      dirLight.shadow.camera.right = 20;
+      dirLight.shadow.camera.top = 20;
+      dirLight.shadow.camera.bottom = -20;
+      dirLight.shadow.mapSize.width = 2048;
+      dirLight.shadow.mapSize.height = 2048;
+      scene.add(dirLight);
+
+      // Ground plane
+      const groundGeometry = new THREE.PlaneGeometry(200, 200);
+      const groundMaterial = new THREE.MeshStandardMaterial({
+        color: 0x4a7c59,
+        roughness: 0.8,
+        metalness: 0.2
+      });
+      const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+      ground.rotation.x = -Math.PI / 2;
+      ground.receiveShadow = true;
+      scene.add(ground);
+
+      // Grid helper
+      const gridHelper = new THREE.GridHelper(200, 40, 0x333333, 0x333333);
+      gridHelper.material.opacity = 0.3;
+      gridHelper.material.transparent = true;
+      scene.add(gridHelper);
+
+      // Axes helper
+      const axesHelper = new THREE.AxesHelper(5);
+      scene.add(axesHelper);
+
+      // Load character
+      statusEl.innerHTML = '<span class="info">Loading character...</span>';
+
+      try {
+        // Try to load from local assets first
+        const characterUrl = './public/assets/models/male_y2k_outfit.glb';
+
+        statusEl.innerHTML = '<span class="info">Loading ' + characterUrl + '...</span>';
+        const character = await loadCharacter(characterUrl);
+
+        // Add to scene
+        character.root.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        scene.add(character.root);
+
+        // Setup character controller
+        const controller = new CharacterController(character);
+
+        // Start with idle animation
+        character.anim.play('idle');
+
+        // Add weapon visualization if socket exists
+        if (character.weaponSocket) {
+          const weaponMarker = new THREE.Mesh(
+            new THREE.SphereGeometry(0.1),
+            new THREE.MeshBasicMaterial({ color: 0xff0000 })
+          );
+          character.weaponSocket.add(weaponMarker);
+        }
+
+        statusEl.innerHTML = `
+          <span class="success">✓ Character loaded</span><br>
+          Animations: ${character.clips.length}<br>
+          <span id="anim-state">State: idle</span><br>
+          <span id="position">Pos: (0, 0, 0)</span><br>
+          <span id="velocity">Speed: 0.00</span>
+        `;
+
+        // Animation loop
+        const clock = new THREE.Clock();
+
+        function animate() {
+          requestAnimationFrame(animate);
+
+          const delta = clock.getDelta();
+
+          // Update controller
+          controller.update(delta);
+
+          // Update animations
+          character.anim.update(delta);
+
+          // Update camera to follow character
+          const charPos = character.root.position;
+          controls.target.set(charPos.x, charPos.y + 1, charPos.z);
+
+          // Update controls
+          controls.update();
+
+          // Render
+          renderer.render(scene, camera);
+
+          // Update status
+          const state = controller.getCurrentState();
+          const animStateEl = document.getElementById('anim-state');
+          const positionEl = document.getElementById('position');
+          const velocityEl = document.getElementById('velocity');
+
+          if (animStateEl) {
+            animStateEl.textContent = `State: ${state.animation}`;
+          }
+          if (positionEl) {
+            positionEl.textContent = `Pos: (${state.position.x.toFixed(2)}, ${state.position.y.toFixed(2)}, ${state.position.z.toFixed(2)})`;
+          }
+          if (velocityEl) {
+            velocityEl.textContent = `Speed: ${state.speed}`;
+          }
+        }
+
+        animate();
+
+      } catch (error) {
+        console.error('Failed to load character:', error);
+        statusEl.innerHTML = `<span class="error">✗ Failed to load character</span><br>${error.message}<br><br>
+          <span class="info">Create a character using:</span><br>
+          <code>npm run rig -- path/to/model.fbx</code>`;
+      }
+
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+
+    // Start
+    init();
+  </script>
+</body>
+</html>
