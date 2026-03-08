@@ -70,46 +70,20 @@ Automated continuous integration for agent documentation and validation.
 - **Loop prevention:** Auto-commits include `[skip ci]` to avoid infinite workflow re-triggering
 - **Scoped commits:** Only stages and commits files in `agentship-x-htdi/` documentation paths, not accidental artifacts
 
-#### 2. **Claude Runner** (`.github/workflows/agents-claude.yml`)
-Execute tasks using Claude AI (Anthropic).
+#### 2. **MLX Local Runner** (`.github/workflows/agents-mlx.yml`)
+Execute tasks using the local MLX gateway.
 
 **Trigger:** Manual dispatch with task ID
 
 **Actions:**
-- Uses Claude 3.5 Sonnet to analyze and plan task execution
+- Uses local MLX models to analyze and plan task execution
 - Runs agent Python scripts
 - Commits changes to `agentship-x-htdi/` directory
-- Creates `agentship-x-htdi/audits/claude-summary.md` with task summary
+- Creates `mlx-output.md` with task summary
 
-**Required Secret:** `ANTHROPIC_API_KEY`
+**Required Secrets:** `MLX_GATEWAY_URL`, `MLX_MODEL`
 
-#### 3. **OpenAI Runner** (`.github/workflows/agents-codex.yml`)
-Execute tasks using OpenAI GPT-4.
-
-**Trigger:** Manual dispatch with task ID
-
-**Actions:**
-- Uses GPT-4 to analyze and plan task execution
-- Runs agent Python scripts
-- Commits changes to `agentship-x-htdi/` directory
-- Creates `agentship-x-htdi/audits/openai-summary.md` with task summary
-
-**Required Secret:** `OPENAI_API_KEY`
-
-#### 4. **Gemini Runner** (`.github/workflows/agents-gemini.yml`)
-Execute tasks using Google Gemini AI.
-
-**Trigger:** Manual dispatch with task ID
-
-**Actions:**
-- Uses Gemini 1.5 Pro to analyze and plan task execution
-- Runs agent Python scripts
-- Commits changes to `agentship-x-htdi/` directory
-- Creates `gemini-output.md` with task summary
-
-**Required Secret:** `GEMINI_API_KEY`
-
-#### 5. **Jules Bridge** (`.github/workflows/agents-jules-bridge.yml`)
+#### 3. **Jules Bridge** (`.github/workflows/agents-jules-bridge.yml`)
 Creates GitHub issues from OPENTASKS for Jules agent handoffs.
 
 **Trigger:** Manual dispatch with task ID
@@ -119,7 +93,7 @@ Creates GitHub issues from OPENTASKS for Jules agent handoffs.
 - Creates or updates GitHub issue with task brief
 - Labels issue with `jules` and `handoff`
 
-#### 6. **Agent Auto-Execute** (`.github/workflows/agent-auto-execute.yml`)
+#### 4. **Agent Auto-Execute** (`.github/workflows/agent-auto-execute.yml`)
 Automated task preparation and PR creation for agent tasks.
 
 **Triggers:**
@@ -136,12 +110,11 @@ Automated task preparation and PR creation for agent tasks.
 
 ### Required Secrets
 
-To use the AI-powered workflows, configure these secrets in your repository:
+To use the MLX-powered workflows, configure these secrets in your repository:
 
 ```
-ANTHROPIC_API_KEY   # For Claude Runner
-OPENAI_API_KEY      # For OpenAI Runner
-GEMINI_API_KEY      # For Gemini Runner
+MLX_GATEWAY_URL   # MLX gateway (default: http://localhost:8090)
+MLX_MODEL         # Local model path (e.g., model-zoo/models/text/gpt-oss-20b-mxfp4-q8)
 ```
 
 ### Workflow Best Practices
@@ -174,22 +147,13 @@ python scripts/agent_cli.py
 
 The CLI mirrors the workflows documented above:
 
-- **Model Runner:** pick Claude Sonnet 4.5 (`claude --print --model claude-sonnet-4-5-20250929`), OpenAI via Codex CLI (`codex exec --model gpt-5.1-codex` — the 0.58 release exposes `gpt-5.1-codex`, `gpt-5.1-codex-mini`, and raw `gpt-5.1`), Gemini 2.5 Flash (`gemini --model gemini-2.5-flash --sandbox`), or Jules (`jules new --repo <path>`). Each run matches the GitHub workflows, writes the same summary artifacts (`agentship-x-htdi/audits/claude-summary.md`, `agentship-x-htdi/audits/openai-summary.md`, `gemini-output.md`, `agentship-x-htdi/audits/jules-summary.md`), and then offers to run the generator scripts. (For Gemini CLI, enable sandbox mode globally via `gemini settings --sandbox=ON` or pass `--sandbox` per run so the agent can execute shell commands.)
-- **Multi-Agent Dispatch:** select one or many agents in a single session. If a runner hits quota (e.g., Claude weekly cap), the CLI logs the error and keeps going with the remaining selections so you still get Codex/Gemini/Jules coverage.
-- **Gemini Triage Library:** when Gemini is selected you can choose a template from `agentship-x-htdi/prompts/gemini_triage.json` (incident triage, bundle sanity, performance watch, etc.) to prepend workflow-specific instructions automatically.
-- **Runner Fallbacks:** missing CLIs or quota/auth failures are downgraded to warnings so the next agent in the chain continues running without manual edits.
-- **Jules Quota Awareness:** Jules runs are asynchronous and limited to 15 free dispatches per day. The CLI tracks usage (stored under `agentship-x-htdi/logs/jules-usage.json`), warns when the cap is hit, and asks for confirmation before spending additional runs.
+- **Model Runner:** MLX local gateway (`MLX_GATEWAY_URL` + `MLX_MODEL`). Each run matches the GitHub workflow and writes `mlx-output.md`, then offers to run the generator scripts.
+- **MLX Triage Library:** choose a template from `agentship-x-htdi/prompts/mlx_triage.json` (incident triage, bundle sanity, performance watch, etc.) to prepend workflow-specific instructions automatically.
 - **Auto Execute:** wrap `agentship-x-htdi/scripts/agent_executor.py` for the same preparation handled by `.github/workflows/agent-auto-execute.yml`.
 - **Workflow Summary:** lists each workflow so you can jump between GitHub and local runs quickly.
 - **Generators:** optionally runs `generate_audit.py`, `generate_sitemap.py`, and `collect_opentasks.py` just like the CI workflow once your model summary is captured.
 
-> Install and authenticate the CLI agents (`claude`, `codex`, `gemini`, `jules`) before running `agents:cli`. The CLI surfaces the error text from each agent when credentials or quotas need attention.
-
-**Agent-specific setup**
-- Claude CLI: run `claude login` (or `claude --print --model claude-sonnet-4-5-20250929 "hi"`) so the tool can refresh tokens and honor the weekly quota. If you hit the cap, the CLI will report “Weekly limit reached…”.
-- Codex CLI: run `codex login` and ensure your account can access the configured model (`gpt-5.1-codex` by default; `gpt-5.1-codex-mini` and `gpt-5.1` are also available). If you need a different tier, change the `CODEX_MODEL` constant in `scripts/agent_cli.py`.
-- Gemini CLI: enable its sandbox so the agent may execute shell commands (`gemini settings --sandbox=ON`, or pass `--sandbox` per invocation). Without the sandbox, Gemini only returns planning text.
-- Jules CLI: run `jules login` to authorize via Google, then the CLI can dispatch asynchronous sessions via `jules new --repo <path>`. Remember the local tool enforces the 15 free runs/day limit and logs usage in `agentship-x-htdi/logs/jules-usage.json`.
+> Ensure the MLX gateway is running locally and reachable at `MLX_GATEWAY_URL` before invoking `agents:cli`.
 
 ### Agent Gallery & Dossier
 

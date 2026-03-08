@@ -176,12 +176,12 @@
         async function initGallery() {
             try {
                 const files = await fetchFileList();
-                const fallback = ['claude-sonnet-4-5.json', 'vault-keeper.json', 'codex-navigator.json'];
+                const fallback = ['mlx-orchestrator.json', 'vault-keeper.json', 'codex-navigator.json'];
                 const profiles = await loadProfiles(files.length ? files : fallback);
                 renderGallery(profiles);
             } catch (err) {
                 console.error('Gallery error', err);
-                const fallback = ['claude-sonnet-4-5.json', 'vault-keeper.json', 'codex-navigator.json'];
+                const fallback = ['mlx-orchestrator.json', 'vault-keeper.json', 'codex-navigator.json'];
                 const profiles = await loadProfiles(fallback);
                 renderGallery(profiles);
             }

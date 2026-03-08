@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Kiki Palette - Voxel Scene</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #050505; }
+        canvas { display: block; }
+        #info {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+    </style>
+    <!-- Import Three.js as an ES module map -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <style>
+      /* Hides common overlay IDs and classes used in Three.js examples and generated code */
+      #info, #loading, #ui, #instructions, .label, .overlay, #description {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+      }
+      /* Ensure the body doesn't show selected text cursor interaction outside canvas */
+      body {
+        user-select: none !important;
+      }
+    </style>
+  </head>
+<body>
+    <div id="info">The Kiki Palette Voxel Wave</div>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // 1. Setup Scene, Camera, Renderer
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color('#050505'); // Matching the dark background of the image
+        scene.fog = new THREE.Fog('#050505', 20, 90);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 28, 48);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        // 2. The Kiki Palette Colors (Approximated from the image)
+        const paletteHex = [
+            "#3b160d", "#3d3d3d", "#1e242b", "#8f916b", "#eb5a42", // 1-5
+            "#bda075", "#fa4d2d", "#fa8eb6", "#fa6eb8", "#c7cba0", // 6-10
+            "#fcb83d", "#ffb885", "#cbd4e3", "#cfe7f7", "#f2d3e1", // 11-15
+            "#fce2b3", "#faff4f", "#fced62", "#f7fbb5", "#dde2e3", // 16-20
+            "#e9fce6", "#e6e1d8", "#fcfff7", "#e0e8e0", "#f0f0ed", // 21-25
+            "#ffffee", "#dcfcb6", "#e0e8ed", "#d0e4f2", "#e3e3e3", // 26-30
+            "#d3ded0", "#cdd6d1", "#c3fc83", "#95fca8", "#bcaecc", // 31-35
+            "#4d72d6", "#0a2e1d", "#98a3b8", "#2b0f3d", "#072499", // 36-40
+            "#1f2ceb"                                              // 41
+        ];
+
+        // Convert hex strings to THREE.Color objects
+        const paletteColors = paletteHex.map(hex => new THREE.Color(hex));
+
+        // 3. Create Voxel Grid using InstancedMesh (Performance optimization)
+        const cols = paletteColors.length; // 41 columns matching the palette
+        const rows = 12; // Depth of the wave
+        const count = cols * rows;
+
+        const geometry = new THREE.BoxGeometry(0.9, 3.0, 0.9); // Tall blocks, slightly separated
+        // Shift geometry center up so scaling Y grows from bottom
+        geometry.translate(0, 1.5, 0); 
+
+        const material = new THREE.MeshStandardMaterial({
+            roughness: 0.4,
+            metalness: 0.1,
+            flatShading: false
+        });
+
+        const instancedMesh = new THREE.InstancedMesh(geometry, material, count);
+        instancedMesh.castShadow = true;
+        instancedMesh.receiveShadow = true;
+        scene.add(instancedMesh);
+
+        // dummy object to help calculate matrices
+        const dummy = new THREE.Object3D();
+
+        // 4. Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(20, 50, 20);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        dirLight.shadow.camera.near = 0.5;
+        dirLight.shadow.camera.far = 100;
+        dirLight.shadow.camera.left = -50;
+        dirLight.shadow.camera.right = 50;
+        dirLight.shadow.camera.top = 50;
+        dirLight.shadow.camera.bottom = -50;
+        scene.add(dirLight);
+
+        // Rim light for aesthetics
+        const spotLight = new THREE.SpotLight(0xffffff, 200);
+        spotLight.position.set(-40, 20, -20);
+        spotLight.lookAt(0, 0, 0);
+        scene.add(spotLight);
+
+        // 5. Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.0;
+        controls.minDistance = 20;
+        controls.maxDistance = 100;
+
+        // 6. Animation Loop
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = clock.getElapsedTime();
+            let index = 0;
+
+            // Generate the wave
+            for (let x = 0; x < cols; x++) {
+                for (let z = 0; z < rows; z++) {
+                    
+                    // Math for the wave movement
+                    const xOffset = (x - cols / 2) * 1.0;
+                    const zOffset = (z - rows / 2) * 1.0;
+                    
+                    // Create a diagonal wave effect
+                    // Frequency is based on position, Phase is based on time
+                    const yNoise = Math.sin(x * 0.3 + time * 1.5) + Math.cos(z * 0.5 + time * 1.2);
+                    const heightScale = THREE.MathUtils.mapLinear(yNoise, -2, 2, 0.5, 3.5);
+                    const yPos = (yNoise * 2); // Base movement up and down
+
+                    dummy.position.set(xOffset, yPos, zOffset);
+                    dummy.scale.set(1, heightScale, 1);
+                    dummy.updateMatrix();
+
+                    instancedMesh.setMatrixAt(index, dummy.matrix);
+
+                    // Set Color: 
+                    // The X index directly corresponds to the palette index (0-40)
+                    // We darken the rows further back to give a sense of depth
+                    const baseColor = paletteColors[x];
+                    
+                    // Simple logic to tint colors based on depth (z)
+                    // Front rows are brighter, back rows slightly dimmer
+                    /* Note: InstancedMesh colors need to be updated in the loop if we want them dynamic,
+                       but here they are static relative to position, so we set them every frame just 
+                       in case we wanted to animate color. For performance, this could be outside the loop
+                       if colors don't change. */
+                    
+                    instancedMesh.setColorAt(index, baseColor);
+
+                    index++;
+                }
+            }
+
+            instancedMesh.instanceMatrix.needsUpdate = true;
+            instancedMesh.instanceColor.needsUpdate = true;
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>

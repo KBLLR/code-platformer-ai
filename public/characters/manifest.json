@@ -1,0 +1,90 @@
+[
+    {
+        "id": "player-001",
+        "file": "assets/models/player_001-v1.glb",
+        "display_name": "Alpha",
+        "skeleton_id": "auto-rig-pro-humanoid",
+        "required_clips": [
+            "idle",
+            "run",
+            "jump",
+            "fall",
+            "land",
+            "hit",
+            "death",
+            "equip",
+            "fire"
+        ],
+        "weapon_socket": "weapon_socket_r",
+        "tags": [
+            "player",
+            "medium"
+        ]
+    },
+    {
+        "id": "player-002",
+        "file": "assets/models/player_002-v1.glb",
+        "display_name": "Bravo",
+        "skeleton_id": "auto-rig-pro-humanoid",
+        "required_clips": [
+            "idle",
+            "run",
+            "jump",
+            "fall",
+            "land",
+            "hit",
+            "death",
+            "equip",
+            "fire"
+        ],
+        "weapon_socket": "weapon_socket_r",
+        "tags": [
+            "player",
+            "light"
+        ]
+    },
+    {
+        "id": "player-003",
+        "file": "assets/models/player_003-v1.glb",
+        "display_name": "Charlie",
+        "skeleton_id": "auto-rig-pro-humanoid",
+        "required_clips": [
+            "idle",
+            "run",
+            "jump",
+            "fall",
+            "land",
+            "hit",
+            "death",
+            "equip",
+            "fire"
+        ],
+        "weapon_socket": "weapon_socket_r",
+        "tags": [
+            "bot",
+            "heavy"
+        ]
+    },
+    {
+        "id": "player-004",
+        "file": "assets/models/player_004-v1.glb",
+        "display_name": "Delta",
+        "skeleton_id": "auto-rig-pro-humanoid",
+        "required_clips": [
+            "idle",
+            "run",
+            "jump",
+            "fall",
+            "land",
+            "hit",
+            "death",
+            "equip",
+            "fire"
+        ],
+        "weapon_socket": "weapon_socket_r",
+        "tags": [
+            "bot",
+            "medium"
+        ]
+    }
+]

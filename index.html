@@ -11,37 +11,6 @@
             referrerpolicy="no-referrer"
         />
         <script src="https://cdn.jsdelivr.net/npm/webvr-polyfill@latest/build/webvr-polyfill.js"></script>
-        <script>
-            // Authentication check - redirect to landing if not logged in
-            (function() {
-                // Skip auth check if we're already in a specific state
-                const urlParams = new URLSearchParams(window.location.search);
-                const state = urlParams.get('state');
-            
-                // Don't redirect if we're in onboarding or game state
-                if (state === 'onboarding' || state === 'game') {
-                    return;
-                }
-            
-                // Check if user is logged in
-                const userData = localStorage.getItem('smartCampusUser');
-                if (!userData) {
-                    console.log('[Auth] User not authenticated, redirecting to landing page');
-                    window.location.href = 'landing.html';
-                    return;
-                }
-            
-                // Check if user has completed onboarding
-                const onboardingCompleted = localStorage.getItem('smartCampusOnboardingCompleted');
-                if (!onboardingCompleted) {
-                    console.log('[Auth] User authenticated but onboarding not completed, redirecting to onboarding');
-                    window.location.href = 'index.html?state=onboarding';
-                    return;
-                }
-            
-                console.log('[Auth] User authenticated and onboarded, proceeding to game');
-            })();
-        </script>
         <script type="module" src="/src/main.js"></script>
         <link rel="stylesheet" href="/src/styles/index.css" />
         <script src="https://cdn.tailwindcss.com"></script>

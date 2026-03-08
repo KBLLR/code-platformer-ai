@@ -1,47 +1,73 @@
+/**
+ * main.js — Entry point for Code Platformer AI.
+ *
+ * Scene-based architecture: registers LobbyScene and MatchScene,
+ * then transitions to lobby on load. Legacy Game.js/GameViverse.js
+ * paths are preserved behind ?mode=legacy URL param.
+ */
 import "./styles/index.css";
-import { initGame } from "@/Game.js";
-import { initGameViverse } from "@/GameViverse.js"; // <--- NEW: Import VIVERSE game
+import { SceneManager } from "@/scenes/SceneManager.js";
+import { LobbyScene } from "@/scenes/LobbyScene.js";
+import { MatchScene } from "@/scenes/MatchScene.js";
 import { GetUrlParam } from "@/util.js";
-import { Mainmenu, LvlSelect, CharSelect } from "@/menus.js";
-import { loadGameConfig } from "@/game_config.js";
-import { Sounds } from "@/sounds.js"; // <--- NEW: Import Sounds
-import { Onboarding } from "@/onboarding.js"; // <--- NEW: Import Onboarding
 
 console.log(`[main.js] Started game in '${import.meta.env.MODE}' mode`);
 
-const canvas = document.getElementById("game-canvas");
-const gameHud = document.getElementById("game-hud");
+// ─── Legacy Mode Gate ────────────────────────────────────────────
+const mode = GetUrlParam("mode");
+if (mode === "legacy") {
+  // Preserve the old menu → GameViverse / Game.js flow
+  import("@/Game.js").then(({ initGame }) => {
+    import("@/GameViverse.js").then(({ initGameViverse }) => {
+      import("@/menus.js").then(({ Mainmenu, LvlSelect, CharSelect }) => {
+        import("@/game_config.js").then(({ loadGameConfig }) => {
+          document.addEventListener("DOMContentLoaded", async () => {
+            console.log("[main.js] Legacy mode — using classic menu flow.");
+            await loadGameConfig();
+            const mainmenu = new Mainmenu();
+            await mainmenu.Show();
+            mainmenu.OnButton("start", async () => {
+              const lvlSelect = new LvlSelect();
+              await lvlSelect.Show();
+              lvlSelect.OnLvlSelect(async (lvl) => {
+                const charSelect = new CharSelect();
+                await charSelect.Show();
+                charSelect.OnStartGame((humanPlayerCount) => {
+                  const canvas = document.getElementById("game-canvas");
+                  const useViverse = GetUrlParam("viverse") !== "false";
+                  if (useViverse) {
+                    initGameViverse(canvas, { lvl, character: humanPlayerCount, humanPlayers: humanPlayerCount });
+                  } else {
+                    initGame(canvas, { lvl, character: humanPlayerCount, humanPlayers: humanPlayerCount });
+                  }
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+} else {
+  // ─── Scene-Based Mode (Default) ─────────────────────────────────
+  document.addEventListener("DOMContentLoaded", async () => {
+    console.log("[main.js] Scene-based mode — initializing SceneManager.");
 
-let selectedLevel = 0;
-let selectedCharacterCount = 0;
+    const canvas = document.getElementById("game-canvas");
+    if (!canvas) {
+      console.error("[main.js] No #game-canvas found.");
+      return;
+    }
 
-async function startGame(lvl = 0, characterCount = 0, humanPlayerCount = 1) {
-  console.log(
-    `[main.js] startGame called with level: ${lvl}, character count: ${characterCount}, human players: ${humanPlayerCount}`,
-  );
-  await loadGameConfig();
-  console.log("[main.js] Game config loaded.");
+    // Hide legacy menu DOM elements
+    const menuWrap = document.querySelector(".menu-wrap");
+    const lvlSelectWrap = document.querySelector(".lvl-select-wrap");
+    const charSelect = document.getElementById("character-select");
+    if (menuWrap) menuWrap.style.display = "none";
+    if (lvlSelectWrap) lvlSelectWrap.style.display = "none";
+    if (charSelect) charSelect.style.display = "none";
 
-  // Hide all menus and show game HUD
-  const menuWrap = document.getElementsByClassName("menu-wrap")[0];
-  const lvlSelectWrap = document.getElementsByClassName("lvl-select-wrap")[0];
-  const charSelect = document.getElementById("character-select");
-
-  if (menuWrap) menuWrap.style.display = "none";
-  if (lvlSelectWrap) lvlSelectWrap.style.display = "none";
-  if (charSelect) {
-    charSelect.style.display = "none";
-    charSelect.classList.add("hidden");
-  }
-
-  // Show game HUD and ensure canvas is visible
-  if (gameHud) {
-    gameHud.classList.remove("hidden");
-    gameHud.style.display = "block";
-  }
-
-  // Make sure canvas is visible and in front
-  if (canvas) {
+    // Ensure canvas is visible
     canvas.style.display = "block";
     canvas.style.position = "fixed";
     canvas.style.top = "0";
@@ -49,154 +75,26 @@ async function startGame(lvl = 0, characterCount = 0, humanPlayerCount = 1) {
     canvas.style.width = "100%";
     canvas.style.height = "100%";
     canvas.style.zIndex = "1";
-  }
 
-  console.log("[main.js] All menus hidden, game starting...");
+    // Initialize SceneManager
+    const sceneManager = new SceneManager(canvas);
 
-  // Initialize audio context and load sounds
-  try {
-    // Create audio context on user interaction
-    const initAudio = () => {
-      if (window.AudioContext || window.webkitAudioContext) {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    // Register scenes
+    sceneManager.register("lobby", () => new LobbyScene());
+    sceneManager.register("match", () => new MatchScene());
 
-        // Resume audio context if suspended
-        if (audioContext.state === 'suspended') {
-          audioContext.resume();
-        }
-
-        console.log("[main.js] Audio context initialized:", audioContext.state);
-      }
-    };
-
-    // Initialize audio on first user interaction
-    document.addEventListener('click', initAudio, { once: true });
-    document.addEventListener('keydown', initAudio, { once: true });
-
-    // Load and play background music
-    await Sounds.LoadSounds(() => {
-      console.log("[main.js] All sounds initialized.");
-      try {
-        Sounds.Play("theme", { loop: true, volume: 0.15 });
-      } catch (error) {
-        console.warn("[main.js] Could not play background music:", error);
-      }
-    });
-  } catch (error) {
-    console.warn("[main.js] Sound system failed to initialize:", error);
-  }
-
-  // Check if VIVERSE mode should be used (URL param or default for this branch)
-  const useViverse = GetUrlParam("viverse") !== "false"; // Default to VIVERSE on this branch
-
-  if (useViverse) {
-    console.log("[main.js] Starting VIVERSE 3D Arena mode...");
-    initGameViverse(canvas, {
-      lvl,
-      character: characterCount > 0 ? characterCount : 1,
-      humanPlayers: humanPlayerCount || 1
-    });
-    console.log("[main.js] initGameViverse initiated.");
-  } else {
-    console.log("[main.js] Starting classic 2.5D platformer mode...");
-    initGame(canvas, {
-      lvl,
-      character: characterCount > 0 ? characterCount : 1,
-      humanPlayers: humanPlayerCount || 1
-    });
-    console.log("[main.js] initGame initiated.");
-  }
-}
-
-// Wait for DOM to be ready
-document.addEventListener('DOMContentLoaded', initializeApp);
-
-function initializeApp() {
-  console.log("[main.js] DOM ready, initializing app...");
-  
-  // Check URL state first
-  const state = GetUrlParam("state");
-  
-  if (state === "game") {
-    console.log("[main.js] URL param 'state=game' detected. Bypassing menus.");
-    const lvlPar = GetUrlParam("lvl");
-    let lvl = lvlPar ? parseInt(lvlPar) : 0;
-    if (isNaN(lvl)) lvl = 0;
-    startGame(lvl, 1); // Start with 1 player by default if bypassing menus
-  } else if (state === "onboarding") {
-    console.log("[main.js] Onboarding state detected.");
-    setupOnboardingFlow();
-  } else {
-    // Check authentication and onboarding status
-    if (!Onboarding.isLoggedIn()) {
-      console.log("[main.js] User not logged in, redirecting to landing page.");
-      window.location.href = 'landing.html';
-      return;
-    }
-    
-    if (!Onboarding.hasCompletedOnboarding()) {
-      console.log("[main.js] User logged in but hasn't completed onboarding.");
-      setupOnboardingFlow();
-    } else {
-      console.log("[main.js] User authenticated and onboarded, starting menu flow.");
-      setupMenuFlow();
-    }
-  }
-}
-
-async function setupOnboardingFlow() {
-  console.log("[main.js] Setting up onboarding flow...");
-  
-  const onboarding = new Onboarding();
-  window.onboarding = onboarding; // Make globally accessible for button clicks
-  
-  await onboarding.Show();
-  
-  onboarding.OnComplete((startMode) => {
-    console.log(`[main.js] Onboarding completed with mode: ${startMode}`);
-    
-    if (startMode === 'practice') {
-      // Start practice game directly
-      startGame(0, 1, 1); // Level 0, 1 character, 1 human player
-    } else {
-      // Show menu flow for multiplayer
-      setupMenuFlow();
-    }
-  });
-}
-
-async function setupMenuFlow() {
-  const mainmenu = new Mainmenu();
-  await mainmenu.Show(); // Will set menu-wrap to 'block'
-  console.log("[main.js] Mainmenu.Show() called.");
-
-  mainmenu.OnButton("start", async () => {
-    console.log("[main.js] Mainmenu 'start' button clicked. Hiding main menu.");
-    // mainmenu.Hide() is called by OnButton internally
-
-    const lvlSelect = new LvlSelect();
-    await lvlSelect.Show(); // Will set lvl-select-wrap to 'block' and load assets
-    console.log("[main.js] LvlSelect.Show() called.");
-
-    lvlSelect.OnLvlSelect(async (lvl) => {
-      selectedLevel = lvl;
-      console.log(
-        `[main.js] Level selected: ${selectedLevel}. Hiding level select.`,
-      );
-      // lvlSelect.Hide() is called by OnLvlSelect internally
-
-      const charSelect = new CharSelect();
-      await charSelect.Show(); // Will set character-select to 'flex' and load assets
-      console.log("[main.js] CharSelect.Show() called.");
-
-      charSelect.OnStartGame((humanPlayerCount) => {
-        // Receive the actual player count from CharSelect
-        selectedCharacterCount = humanPlayerCount || 2;
-        console.log(
-          `[main.js] CharSelect 'START' button clicked. Starting game with level ${selectedLevel}, ${selectedCharacterCount} human players.`,
-        );
-        startGame(selectedLevel, selectedCharacterCount, humanPlayerCount);
+    // Short-circuit: jump straight into match if ?state=game
+    const state = GetUrlParam("state");
+    if (state === "game") {
+      const seed = parseInt(GetUrlParam("seed")) || 42;
+      const { createDefaultArenaConfig } = await import("@/interfaces/ArenaConfig.js");
+      sceneManager.switchTo("match", {
+        arenaConfig: createDefaultArenaConfig(seed),
+        humanPlayers: 1,
       });
-    });
+    } else {
+      // Default: start at lobby
+      sceneManager.switchTo("lobby");
+    }
   });
 }

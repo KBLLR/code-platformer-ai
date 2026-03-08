@@ -1,0 +1,766 @@
+{
+  "$schema": "../../htdi-collective-agency/schemas/flow-manifest.schema.json",
+  "house_id": "code-platformer-ai",
+  "version": "1.0.0",
+  "description": "3D multiplayer platformer battle game with AI-powered development workflows and multi-agent task execution",
+  "items": [
+    {
+      "id": "code-platformer-ai:game-dev-specialist",
+      "type": "agent",
+      "status": "active",
+      "name": "Game Dev Specialist",
+      "description": "Implements game features, physics systems, and multiplayer mechanics using Three.js",
+      "provider": "mlx-local",
+      "model": "/Users/davidcaballero/core-x-kbllr_0/model-zoo/models/text/qwen2.5-14b-4bit",
+      "promptPath": "./agentship-x-htdi/profiles/game-dev-specialist.md",
+      "skills": [
+        "game-systems-implementation",
+        "physics-development"
+      ],
+      "tools": [
+        "configure_game_rules",
+        "implement_weapon",
+        "setup_physics"
+      ],
+      "capabilities": [
+        "game-systems",
+        "three-js",
+        "physics",
+        "multiplayer"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154017+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:ui-ux-engineer",
+      "type": "agent",
+      "status": "active",
+      "name": "UI/UX Engineer",
+      "description": "Builds menus, HUD systems, and player interfaces with Tailwind CSS",
+      "provider": "mlx-local",
+      "model": "/Users/davidcaballero/core-x-kbllr_0/model-zoo/models/text/qwen2.5-14b-4bit",
+      "promptPath": "./agentship-x-htdi/profiles/ui-ux-engineer.md",
+      "skills": [
+        "ui-development",
+        "menu-design"
+      ],
+      "tools": [
+        "create_menu",
+        "update_hud",
+        "design_onboarding"
+      ],
+      "capabilities": [
+        "ui-development",
+        "tailwind",
+        "user-interaction"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154025+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:graphics-optimizer",
+      "type": "agent",
+      "status": "active",
+      "name": "Graphics & Performance Engineer",
+      "description": "Optimizes WebGPU/WebGL rendering, asset loading, and 3D performance",
+      "provider": "mlx-local",
+      "model": "/Users/davidcaballero/core-x-kbllr_0/model-zoo/models/text/qwen2.5-14b-4bit",
+      "promptPath": "./agentship-x-htdi/profiles/graphics-optimizer.md",
+      "skills": [
+        "render-optimization",
+        "asset-management"
+      ],
+      "tools": [
+        "profile_render",
+        "optimize_assets",
+        "configure_webgpu"
+      ],
+      "capabilities": [
+        "webgpu",
+        "three-js-optimization",
+        "asset-loading",
+        "performance"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154031+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:stage-generator",
+      "type": "tool",
+      "status": "active",
+      "name": "Stage Generator",
+      "description": "Dynamically generate 3D battle arenas from JSON configuration",
+      "category": "game-system",
+      "entry_point": "./src/StageGenerator.js",
+      "mcp_server": "house-functions",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "config": {
+            "type": "object",
+            "description": "Stage configuration object"
+          },
+          "template": {
+            "type": "string",
+            "description": "Template name to use"
+          }
+        },
+        "required": [
+          "config"
+        ]
+      },
+      "capabilities": [
+        "level-generation",
+        "3d"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154036+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:configure_game_rules",
+      "type": "tool",
+      "status": "active",
+      "name": "Configure Game Rules",
+      "description": "Set victory conditions, respawn rules, and match settings",
+      "category": "game-system",
+      "entry_point": "./src/GameRules.js",
+      "mcp_server": "house-functions",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "victory_type": {
+            "type": "string",
+            "enum": [
+              "money",
+              "elimination",
+              "time",
+              "kills"
+            ]
+          },
+          "respawn_enabled": {
+            "type": "boolean"
+          },
+          "time_limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "victory_type"
+        ]
+      },
+      "capabilities": [
+        "game-rules",
+        "configuration"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154041+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:implement_weapon",
+      "type": "tool",
+      "status": "active",
+      "name": "Implement Weapon",
+      "description": "Create or modify weapon with projectile physics (Bow, Gun, Shotgun, Minigun)",
+      "category": "game-system",
+      "entry_point": "./src/Weapons.js",
+      "mcp_server": "house-functions",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "weapon_type": {
+            "type": "string",
+            "enum": [
+              "bow",
+              "gun",
+              "shotgun",
+              "minigun"
+            ]
+          },
+          "damage": {
+            "type": "number"
+          },
+          "fire_rate": {
+            "type": "number"
+          },
+          "projectile_speed": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "weapon_type"
+        ]
+      },
+      "capabilities": [
+        "weapons",
+        "combat"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154046+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:setup_physics",
+      "type": "tool",
+      "status": "active",
+      "name": "Setup Physics",
+      "description": "Configure gravity, jump mechanics, and collision detection",
+      "category": "game-system",
+      "entry_point": "./src/Physics.js",
+      "mcp_server": "house-functions",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "gravity": {
+            "type": "number"
+          },
+          "jump_force": {
+            "type": "number"
+          },
+          "coyote_time": {
+            "type": "number"
+          },
+          "jump_buffer": {
+            "type": "number"
+          }
+        }
+      },
+      "capabilities": [
+        "physics",
+        "mechanics"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154051+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:create_menu",
+      "type": "tool",
+      "status": "active",
+      "name": "Create Menu",
+      "description": "Generate menu screens (main, level select, character select)",
+      "category": "ui",
+      "entry_point": "./src/menus.js",
+      "mcp_server": "house-functions",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "menu_type": {
+            "type": "string",
+            "enum": [
+              "main",
+              "level_select",
+              "character_select",
+              "settings"
+            ]
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "menu_type"
+        ]
+      },
+      "capabilities": [
+        "ui",
+        "menus"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154055+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:update_hud",
+      "type": "tool",
+      "status": "active",
+      "name": "Update HUD",
+      "description": "Update player health bars, scores, and game status display",
+      "category": "ui",
+      "entry_point": "./src/ui/player_ui.js",
+      "mcp_server": "house-functions",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "player_id": {
+            "type": "number"
+          },
+          "health": {
+            "type": "number"
+          },
+          "score": {
+            "type": "number"
+          },
+          "weapon": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "player_id"
+        ]
+      },
+      "capabilities": [
+        "ui",
+        "hud"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154060+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:load_assets",
+      "type": "tool",
+      "status": "active",
+      "name": "Load Assets",
+      "description": "Preload GLB models, textures, sounds, and level data",
+      "category": "utility",
+      "entry_point": "./src/LoaderManager.js",
+      "mcp_server": "house-functions",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "asset_type": {
+            "type": "string",
+            "enum": [
+              "model",
+              "texture",
+              "sound",
+              "level"
+            ]
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_type",
+          "path"
+        ]
+      },
+      "capabilities": [
+        "assets",
+        "loading"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154065+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:play_sound",
+      "type": "tool",
+      "status": "active",
+      "name": "Play Sound",
+      "description": "Play sound effects and music using Web Audio API",
+      "category": "audio",
+      "entry_point": "./src/sounds.js",
+      "mcp_server": "house-functions",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "sound_id": {
+            "type": "string"
+          },
+          "volume": {
+            "type": "number",
+            "default": 1.0
+          },
+          "loop": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "sound_id"
+        ]
+      },
+      "capabilities": [
+        "audio",
+        "sfx"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154073+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:game-systems-implementation",
+      "type": "skill",
+      "status": "active",
+      "name": "Game Systems Implementation",
+      "description": "Implement core game mechanics including combat, physics, and victory conditions",
+      "category": "development",
+      "entry_point": "./skills/game-systems/SKILL.md",
+      "tools": [
+        "configure_game_rules",
+        "implement_weapon",
+        "setup_physics",
+        "stage-generator"
+      ],
+      "agents": [
+        "game-dev-specialist"
+      ],
+      "capabilities": [
+        "game-development",
+        "mechanics"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154078+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:ui-development",
+      "type": "skill",
+      "status": "active",
+      "name": "UI Development",
+      "description": "Create and manage user interface components for the game",
+      "category": "development",
+      "entry_point": "./skills/ui-development/SKILL.md",
+      "tools": [
+        "create_menu",
+        "update_hud"
+      ],
+      "agents": [
+        "ui-ux-engineer"
+      ],
+      "capabilities": [
+        "ui",
+        "ux"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154082+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:render-optimization",
+      "type": "skill",
+      "status": "active",
+      "name": "Render Optimization",
+      "description": "Profile and optimize Three.js/WebGPU rendering performance",
+      "category": "performance",
+      "entry_point": "./skills/render-optimization/SKILL.md",
+      "tools": [
+        "load_assets"
+      ],
+      "agents": [
+        "graphics-optimizer"
+      ],
+      "capabilities": [
+        "optimization",
+        "performance"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154087+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:game-config-store",
+      "type": "memory_store",
+      "status": "active",
+      "name": "Game Configuration Store",
+      "description": "Stores game settings, level configurations, and player preferences",
+      "category": "memory",
+      "entry_point": "./src/game_config.js",
+      "config": {
+        "backend": "json",
+        "path": "./src/game_config.js"
+      },
+      "capabilities": [
+        "memory",
+        "configuration"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154091+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:task-ledger",
+      "type": "memory_store",
+      "status": "active",
+      "name": "Task Ledger",
+      "description": "Tracks open tasks and agent work items for the project",
+      "category": "memory",
+      "entry_point": "./agentship-x-htdi/OPENTASKS.md",
+      "config": {
+        "backend": "markdown",
+        "path": "./agentship-x-htdi/OPENTASKS.md"
+      },
+      "capabilities": [
+        "memory",
+        "tasks"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai",
+      "_envelope": {
+        "version": "1.0.0",
+        "generated_at": "2026-02-06T18:24:23.154096+00:00",
+        "source_path": "houses/code-platformer-AI/functions.manifest.json"
+      }
+    },
+    {
+      "id": "code-platformer-ai:generate_arena_config",
+      "type": "tool",
+      "status": "active",
+      "name": "Generate Arena Config",
+      "description": "Generate a battle royale ArenaConfig via OpenResponses or seeded defaults",
+      "category": "game-system",
+      "entry_point": "./src/interfaces/ArenaConfig.js",
+      "mcp_server": "house-functions",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "seed": {
+            "type": "number"
+          },
+          "theme": {
+            "type": "string",
+            "enum": [
+              "code",
+              "google",
+              "ballpit",
+              "neon",
+              "scifi",
+              "basement",
+              "vr"
+            ]
+          },
+          "use_ai": {
+            "type": "boolean",
+            "description": "Use OpenResponses to generate config"
+          }
+        }
+      },
+      "capabilities": [
+        "arena-generation",
+        "configuration"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai"
+    },
+    {
+      "id": "code-platformer-ai:validate_character_asset",
+      "type": "tool",
+      "status": "active",
+      "name": "Validate Character Asset",
+      "description": "Validate a GLB character against the manifest contract (clips, sockets, skeleton)",
+      "category": "asset-pipeline",
+      "entry_point": "./src/interfaces/CharacterManifestEntry.js",
+      "mcp_server": "house-functions",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "character_id": {
+            "type": "string"
+          },
+          "glb_path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "character_id"
+        ]
+      },
+      "capabilities": [
+        "asset-validation",
+        "character-pipeline"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai"
+    },
+    {
+      "id": "code-platformer-ai:simulate_match",
+      "type": "tool",
+      "status": "active",
+      "name": "Simulate Match",
+      "description": "Run a headless battle royale match simulation with given ArenaConfig and return results",
+      "category": "game-system",
+      "entry_point": "./src/BattleRoyaleMatchDirector.js",
+      "mcp_server": "house-functions",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "arena_config": {
+            "type": "object"
+          },
+          "player_count": {
+            "type": "number",
+            "default": 12
+          },
+          "max_ticks": {
+            "type": "number",
+            "default": 6000
+          }
+        }
+      },
+      "capabilities": [
+        "match-simulation",
+        "testing"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai"
+    },
+    {
+      "id": "code-platformer-ai:publish_match_status",
+      "type": "tool",
+      "status": "active",
+      "name": "Publish Match Status",
+      "description": "Send a MatchStatusEvent to the A2A event bus",
+      "category": "ecosystem",
+      "entry_point": "./src/interfaces/MatchStatusEvent.js",
+      "mcp_server": "house-functions",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "match_id": {
+            "type": "string"
+          },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "warmup",
+              "active",
+              "final_zone",
+              "ended"
+            ]
+          },
+          "alive_count": {
+            "type": "number"
+          },
+          "winner_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "match_id",
+          "phase"
+        ]
+      },
+      "capabilities": [
+        "a2a",
+        "events"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai"
+    },
+    {
+      "id": "code-platformer-ai:ingest_arena_notes",
+      "type": "tool",
+      "status": "active",
+      "name": "Ingest Arena Notes",
+      "description": "Ingest arena design notes into the RAG collection house:code-platformer-ai:arena-presets",
+      "category": "knowledge",
+      "entry_point": "./src/core-x/OpenResponsesClient.js",
+      "mcp_server": "mlx-rag",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Arena design notes to ingest"
+          },
+          "metadata": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "capabilities": [
+        "rag",
+        "knowledge-ingestion"
+      ],
+      "house_binding": "local",
+      "house_id": "code-platformer-ai"
+    }
+  ],
+  "metadata": {
+    "endpoints": {
+      "dev": "http://localhost:5173"
+    },
+    "dependencies": {
+      "three": "^0.181.0",
+      "vite": "^7.2.2",
+      "tailwindcss": "^4.0"
+    },
+    "features": [
+      "Scene-based runtime (LobbyScene / MatchScene)",
+      "Battle royale mode (1 human + 11 bots)",
+      "ArenaConfig-driven arena compilation",
+      "Safe-zone shrink with damage",
+      "WebGPU graphics with WebGL fallback",
+      "Chase camera with spectate-on-death",
+      "A2A event bus integration",
+      "OpenResponses arena authoring",
+      "4 weapon types with projectile physics",
+      "Character manifest pipeline",
+      "Multi-agent CI/CD workflows"
+    ]
+  },
+  "updatedAt": "2026-03-07T16:26:00.000000+00:00"
+}
