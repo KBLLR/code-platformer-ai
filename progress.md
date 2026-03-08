@@ -21,3 +21,12 @@ Original prompt: make the world generator integration real and production ready 
   - loose visual artifacts like `code-platformer-worldpack.png` and `rigging-palace-*.png` are intentionally not part of the product commits; if they matter on this machine, check the local git stash after pull/teleport.
 - 2026-03-08: fixed a real boot bug in `src/main.js` by handling the already-loaded DOM case instead of waiting only on `DOMContentLoaded`.
 - 2026-03-08: aligned `src/A2AClient.js` with the canonical Core-X Event Bus base URL (`8085`) and message shape (`context.share` over `/events`).
+- 2026-03-08: root docs now carry the cross-ecosystem handoff for the next Claude session:
+  - `/Users/davidcaballero/core-x-kbllr_0/core-x/docs/audit/2026-03-08-ecosystem-change-audit.md`
+  - `/Users/davidcaballero/core-x-kbllr_0/core-x/docs/ops/2026-03-08-claude-rigging-palace-handoff.md`
+- 2026-03-08: next Claude scope is explicit:
+  - preserve this repo's world-pack consumer path and gallery/A2A fixes
+  - use `rigging-pipeline/` only as the migration source for Blender MCP + rig/export code
+  - move authoritative rigging ownership into `/Users/davidcaballero/core-x-kbllr_0/houses/rigging-palace`
+  - do not connect or symlink to `emergence-lab`
+  - make this repo consumer-only for approved rigged character assets
