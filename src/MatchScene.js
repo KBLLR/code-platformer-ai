@@ -51,7 +51,7 @@ export class MatchScene {
     console.log('[MatchScene] Entering…');
 
     // Arena geometry
-    const { safeZoneRing, spawnMarkers } = StageGenerator.generate(
+    const { safeZoneRing, spawnMarkers } = await StageGenerator.generate(
       this._config, this.threeScene
     );
     this._safeRing    = safeZoneRing;

@@ -32,6 +32,8 @@ export const MatchStatusEvent = {
       seed: arenaConfig.seed,
       size: arenaConfig.size,
       numPlayers: arenaConfig.numPlayers,
+      worldPackId: arenaConfig.worldPackId ?? null,
+      worldPackName: arenaConfig.worldPackName ?? null,
     });
   },
 

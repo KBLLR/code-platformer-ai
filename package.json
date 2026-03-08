@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "worlds:sync": "node scripts/sync-world-packs.mjs",
     "agents:update": "python agentship-x-htdi/scripts/generate_audit.py && python agentship-x-htdi/scripts/generate_sitemap.py && python agentship-x-htdi/scripts/collect_opentasks.py",
     "agents:cli": "python scripts/agent_cli.py",
     "agents:sync": "python agentship-x-htdi/scripts/sync_with_lab.py",

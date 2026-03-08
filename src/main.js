@@ -12,6 +12,7 @@ import { Onboarding }     from '@/onboarding.js';
 import { SceneManager }   from '@/SceneManager.js';
 import { LobbyScene }     from '@/LobbyScene.js';
 import { MatchScene }     from '@/MatchScene.js';
+import { createArenaConfigFromWorldPack, loadWorldPack } from '@/world/WorldPackAdapter.js';
 
 // Legacy modes
 import { initGame }       from '@/Game.js';
@@ -52,7 +53,7 @@ async function initAudio() {
 
 // ── Scene-based entry point (default) ─────────────────────────────────────────
 
-async function startSceneMode() {
+async function startSceneMode(worldPackUrl = null) {
   await loadGameConfig();
   hideAllMenus();
   showCanvas();
@@ -60,6 +61,20 @@ async function startSceneMode() {
 
   const sm = new SceneManager(canvas);
   await sm.init();
+
+  if (worldPackUrl) {
+    try {
+      const worldPack = await loadWorldPack(worldPackUrl);
+      const arenaConfig = createArenaConfigFromWorldPack(worldPack);
+      const match = new MatchScene(arenaConfig);
+      await sm.switchTo(match);
+      sm.start();
+      console.log(`[main.js] SceneManager started from world pack ${worldPack.id}`);
+      return;
+    } catch (error) {
+      console.error(`[main.js] Failed to start from world pack ${worldPackUrl}:`, error);
+    }
+  }
 
   const lobby = new LobbyScene({
     onStart: async (arenaConfig) => {
@@ -92,9 +107,10 @@ async function startLegacyGame(lvl = 0, characterCount = 1, humanPlayers = 1) {
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', () => {
+function boot() {
   const state = GetUrlParam('state');
   const mode  = GetUrlParam('mode');
+  const worldPackUrl = GetUrlParam('worldpack');
 
   // Direct URL overrides
   if (state === 'game') { startLegacyGame(); return; }
@@ -114,11 +130,17 @@ document.addEventListener('DOMContentLoaded', () => {
     o.Show().then(() => {
       o.OnComplete((startMode) => {
         if (startMode === 'practice') startLegacyGame(0, 1, 1);
-        else startSceneMode();
+        else startSceneMode(worldPackUrl);
       });
     });
     return;
   }
 
-  startSceneMode();
-});
+  startSceneMode(worldPackUrl);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot, { once: true });
+} else {
+  boot();
+}

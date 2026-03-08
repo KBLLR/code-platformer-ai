@@ -3,6 +3,7 @@
 // No HTML/DOM output — pure 3D scene construction.
 
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // ── Materials ─────────────────────────────────────────────────────────────────
 
@@ -15,6 +16,8 @@ const MAT = {
   spawnGlow: new THREE.MeshBasicMaterial({ color: 0xffee55, transparent: true, opacity: 0.35, side: THREE.DoubleSide }),
 };
 
+const WORLD_LOADER = new GLTFLoader();
+
 export class StageGenerator {
   /**
    * Build the full arena from an ArenaConfig.
@@ -22,16 +25,34 @@ export class StageGenerator {
    * @param {THREE.Scene} scene
    * @returns {{ group: THREE.Group, safeZoneRing: THREE.Mesh, spawnMarkers: THREE.Mesh[] }}
    */
-  static generate(config, scene) {
+  static async generate(config, scene) {
     console.log(`[StageGenerator] Compiling arena (seed=${config.seed}, size=${config.size})`);
 
     const group = new THREE.Group();
     group.name = 'Arena';
 
-    StageGenerator._buildGround(config, group);
-    StageGenerator._buildBoundaryWall(config, group);
-    StageGenerator._buildTerrainBands(config, group);
-    const coverGroup  = StageGenerator._buildCoverClusters(config, group);
+    let coverGroup = null;
+    const renderAsset = config.worldPack?.geometry?.renderAsset;
+
+    if (renderAsset) {
+      try {
+        const worldMesh = await StageGenerator._loadWorldPackRenderAsset(renderAsset);
+        group.add(worldMesh);
+        StageGenerator._buildBoundaryWall(config, group);
+      } catch (error) {
+        console.warn(`[StageGenerator] Failed to load world-pack render asset "${renderAsset}": ${error.message}`);
+        StageGenerator._buildGround(config, group);
+        StageGenerator._buildBoundaryWall(config, group);
+        StageGenerator._buildTerrainBands(config, group);
+        coverGroup = StageGenerator._buildCoverClusters(config, group);
+      }
+    } else {
+      StageGenerator._buildGround(config, group);
+      StageGenerator._buildBoundaryWall(config, group);
+      StageGenerator._buildTerrainBands(config, group);
+      coverGroup = StageGenerator._buildCoverClusters(config, group);
+    }
+
     const spawnMarkers = StageGenerator._buildSpawnMarkers(config, group);
     const safeZoneRing = StageGenerator._buildSafeZoneRing(config, group);
 
@@ -45,6 +66,28 @@ export class StageGenerator {
     );
 
     return { group, safeZoneRing, spawnMarkers, coverGroup };
+  }
+
+  static async _loadWorldPackRenderAsset(assetUrl) {
+    const gltf = await new Promise((resolve, reject) => {
+      WORLD_LOADER.load(assetUrl, resolve, undefined, reject);
+    });
+
+    const root = gltf.scene ?? new THREE.Group();
+    root.name = 'WorldPackRender';
+    root.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+
+    const bounds = new THREE.Box3().setFromObject(root);
+    if (Number.isFinite(bounds.min.y)) {
+      root.position.y -= bounds.min.y;
+    }
+
+    return root;
   }
 
   static _buildGround(config, parent) {
@@ -158,6 +201,9 @@ export class StageGenerator {
   }
 
   static _buildLighting(config, scene) {
+    if (scene.userData.stageLightingBuilt) return;
+    scene.userData.stageLightingBuilt = true;
+
     scene.add(new THREE.AmbientLight(0xffffff, 0.45));
 
     const sun = new THREE.DirectionalLight(0xfff5e0, 1.1);

@@ -1,0 +1,248 @@
+{
+  "id": "floating-bastion",
+  "version": "0.1.0",
+  "name": "Floating Bastion",
+  "kind": "arena",
+  "seed": 18427,
+  "description": "A battle royale floating island prototype with a central ridge, reactive camera profile, and publishable world-pack structure.",
+  "status": "published",
+  "spatialMode": "local-metric",
+  "physicsProfile": "character-kinematic",
+  "render": {
+    "skyMode": "panorama",
+    "environmentAsset": "core-x/sky/storm-sunset.exr",
+    "backgroundAsset": "core-x/sky/storm-sunset.exr",
+    "atmosphereProfile": "storm-sunset",
+    "materialProfile": "basalt_moss_ash",
+    "postProfile": "arena-cinematic"
+  },
+  "geometry": {
+    "primaryAssetType": "procedural",
+    "renderAsset": "render.glb",
+    "collisionAsset": "collision.glb",
+    "markers": [
+      {
+        "id": "spawn-01",
+        "type": "spawn",
+        "position": [
+          0,
+          12.5,
+          -8.2
+        ],
+        "tags": [
+          "north"
+        ]
+      },
+      {
+        "id": "spawn-02",
+        "type": "spawn",
+        "position": [
+          4.1,
+          12.5,
+          -7.1
+        ],
+        "tags": [
+          "north-east"
+        ]
+      },
+      {
+        "id": "spawn-03",
+        "type": "spawn",
+        "position": [
+          7.1,
+          12.5,
+          -4.1
+        ],
+        "tags": [
+          "north-east"
+        ]
+      },
+      {
+        "id": "spawn-04",
+        "type": "spawn",
+        "position": [
+          8.2,
+          12.5,
+          0
+        ],
+        "tags": [
+          "east"
+        ]
+      },
+      {
+        "id": "spawn-05",
+        "type": "spawn",
+        "position": [
+          7.1,
+          12.5,
+          4.1
+        ],
+        "tags": [
+          "south-east"
+        ]
+      },
+      {
+        "id": "spawn-06",
+        "type": "spawn",
+        "position": [
+          4.1,
+          12.5,
+          7.1
+        ],
+        "tags": [
+          "south-east"
+        ]
+      },
+      {
+        "id": "spawn-07",
+        "type": "spawn",
+        "position": [
+          0,
+          12.5,
+          8.2
+        ],
+        "tags": [
+          "south"
+        ]
+      },
+      {
+        "id": "spawn-08",
+        "type": "spawn",
+        "position": [
+          -4.1,
+          12.5,
+          7.1
+        ],
+        "tags": [
+          "south-west"
+        ]
+      },
+      {
+        "id": "spawn-09",
+        "type": "spawn",
+        "position": [
+          -7.1,
+          12.5,
+          4.1
+        ],
+        "tags": [
+          "south-west"
+        ]
+      },
+      {
+        "id": "spawn-10",
+        "type": "spawn",
+        "position": [
+          -8.2,
+          12.5,
+          0
+        ],
+        "tags": [
+          "west"
+        ]
+      },
+      {
+        "id": "spawn-11",
+        "type": "spawn",
+        "position": [
+          -7.1,
+          12.5,
+          -4.1
+        ],
+        "tags": [
+          "north-west"
+        ]
+      },
+      {
+        "id": "spawn-12",
+        "type": "spawn",
+        "position": [
+          -4.1,
+          12.5,
+          -7.1
+        ],
+        "tags": [
+          "north-west"
+        ]
+      },
+      {
+        "id": "spire",
+        "type": "poi",
+        "position": [
+          0,
+          18,
+          0
+        ],
+        "tags": [
+          "high-ground"
+        ]
+      },
+      {
+        "id": "cam-hero",
+        "type": "camera",
+        "position": [
+          24,
+          18,
+          26
+        ],
+        "tags": [
+          "preview"
+        ]
+      }
+    ]
+  },
+  "semantics": {
+    "tags": [
+      "battle-royale",
+      "floating-island",
+      "core-x",
+      "basalt",
+      "storm"
+    ],
+    "zones": [
+      {
+        "id": "play-surface",
+        "type": "play-area",
+        "tags": [
+          "surface",
+          "combat"
+        ]
+      },
+      {
+        "id": "center-spire",
+        "type": "poi",
+        "tags": [
+          "verticality",
+          "high-ground"
+        ],
+        "note": "Primary control point."
+      }
+    ],
+    "gameplayNotes": [
+      "Reactive camera only during active arena play.",
+      "Allow free orbit in preview and editorial contexts.",
+      "Collision and traversal metrics are mandatory before publish."
+    ]
+  },
+  "interaction": {
+    "cameraProfile": "arena-reactive",
+    "userRotationAllowed": true,
+    "eventReactiveCamera": true,
+    "defaultFocus": "spire"
+  },
+  "provenance": {
+    "sourceHouse": "world-generative-labs",
+    "generatorLane": "blender",
+    "blenderStage": "studio/world-generative-stage.blend",
+    "promptPackRefs": [
+      "core-x:world/arena/floating-island",
+      "core-x:world/material/basalt-moss"
+    ],
+    "dependencyRefs": [
+      "visual-composition-lab",
+      "code-platformer-AI",
+      "Leagentdiary"
+    ],
+    "lastReview": "2026-03-08"
+  }
+}

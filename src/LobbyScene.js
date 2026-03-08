@@ -29,7 +29,7 @@ export class LobbyScene {
 
   async enter(sm) {
     this._sm = sm;
-    this._buildPreview();
+    await this._buildPreview();
     this._buildUI();
     console.log('[LobbyScene] Entered');
   }
@@ -67,7 +67,7 @@ export class LobbyScene {
 
   // ── Arena preview ──────────────────────────────────────────────────────────
 
-  _buildPreview(seed) {
+  async _buildPreview(seed) {
     if (seed !== undefined) this._seed = seed;
 
     // Clear old arena
@@ -78,7 +78,7 @@ export class LobbyScene {
 
     this._arenaConfig = new ArenaConfig({ seed: this._seed, size: 40, numPlayers: 12 });
 
-    const { group, safeZoneRing, spawnMarkers } = StageGenerator.generate(
+    const { group, safeZoneRing, spawnMarkers } = await StageGenerator.generate(
       this._arenaConfig, this.threeScene
     );
     this._arenaGroup  = group;
@@ -159,13 +159,13 @@ export class LobbyScene {
     const seedInput = ui.querySelector('#seed-input');
     seedInput.addEventListener('change', () => {
       this._seed = parseInt(seedInput.value) || 1;
-      this._buildPreview();
+      void this._buildPreview();
     });
 
     ui.querySelector('#btn-randomise').addEventListener('click', () => {
       this._seed = Math.floor(Math.random() * 99999) + 1;
       seedInput.value = this._seed;
-      this._buildPreview();
+      void this._buildPreview();
     });
 
     ui.querySelector('#btn-start-match').addEventListener('click', () => {
