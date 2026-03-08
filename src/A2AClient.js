@@ -2,7 +2,7 @@
 // Plain-JS port of the Core-X A2A event bus client.
 // Publishes game events over SSE POST and subscribes to inbound streams.
 
-const DEFAULT_GATEWAY = import.meta.env?.VITE_A2A_GATEWAY_URL || 'http://localhost:4000';
+const DEFAULT_GATEWAY = import.meta.env?.VITE_A2A_GATEWAY_URL || 'http://localhost:8085';
 const SOURCE_ID       = 'code-platformer-ai';
 
 export class A2AClient {
@@ -28,7 +28,12 @@ export class A2AClient {
       const res = await fetch(`${this._base}/events`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...event, source: SOURCE_ID }),
+        body: JSON.stringify({
+          type: 'context.share',
+          source_house: SOURCE_ID,
+          target: { broadcast: true },
+          payload: { event },
+        }),
       });
       if (!res.ok) {
         console.warn(`[A2AClient] Publish failed (${res.status}):`, event.type);
@@ -61,14 +66,15 @@ export class A2AClient {
   }
 
   _openStream() {
-    const url = `${this._base}/events/stream?source=${SOURCE_ID}`;
+    const url = `${this._base}/events?house=${SOURCE_ID}`;
     try {
       this._sse = new EventSource(url);
       this._sse.onmessage = (e) => {
         try {
           const event = JSON.parse(e.data);
-          const handler = this._handlers[event.type];
-          if (handler) handler(event);
+          const payloadEvent = event?.payload?.event;
+          const handler = this._handlers[payloadEvent?.type];
+          if (handler) handler(payloadEvent);
         } catch { /* malformed message */ }
       };
       this._sse.onerror = () => {
