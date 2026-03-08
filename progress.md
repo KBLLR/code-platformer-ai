@@ -1,0 +1,23 @@
+Original prompt: make the world generator integration real and production ready by turning `world-generative-labs` into a real publish pipeline and wiring `code-platformer-AI` to consume published world packs cleanly.
+
+- 2026-03-08: confirmed the active runtime seam is `src/main.js` -> `src/LobbyScene.js` / `src/MatchScene.js` with `src/StageGenerator.js` and root `src/ArenaConfig.js`.
+- 2026-03-08: decided against cross-origin GLB loading as the default dev path; the consumption contract will mirror approved world packs from `model-zoo` into this house’s `public/world-packs`.
+- TODO: keep the world-pack adapter thin and avoid changing the legacy / classic / viverse modes.
+
+- 2026-03-08: implemented canonical publisher script in world-generative-labs and added game-side world pack adapter + sync script.
+- 2026-03-08: investigated `npm run dev` failure and found `public/agent-gallery.html` contained two HTML documents accidentally concatenated together, which broke Vite's inline-module parsing.
+- 2026-03-08: confirmed unrelated dirty worktree changes exist under `rigging-pipeline/` plus image assets and left them untouched.
+- 2026-03-08: replaced the broken gallery flow with root-level Vite entries `agent-gallery.html` and `agent-card-view.html`, both loading `agents/profiles/*.json` and optional `agents/profiles/models/*` assets via `import.meta.glob(...)`.
+- 2026-03-08: updated `index.html` so the main menu only links to `/agent-gallery.html`.
+- 2026-03-08: added Vite middleware redirects from legacy `/public/agent-gallery.html` and `/public/agent-card-view.html?...` to the new entry pages, then removed the shadowing files from `public/`.
+- 2026-03-08: verification:
+  - `npm run build` succeeds.
+  - `curl -I http://127.0.0.1:4173/agent-gallery.html` returns `200 OK`.
+  - `curl -I http://127.0.0.1:4173/public/agent-gallery.html` returns `302 Found` with `Location: /agent-gallery.html`.
+  - `curl -I 'http://127.0.0.1:4173/public/agent-card-view.html?profile=claude-sonnet-4-5.json'` returns `302 Found` with the query string preserved.
+- 2026-03-08: screenshot/browser automation verification was attempted but blocked because the shared `develop-web-game` Playwright client is missing the `playwright` package in its own environment, and the built-in Playwright browser tool could not launch due to an existing Chrome MCP session on this machine.
+- 2026-03-08: Claude handoff:
+  - pushed work is being split into coherent commits for world-pack loading, agent gallery repair, and rigging pipeline upgrades.
+  - loose visual artifacts like `code-platformer-worldpack.png` and `rigging-palace-*.png` are intentionally not part of the product commits; if they matter on this machine, check the local git stash after pull/teleport.
+- 2026-03-08: fixed a real boot bug in `src/main.js` by handling the already-loaded DOM case instead of waiting only on `DOMContentLoaded`.
+- 2026-03-08: aligned `src/A2AClient.js` with the canonical Core-X Event Bus base URL (`8085`) and message shape (`context.share` over `/events`).
