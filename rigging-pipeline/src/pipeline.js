@@ -3,6 +3,8 @@
  */
 
 import { BlenderMCPClient } from './mcp/blender-client.js';
+import { ensureMixamoSkin } from './gltf-skin-fix.js';
+import { spawn } from 'child_process';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -37,85 +39,53 @@ export class RiggingPipeline {
    */
   async processCharacter(modelPath, options = {}) {
     const characterId = options.id || path.basename(modelPath, path.extname(modelPath));
+    const outputDir = options.outputDir || path.join(process.cwd(), '../public/assets/models/rigged');
+    const glbPath = path.join(outputDir, `${characterId}.glb`);
+    let decodedPath = null;
 
     console.log(`\n[Pipeline] Processing character: ${characterId}`);
     console.log(`[Pipeline] Input: ${modelPath}`);
 
     const stages = {
-      import: false,
-      validate: false,
-      enhance: false,
-      export_glb: false,
-      export_vrm: false
+      decode: false,
+      process: false,
+      fix_skin: false,
+      export_glb: false
     };
 
     try {
-      // Stage 1: Import model
-      console.log('[Stage 1/5] Importing model to Blender...');
-      await this.mcp.importModel(modelPath);
-      stages.import = true;
-      console.log('  ✓ Import complete');
+      decodedPath = await this.decodeModel(modelPath, characterId);
+      stages.decode = true;
 
-      // Stage 2: Validate skeleton
-      console.log('[Stage 2/5] Validating skeleton...');
-      const objects = await this.mcp.getSceneObjects();
-      console.log(`  Found ${objects.length || 0} objects in scene`);
-
-      // Find armature
-      const armatureName = await this.findArmature();
-      if (!armatureName) {
-        throw new Error('No armature found in model');
-      }
-      console.log(`  ✓ Found armature: ${armatureName}`);
-      stages.validate = true;
-
-      // Stage 3: Enhance rig (weapon sockets, etc.)
-      console.log('[Stage 3/5] Enhancing rig...');
-      await this.enhanceRig(armatureName, options);
-      stages.enhance = true;
-      console.log('  ✓ Rig enhanced');
-
-      // Stage 4: Export GLB
-      console.log('[Stage 4/5] Exporting GLB...');
-      const outputDir = options.outputDir || path.join(process.cwd(), '../public/assets/models/rigged');
       await fs.mkdir(outputDir, { recursive: true });
 
-      const glbPath = path.join(outputDir, `${characterId}.glb`);
-      await this.mcp.exportGLB(glbPath, {
-        includeAnimations: true,
-        dracoCompression: true,
-        dracoCompressionLevel: 10,
-        textureFormat: 'webp'
+      console.log('[Stage 1/4] Processing character in Blender...');
+      const scriptPath = path.join(__dirname, '../blender-scripts/process_character.py');
+      const result = await this.mcp.runPythonScript(scriptPath, {
+        input_path: decodedPath,
+        output_path: glbPath,
+        add_weapon_sockets: options.addWeaponSockets ?? true,
+        add_ik_targets: options.addIKTargets ?? true,
+        draco_compression: false
       });
-      stages.export_glb = true;
+      stages.process = true;
+
+      if (result?.result) {
+        process.stdout.write(result.result);
+      }
+
+      console.log('[Stage 2/4] Repairing GLB skin binding...');
+      await ensureMixamoSkin(glbPath);
+      stages.fix_skin = true;
+
+      console.log('[Stage 3/4] Verifying GLB export...');
 
       const stats = await fs.stat(glbPath);
       const sizeMB = (stats.size / 1024 / 1024).toFixed(2);
+      stages.export_glb = true;
       console.log(`  ✓ GLB exported: ${glbPath} (${sizeMB}MB)`);
 
-      // Stage 5: Export VRM (optional)
-      if (options.exportVRM !== false) {
-        console.log('[Stage 5/5] Exporting VRM...');
-        const vrmPath = path.join(outputDir, `${characterId}.vrm`);
-
-        try {
-          await this.mcp.exportVRM(vrmPath, {
-            version: '1.0',
-            title: options.displayName || characterId,
-            author: 'CODE Platformer AI'
-          });
-          stages.export_vrm = true;
-
-          const vrmStats = await fs.stat(vrmPath);
-          const vrmSizeMB = (vrmStats.size / 1024 / 1024).toFixed(2);
-          console.log(`  ✓ VRM exported: ${vrmPath} (${vrmSizeMB}MB)`);
-        } catch (error) {
-          console.warn(`  ⚠ VRM export failed (optional): ${error.message}`);
-        }
-      } else {
-        console.log('[Stage 5/5] Skipping VRM export');
-      }
-
+      console.log('[Stage 4/4] Scene ready for next character');
       console.log(`\n✅ Character "${characterId}" processed successfully!`);
 
       return {
@@ -134,78 +104,33 @@ export class RiggingPipeline {
         error: error.message,
         stages
       };
-    }
-  }
-
-  /**
-   * Find armature in scene
-   */
-  async findArmature() {
-    const objects = await this.mcp.getSceneObjects();
-
-    // Common armature names
-    const armatureNames = [
-      'Armature',
-      'armature',
-      'rig',
-      'Rig',
-      'skeleton',
-      'Skeleton',
-      'Root'
-    ];
-
-    // Search for armature
-    for (const name of armatureNames) {
-      if (objects.content && objects.content.includes(name)) {
-        return name;
+    } finally {
+      if (decodedPath) {
+        await fs.rm(decodedPath, { force: true }).catch(() => {});
       }
-    }
-
-    // If response has structured data, search there
-    if (Array.isArray(objects)) {
-      for (const obj of objects) {
-        if (obj.type === 'ARMATURE' || armatureNames.includes(obj.name)) {
-          return obj.name;
-        }
-      }
-    }
-
-    return 'Armature'; // Default fallback
-  }
-
-  /**
-   * Enhance rig with weapon sockets and IK targets
-   */
-  async enhanceRig(armatureName, options) {
-    // Run enhancement script
-    const scriptPath = path.join(__dirname, '../blender-scripts/enhance_rig.py');
-
-    try {
-      await this.mcp.runPythonScript(scriptPath, {
-        armature_name: armatureName,
-        add_weapon_sockets: options.addWeaponSockets ?? true,
-        add_ik_targets: options.addIKTargets ?? true
-      });
-    } catch (error) {
-      console.warn(`  ⚠ Rig enhancement script failed: ${error.message}`);
-      // Continue anyway - enhancement is optional
     }
   }
 
   /**
    * Batch process multiple characters
    */
-  async batchProcess(modelPaths, options = {}) {
-    console.log(`\n[Pipeline] Batch processing ${modelPaths.length} characters...\n`);
+  async batchProcess(modelEntries, options = {}) {
+    console.log(`\n[Pipeline] Batch processing ${modelEntries.length} characters...\n`);
 
     const results = [];
 
-    for (const modelPath of modelPaths) {
-      const result = await this.processCharacter(modelPath, options);
-      results.push(result);
+    for (const entry of modelEntries) {
+      const modelPath = typeof entry === 'string' ? entry : entry.path;
+      const entryOptions = typeof entry === 'string'
+        ? options
+        : {
+            ...options,
+            id: entry.id ?? options.id,
+            displayName: entry.displayName ?? options.displayName
+          };
 
-      // Clear scene for next model
-      await this.clearScene();
+      const result = await this.processCharacter(modelPath, entryOptions);
+      results.push(result);
     }
 
     const successCount = results.filter(r => r.success).length;
@@ -219,14 +144,20 @@ export class RiggingPipeline {
   }
 
   /**
-   * Clear Blender scene
+   * Decode meshopt-compressed input so Blender can import it reliably.
    */
-  async clearScene() {
-    try {
-      await this.mcp.callTool('delete_all_objects', {});
-    } catch (error) {
-      console.warn('[Pipeline] Failed to clear scene:', error.message);
-    }
+  async decodeModel(modelPath, characterId) {
+    const tempDir = path.join(process.cwd(), 'tmp', 'decoded');
+    const decodedPath = path.join(tempDir, `${characterId}.glb`);
+
+    await fs.mkdir(tempDir, { recursive: true });
+
+    console.log('[Decode] Rewriting source GLB for Blender import...');
+    await runCommand('npx', ['gltf-transform', 'copy', modelPath, decodedPath], {
+      cwd: process.cwd()
+    });
+
+    return decodedPath;
   }
 
   /**
@@ -238,4 +169,30 @@ export class RiggingPipeline {
     }
     console.log('[Pipeline] Shutdown complete');
   }
+}
+
+function runCommand(command, args, options = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd: options.cwd,
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+
+    let stderr = '';
+
+    child.stdout.on('data', () => {});
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    child.on('error', reject);
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+
+      reject(new Error(stderr.trim() || `${command} exited with code ${code}`));
+    });
+  });
 }

@@ -109,8 +109,7 @@ async function processCharacters(args) {
     const result = await pipeline.processCharacter(modelPath, {
       id: path.basename(modelPath, path.extname(modelPath)),
       addWeaponSockets: true,
-      addIKTargets: true,
-      exportVRM: true
+      addIKTargets: true
     });
 
     await pipeline.shutdown();
@@ -145,14 +144,15 @@ async function batchProcess() {
     process.exit(1);
   }
 
-  // Get all character model paths
-  const modelPaths = manifest.characters.map(char => {
-    return path.join(__dirname, '../../public', char.glb);
-  });
+  const characters = manifest.characters.map(char => ({
+    id: char.id,
+    displayName: char.displayName,
+    path: path.join(__dirname, '../../public', char.glb)
+  }));
 
-  console.log(`Found ${modelPaths.length} characters to process:\n`);
-  modelPaths.forEach((p, i) => {
-    console.log(`  ${i + 1}. ${path.basename(p)}`);
+  console.log(`Found ${characters.length} characters to process:\n`);
+  characters.forEach((char, i) => {
+    console.log(`  ${i + 1}. ${path.basename(char.path)}`);
   });
   console.log('');
 
@@ -161,10 +161,9 @@ async function batchProcess() {
   try {
     await pipeline.initialize();
 
-    const results = await pipeline.batchProcess(modelPaths, {
+    const results = await pipeline.batchProcess(characters, {
       addWeaponSockets: true,
       addIKTargets: true,
-      exportVRM: true,
       outputDir: path.join(__dirname, '../../public/assets/models/rigged')
     });
 
@@ -177,8 +176,8 @@ async function batchProcess() {
     console.log('\n' + '='.repeat(50));
     console.log('BATCH PROCESSING COMPLETE');
     console.log('='.repeat(50));
-    console.log(`✅ Success: ${successCount}/${modelPaths.length}`);
-    console.log(`❌ Failed: ${failCount}/${modelPaths.length}`);
+    console.log(`✅ Success: ${successCount}/${characters.length}`);
+    console.log(`❌ Failed: ${failCount}/${characters.length}`);
 
     if (failCount > 0) {
       console.log('\nFailed characters:');
