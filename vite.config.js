@@ -6,6 +6,39 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+function createLegacyAgentPageRedirect() {
+  const legacyRoutes = new Map([
+    ["/public/agent-gallery.html", "/agent-gallery.html"],
+    ["/public/agent-card-view.html", "/agent-card-view.html"],
+  ]);
+
+  const redirectLegacyRoute = (req, res, next) => {
+    const requestUrl = req.url ?? "";
+
+    for (const [legacyPath, targetPath] of legacyRoutes) {
+      if (requestUrl.startsWith(legacyPath)) {
+        const suffix = requestUrl.slice(legacyPath.length);
+        res.statusCode = 302;
+        res.setHeader("Location", `${targetPath}${suffix}`);
+        res.end();
+        return;
+      }
+    }
+
+    next();
+  };
+
+  return {
+    name: "legacy-agent-page-redirect",
+    configureServer(server) {
+      server.middlewares.use(redirectLegacyRoute);
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(redirectLegacyRoute);
+    },
+  };
+}
+
 export default defineConfig({
   root: ".",
   server: {
@@ -16,6 +49,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, "index.html"),
+        agentGallery: path.resolve(__dirname, "agent-gallery.html"),
+        agentCardView: path.resolve(__dirname, "agent-card-view.html"),
       },
       output: {
         assetFileNames: "assets/[name]-[hash][extname]",
@@ -46,7 +81,7 @@ export default defineConfig({
       "three/examples/jsm/postprocessing/UnrealBloomPass",
     ],
   },
-  plugins: [tailwindcss()],
+  plugins: [tailwindcss(), createLegacyAgentPageRedirect()],
   experimental: {
     renderBuiltUrl(filename) {
       if (filename.endsWith(".wasm")) {

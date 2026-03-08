@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Agent Gallery</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+        <script
+            type="module"
+            src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"
+        ></script>
+        <style>
+            :root {
+                color-scheme: dark;
+                --bg: #060816;
+                --bg-soft: rgba(15, 23, 42, 0.82);
+                --panel: rgba(8, 15, 31, 0.84);
+                --panel-border: rgba(148, 163, 184, 0.14);
+                --text: #f8fafc;
+                --muted: #94a3b8;
+                --shadow: 0 28px 80px rgba(2, 6, 23, 0.45);
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                min-height: 100vh;
+                font-family: "Space Grotesk", sans-serif;
+                color: var(--text);
+                background:
+                    radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.16), transparent 32%),
+                    radial-gradient(circle at 78% 12%, rgba(249, 115, 22, 0.18), transparent 28%),
+                    linear-gradient(180deg, #081121 0%, #030712 62%, #020617 100%);
+            }
+
+            body::before,
+            body::after {
+                content: "";
+                position: fixed;
+                inset: auto;
+                width: 34rem;
+                height: 34rem;
+                border-radius: 999px;
+                filter: blur(80px);
+                pointer-events: none;
+                opacity: 0.18;
+            }
+
+            body::before {
+                top: -10rem;
+                right: -6rem;
+                background: #38bdf8;
+            }
+
+            body::after {
+                bottom: -12rem;
+                left: -10rem;
+                background: #f97316;
+            }
+
+            .shell {
+                position: relative;
+                width: min(1180px, calc(100% - 32px));
+                margin: 0 auto;
+                padding: 28px 0 56px;
+            }
+
+            .topbar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                margin-bottom: 44px;
+            }
+
+            .brand {
+                display: inline-flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 18px;
+                border-radius: 999px;
+                background: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(148, 163, 184, 0.12);
+                backdrop-filter: blur(14px);
+                box-shadow: var(--shadow);
+            }
+
+            .brand-mark {
+                display: grid;
+                place-items: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 14px;
+                background: linear-gradient(135deg, #f97316, #38bdf8);
+                color: #020617;
+            }
+
+            .brand-copy {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .brand-copy strong {
+                font-size: 0.92rem;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+
+            .brand-copy span,
+            .nav a,
+            .eyebrow,
+            .meta {
+                font-family: "IBM Plex Mono", monospace;
+            }
+
+            .brand-copy span {
+                color: var(--muted);
+                font-size: 0.74rem;
+            }
+
+            .nav {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .nav a {
+                color: var(--text);
+                text-decoration: none;
+                font-size: 0.76rem;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                padding: 12px 16px;
+                border-radius: 999px;
+                border: 1px solid rgba(148, 163, 184, 0.16);
+                background: rgba(15, 23, 42, 0.44);
+                transition:
+                    transform 0.18s ease,
+                    border-color 0.18s ease,
+                    background 0.18s ease;
+            }
+
+            .nav a:hover {
+                transform: translateY(-1px);
+                border-color: rgba(56, 189, 248, 0.45);
+                background: rgba(15, 23, 42, 0.68);
+            }
+
+            .hero {
+                display: grid;
+                grid-template-columns: 1.3fr 0.9fr;
+                gap: 24px;
+                margin-bottom: 28px;
+            }
+
+            .hero-copy,
+            .hero-panel {
+                position: relative;
+                overflow: hidden;
+                border-radius: 28px;
+                border: 1px solid var(--panel-border);
+                background: var(--panel);
+                box-shadow: var(--shadow);
+                backdrop-filter: blur(18px);
+            }
+
+            .hero-copy {
+                padding: 38px;
+            }
+
+            .hero-copy::after,
+            .hero-panel::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(135deg, transparent 48%, rgba(255, 255, 255, 0.04));
+                pointer-events: none;
+            }
+
+            .eyebrow {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                color: #cbd5e1;
+                font-size: 0.76rem;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+            }
+
+            .eyebrow::before {
+                content: "";
+                width: 42px;
+                height: 1px;
+                background: linear-gradient(90deg, #38bdf8, transparent);
+            }
+
+            h1 {
+                margin: 18px 0 14px;
+                max-width: 12ch;
+                font-size: clamp(2.6rem, 6vw, 5.2rem);
+                line-height: 0.95;
+                letter-spacing: -0.05em;
+            }
+
+            .lede {
+                margin: 0;
+                max-width: 56ch;
+                font-size: 1.02rem;
+                line-height: 1.7;
+                color: #cbd5e1;
+            }
+
+            .hero-panel {
+                display: grid;
+                align-content: space-between;
+                gap: 24px;
+                padding: 30px;
+            }
+
+            .hero-stats {
+                display: grid;
+                gap: 16px;
+            }
+
+            .hero-stat {
+                padding: 18px 20px;
+                border-radius: 20px;
+                background: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(148, 163, 184, 0.12);
+            }
+
+            .hero-stat strong {
+                display: block;
+                margin-top: 8px;
+                font-size: 1.8rem;
+                line-height: 1;
+            }
+
+            .hero-stat span {
+                color: var(--muted);
+                font-size: 0.78rem;
+                text-transform: uppercase;
+                letter-spacing: 0.12em;
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 22px;
+                margin-top: 28px;
+            }
+
+            .card {
+                display: grid;
+                gap: 18px;
+                padding: 20px;
+                border-radius: 26px;
+                text-decoration: none;
+                color: inherit;
+                border: 1px solid var(--panel-border);
+                background: linear-gradient(180deg, rgba(10, 16, 30, 0.94), rgba(8, 13, 24, 0.92));
+                box-shadow: var(--shadow);
+                transition:
+                    transform 0.22s ease,
+                    border-color 0.22s ease,
+                    box-shadow 0.22s ease;
+            }
+
+            .card:hover {
+                transform: translateY(-6px);
+                border-color: rgba(255, 255, 255, 0.22);
+                box-shadow: 0 34px 100px rgba(2, 6, 23, 0.56);
+            }
+
+            .viewer {
+                position: relative;
+                min-height: 264px;
+                border-radius: 20px;
+                overflow: hidden;
+                background:
+                    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.08), transparent 40%),
+                    linear-gradient(180deg, rgba(15, 23, 42, 0.86), rgba(2, 6, 23, 0.96));
+                border: 1px solid rgba(148, 163, 184, 0.12);
+            }
+
+            model-viewer {
+                width: 100%;
+                height: 100%;
+                min-height: 264px;
+                --poster-color: transparent;
+            }
+
+            .viewer-fallback {
+                display: grid;
+                place-items: center;
+                gap: 10px;
+                min-height: 264px;
+                padding: 22px;
+                text-align: center;
+                color: #cbd5e1;
+            }
+
+            .viewer-fallback i {
+                font-size: 2.8rem;
+                opacity: 0.82;
+            }
+
+            .meta-row,
+            .tag-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                min-height: 36px;
+                padding: 8px 12px;
+                border-radius: 999px;
+                background: rgba(15, 23, 42, 0.72);
+                border: 1px solid rgba(148, 163, 184, 0.12);
+                color: #dbeafe;
+                font-size: 0.8rem;
+            }
+
+            .color-chip {
+                width: 10px;
+                height: 10px;
+                border-radius: 999px;
+                box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+            }
+
+            .card h2 {
+                margin: 0;
+                font-size: 1.6rem;
+                line-height: 1.05;
+            }
+
+            .subhead {
+                margin: 4px 0 0;
+                color: var(--muted);
+                font-size: 0.95rem;
+            }
+
+            .quote {
+                margin: 0;
+                padding: 16px 18px;
+                border-radius: 18px;
+                background: rgba(15, 23, 42, 0.7);
+                border: 1px solid rgba(148, 163, 184, 0.1);
+                color: #e2e8f0;
+                line-height: 1.65;
+            }
+
+            .quote::before {
+                content: '"';
+                margin-right: 6px;
+                color: var(--accent, #38bdf8);
+                font-size: 1.3rem;
+                font-weight: 700;
+            }
+
+            .footer-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                color: var(--muted);
+                font-size: 0.82rem;
+            }
+
+            .footer-row span {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .empty {
+                padding: 52px 28px;
+                border-radius: 26px;
+                border: 1px dashed rgba(148, 163, 184, 0.2);
+                background: rgba(8, 15, 31, 0.6);
+                text-align: center;
+                color: var(--muted);
+            }
+
+            @media (max-width: 980px) {
+                .hero {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            @media (max-width: 720px) {
+                .shell {
+                    width: min(100% - 24px, 1180px);
+                    padding-top: 20px;
+                }
+
+                .topbar {
+                    align-items: stretch;
+                    flex-direction: column;
+                }
+
+                .nav {
+                    flex-wrap: wrap;
+                }
+
+                .hero-copy,
+                .hero-panel {
+                    padding: 24px;
+                }
+
+                h1 {
+                    max-width: none;
+                    font-size: clamp(2.2rem, 14vw, 4rem);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="shell">
+            <header class="topbar">
+                <div class="brand">
+                    <div class="brand-mark">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="brand-copy">
+                        <strong>Agent Gallery</strong>
+                        <span>Profiles loaded from `agents/profiles`</span>
+                    </div>
+                </div>
+                <nav class="nav">
+                    <a href="/index.html"><i class="fa-solid fa-gamepad"></i> Back to Game</a>
+                    <a href="/agent-card-view.html?profile=claude-sonnet-4-5.json"><i class="fa-solid fa-id-badge"></i> Open Sample Dossier</a>
+                </nav>
+            </header>
+
+            <section class="hero">
+                <div class="hero-copy">
+                    <div class="eyebrow">Legendary Profiles</div>
+                    <h1>Meet the builders behind the arena.</h1>
+                    <p class="lede">
+                        Each card is sourced from the house profile registry, with optional 3D assets pulled from
+                        the matching model folder. Open any dossier to inspect the agent’s quote, prompts, and recent
+                        mission summary.
+                    </p>
+                </div>
+                <aside class="hero-panel" aria-label="Gallery summary">
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <span>Profiles Loaded</span>
+                            <strong id="profile-count">0</strong>
+                        </div>
+                        <div class="hero-stat">
+                            <span>3D Models Available</span>
+                            <strong id="model-count">0</strong>
+                        </div>
+                    </div>
+                    <p class="lede" style="margin: 0;">
+                        The gallery now resolves through Vite entries instead of `public/` HTML, so the route works
+                        consistently in dev and build output.
+                    </p>
+                </aside>
+            </section>
+
+            <main>
+                <div id="agent-grid" class="grid"></div>
+                <div id="empty-state" class="empty" hidden>
+                    <p>No agent profiles were found. Add a JSON file under `agents/profiles/` to populate the gallery.</p>
+                </div>
+            </main>
+        </div>
+
+        <script type="module">
+            const profileModules = import.meta.glob("./agents/profiles/*.json", { eager: true });
+            const modelModules = import.meta.glob("./agents/profiles/models/*.{glb,gltf}", {
+                eager: true,
+                query: "?url",
+            });
+
+            const grid = document.getElementById("agent-grid");
+            const emptyState = document.getElementById("empty-state");
+            const profileCount = document.getElementById("profile-count");
+            const modelCount = document.getElementById("model-count");
+
+            const moduleValue = (mod) =>
+                mod && typeof mod === "object" && "default" in mod ? mod.default : mod;
+
+            const fileNameFromPath = (value) => value.split("/").pop();
+            const escapeHtml = (value = "") =>
+                value
+                    .replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;")
+                    .replaceAll(">", "&gt;")
+                    .replaceAll('"', "&quot;")
+                    .replaceAll("'", "&#39;");
+
+            const modelUrlByFile = new Map(
+                Object.entries(modelModules).map(([path, mod]) => [fileNameFromPath(path), moduleValue(mod)]),
+            );
+
+            const profiles = Object.entries(profileModules)
+                .map(([path, mod]) => {
+                    const data = moduleValue(mod);
+                    return {
+                        ...data,
+                        __fileName: fileNameFromPath(path),
+                        __modelUrl: data.model3D ? modelUrlByFile.get(data.model3D) ?? null : null,
+                    };
+                })
+                .sort((left, right) => (right.completedDate || "").localeCompare(left.completedDate || ""));
+
+            profileCount.textContent = String(profiles.length);
+            modelCount.textContent = String(profiles.filter((profile) => profile.__modelUrl).length);
+
+            if (!profiles.length) {
+                emptyState.hidden = false;
+            } else {
+                const cardMarkup = profiles
+                    .map((profile) => {
+                        const accent = escapeHtml(profile.favoriteColor || "#38bdf8");
+                        const quote = escapeHtml(profile.quote || "Awaiting debrief.");
+                        const taskCompleted = escapeHtml(profile.taskCompleted || "Mission data pending.");
+                        const provider = escapeHtml(profile.provider || "Unknown provider");
+                        const animal = escapeHtml(profile.favoriteAnimal || "Unknown spirit animal");
+                        const name = escapeHtml(profile.name || profile.__fileName.replace(/\.json$/i, ""));
+                        const completedDate = escapeHtml(profile.completedDate || "Unknown date");
+                        const fileName = encodeURIComponent(profile.__fileName);
+                        const viewerMarkup = profile.__modelUrl
+                            ? `
+                                <model-viewer
+                                    src="${profile.__modelUrl}"
+                                    alt="${name} 3D model"
+                                    auto-rotate
+                                    camera-controls
+                                    shadow-intensity="1"
+                                    exposure="0.95"
+                                    interaction-prompt="none"
+                                    camera-orbit="0deg 75deg 2.7m"
+                                ></model-viewer>
+                            `
+                            : `
+                                <div class="viewer-fallback">
+                                    <i class="fa-solid fa-cube"></i>
+                                    <div>
+                                        <strong>3D Model Pending</strong>
+                                        <div class="subhead">No matching asset found for ${escapeHtml(profile.model3D || "this agent")}.</div>
+                                    </div>
+                                </div>
+                            `;
+
+                        return `
+                            <a class="card" href="/agent-card-view.html?profile=${fileName}" style="--accent:${accent};">
+                                <div class="viewer">${viewerMarkup}</div>
+                                <div>
+                                    <div class="meta-row">
+                                        <span class="pill meta"><i class="fa-solid fa-bolt"></i> ${provider}</span>
+                                        <span class="pill meta"><span class="color-chip" style="background:${accent};"></span> ${accent}</span>
+                                        <span class="pill meta"><i class="fa-solid fa-paw"></i> ${animal}</span>
+                                    </div>
+                                    <h2>${name}</h2>
+                                    <p class="subhead">${taskCompleted}</p>
+                                </div>
+                                <p class="quote">${quote}</p>
+                                <div class="footer-row">
+                                    <span><i class="fa-regular fa-calendar"></i> ${completedDate}</span>
+                                    <span><i class="fa-solid fa-arrow-right"></i> Open dossier</span>
+                                </div>
+                            </a>
+                        `;
+                    })
+                    .join("");
+
+                grid.innerHTML = cardMarkup;
+            }
+        </script>
+    </body>
+</html>
