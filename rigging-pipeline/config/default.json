@@ -1,0 +1,52 @@
+{
+  "mcp": {
+    "blender": {
+      "port": 9876,
+      "host": "localhost",
+      "server": "poly-mcp/Blender-MCP-Server",
+      "blenderPath": "/usr/bin/blender",
+      "autoStart": false,
+      "timeout": 60000
+    }
+  },
+  "autorig": {
+    "preset": "mixamo",
+    "ikSetup": true,
+    "fingerControl": true,
+    "autoWeightPaint": true
+  },
+  "export": {
+    "formats": ["glb", "vrm"],
+    "glb": {
+      "dracoCompression": true,
+      "dracoCompressionLevel": 10,
+      "textureFormat": "webp",
+      "maxTextureSize": 2048,
+      "targetFileSize": 5242880
+    },
+    "vrm": {
+      "version": "1.0",
+      "includeSpringBones": true
+    }
+  },
+  "validation": {
+    "maxVertexCount": 50000,
+    "maxMaterialCount": 10,
+    "requiredBones": [
+      "Hips", "Spine", "Chest", "Neck", "Head",
+      "LeftShoulder", "LeftUpperArm", "LeftLowerArm", "LeftHand",
+      "RightShoulder", "RightUpperArm", "RightLowerArm", "RightHand",
+      "LeftUpperLeg", "LeftLowerLeg", "LeftFoot",
+      "RightUpperLeg", "RightLowerLeg", "RightFoot"
+    ],
+    "requiredClips": [
+      "idle", "walk", "run", "jump", "fall", "land",
+      "crouch", "shoot", "reload", "hit_reaction", "death"
+    ]
+  },
+  "api": {
+    "port": 3001,
+    "cors": true,
+    "maxJobsPerUser": 5
+  }
+}

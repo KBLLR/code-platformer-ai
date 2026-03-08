@@ -1,0 +1,34 @@
+{
+  "name": "@code-platformer-ai/rigging-pipeline",
+  "version": "1.0.0",
+  "description": "Automated character rigging pipeline with MCP Blender + AutoRig Pro",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/api/server.js",
+    "dev": "node --watch src/api/server.js",
+    "rig": "node src/cli.js",
+    "process": "node src/process-cli.js",
+    "test": "vitest",
+    "check-blender": "node src/mcp/check-blender.js"
+  },
+  "keywords": [
+    "blender",
+    "mcp",
+    "autorig",
+    "3d",
+    "character",
+    "rigging",
+    "animation"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0"
+  }
+}
