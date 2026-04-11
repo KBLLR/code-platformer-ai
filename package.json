@@ -8,13 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test:smoke": "node scripts/validate-toybox-smoke.mjs",
-    "validate:contracts": "node scripts/validate-toybox-content.mjs",
-    "agents:update": "python agentship-x-htdi/scripts/generate_audit.py && python agentship-x-htdi/scripts/generate_sitemap.py && python agentship-x-htdi/scripts/collect_opentasks.py",
-    "agents:cli": "python scripts/agent_cli.py",
-    "agents:sync": "python agentship-x-htdi/scripts/sync_with_lab.py",
-    "agents:register": "python agentship-x-htdi/scripts/register_house.py",
-    "lab:dashboard": "cd /Users/davidcaballero/htdi-agentic-lab && npm run dev",
-    "lab:api": "cd /Users/davidcaballero/htdi-agentic-lab && npm run api:start"
+    "validate:contracts": "node scripts/validate-toybox-content.mjs"
   },
   "dependencies": {
     "@pmndrs/viverse": "^0.2.6",
