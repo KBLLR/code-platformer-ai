@@ -1,0 +1,46 @@
+{
+  "worldId": "floating-bastion",
+  "runId": "20260308T195009Z-floating-bastion",
+  "status": "passed",
+  "checkedAt": "2026-03-08T19:50:11.070Z",
+  "checks": [
+    {
+      "id": "schema-valid",
+      "label": "Schema validation",
+      "status": "passed",
+      "detail": "World pack matches the canonical core-x world-pack schema."
+    },
+    {
+      "id": "render-generated",
+      "label": "Render mesh generated",
+      "status": "passed",
+      "detail": "Expected render artifact at runs/20260308T195009Z-floating-bastion/generated/floating-bastion.glb."
+    },
+    {
+      "id": "collision-generated",
+      "label": "Collision mesh generated",
+      "status": "passed",
+      "detail": "Expected collision artifact at runs/20260308T195009Z-floating-bastion/generated/floating-bastion-collision.glb."
+    },
+    {
+      "id": "preview-generated",
+      "label": "Preview image generated",
+      "status": "passed",
+      "detail": "Expected preview render at runs/20260308T195009Z-floating-bastion/generated/preview.png."
+    },
+    {
+      "id": "arena-spawn-coverage",
+      "label": "Arena spawn coverage",
+      "status": "passed",
+      "detail": "Arena pack exposes 12 spawn markers."
+    }
+  ],
+  "metrics": {
+    "markerCount": 14,
+    "spawnCount": 12,
+    "poiCount": 1,
+    "cameraCount": 1,
+    "tagCount": 5,
+    "maxMarkerRadius": 35.38
+  }
+}

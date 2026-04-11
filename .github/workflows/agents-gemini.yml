@@ -35,7 +35,7 @@ jobs:
           from pathlib import Path
 
           genai.configure(api_key=os.environ['GEMINI_API_KEY'])
-          model = genai.GenerativeModel('gemini-1.5-pro')
+          model = genai.GenerativeModel('/Users/davidcaballero/core-x-kbllr_0/model-zoo/models//Users/davidcaballero/core-x-kbllr_0/model-zoo/models/text/gpt-oss-20b-mxfp4-q8')
 
           task = "${{ github.event.inputs.task }}"
           opentasks = Path("agentship-x-htdi/OPENTASKS.md").read_text()

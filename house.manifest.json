@@ -1,0 +1,101 @@
+{
+  "house_id": "code-platformer-ai",
+  "name": "Toybox Arena",
+  "version": "2.0.0",
+  "status": "active",
+  "purpose": {
+    "domain": "gaming",
+    "mission": "Ship a browser-native 2.5D toybox platform battler with offline bots, local-first content, and rigged fighter exports from rigging-palace.",
+    "target_users": [
+      "game developers",
+      "creative technologists",
+      "local playtesters"
+    ],
+    "key_outcomes": [
+      "Readable side-view combat",
+      "Fast fighter and stage iteration",
+      "Reliable runtime content contracts"
+    ]
+  },
+  "personality": {
+    "voice": "Toybox Arena is a focused browser-game house that prioritizes game feel, stage readability, and clean runtime contracts.",
+    "tone": "professional",
+    "theme": {
+      "primary_color": "#ffb84d",
+      "secondary_color": "#ff6f61",
+      "icon": "toybox-arena"
+    }
+  },
+  "agents": {
+    "roster": [
+      {
+        "agent_id": "code-platformer-ai:game-dev-specialist",
+        "role_in_house": "lead",
+        "capabilities": [
+          "game-systems",
+          "three-js",
+          "combat-tuning",
+          "offline-bots"
+        ]
+      },
+      {
+        "agent_id": "code-platformer-ai:ui-ux-engineer",
+        "role_in_house": "specialist",
+        "capabilities": [
+          "ui-development",
+          "shell-design",
+          "playtest-readability"
+        ]
+      },
+      {
+        "agent_id": "code-platformer-ai:graphics-optimizer",
+        "role_in_house": "specialist",
+        "capabilities": [
+          "three-js-optimization",
+          "asset-loading",
+          "animation-runtime"
+        ]
+      }
+    ],
+    "default_agent": "code-platformer-ai:game-dev-specialist"
+  },
+  "capabilities": {
+    "domains": [
+      "gaming",
+      "game-systems",
+      "three-js",
+      "animation-runtime",
+      "ui-development"
+    ],
+    "input_types": ["file", "image", "text"],
+    "output_types": ["3d", "structured", "text"],
+    "streaming": true,
+    "tool_calling": true
+  },
+  "dependencies": {
+    "services": [
+      "rigging-palace"
+    ],
+    "models": [],
+    "houses": [
+      "rigging-palace"
+    ],
+    "mcp_servers": []
+  },
+  "ui_modes": [
+    "chat",
+    "canvas",
+    "code"
+  ],
+  "council_integration": {
+    "broadcast_events": [
+      "code-platformer-ai.toybox.status",
+      "code-platformer-ai.toybox.match.started",
+      "code-platformer-ai.toybox.match.completed"
+    ],
+    "subscribe_events": [
+      "task.request"
+    ],
+    "voting_weight": 0.7
+  }
+}

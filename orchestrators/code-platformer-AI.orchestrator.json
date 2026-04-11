@@ -1,0 +1,124 @@
+{
+  "$schema": "../../../htdi-collective-agency/schemas/house-orchestrator.schema.json",
+  "id": "orchestrator:code-platformer-ai",
+  "house_id": "code-platformer-ai",
+  "name": "Toybox Arena Orchestrator",
+  "version": "2.0.0",
+  "status": "active",
+  "personality": {
+    "voice": "technical",
+    "tone": "professional",
+    "style_guide": "Clear, concise communication focused on fighter gameplay, browser runtime quality, and content contract safety.",
+    "pronouns": "we/our",
+    "signature_phrases": [],
+    "avatar": "/assets/toybox-arena.png",
+    "theme": {
+      "primary_color": "#ffb84d",
+      "secondary_color": "#ff6f61",
+      "icon": "toybox"
+    }
+  },
+  "shared_resources": {
+    "filesystem": {
+      "root_paths": [
+        "houses/code-platformer-AI"
+      ],
+      "workspace": "var/workspace",
+      "artifacts": "var/artifacts"
+    },
+    "knowledge": {
+      "collections": [
+        "house:code-platformer-ai:toybox-docs"
+      ],
+      "embeddings_model": "/Users/davidcaballero/core-x-kbllr_0/model-zoo/models/embeddings/all-minilm-l6-v2-4bit",
+      "rag_endpoint": "http://localhost:8090/v1/search",
+      "vector_db": "lancedb"
+    },
+    "skills": [],
+    "tools": [
+      "fs_list",
+      "fs_read",
+      "rag_search"
+    ],
+    "mcp_servers": [
+      "house-functions",
+      "mlx-rag"
+    ]
+  },
+  "agents": {
+    "roster": [
+      {
+        "agent_id": "code-platformer-ai:orchestrator",
+        "role_in_house": "lead",
+        "delegation_priority": 100,
+        "capabilities": [
+          "routing",
+          "planning",
+          "coordination"
+        ]
+      },
+      {
+        "agent_id": "code-platformer-ai:worker",
+        "role_in_house": "worker",
+        "delegation_priority": 80,
+        "capabilities": [
+          "execute",
+          "process"
+        ]
+      }
+    ],
+    "default_agent": "code-platformer-ai:orchestrator",
+    "routing_rules": []
+  },
+  "capabilities": {
+    "domains": [
+      "gaming",
+      "runtime",
+      "content"
+    ],
+    "input_types": [
+      "text"
+    ],
+    "output_types": [
+      "text"
+    ],
+    "streaming": true,
+    "tool_calling": true,
+    "max_context_window": 32768
+  },
+  "council_integration": {
+    "council_member_id": "council:code-platformer-ai",
+    "broadcast_events": [
+      "response.in_progress",
+      "response.output_text.delta",
+      "response.completed",
+      "council.task.completed",
+      "code-platformer-ai.toybox.match.started",
+      "code-platformer-ai.toybox.match.completed"
+    ],
+    "subscribe_events": [
+      "council.task.delegated",
+      "council.motion.proposed",
+      "council.vote.required",
+      "council.house.capabilities"
+    ],
+    "voting_weight": 0.1,
+    "delegation_accepts": [
+      "code",
+      "gaming"
+    ]
+  },
+  "workflows": {
+    "flows": []
+  },
+  "endpoints": {
+    "base_url": "http://localhost:3008",
+    "responses": "/v1/responses",
+    "capabilities": "/capabilities"
+  },
+  "_envelope": {
+    "created_at": "2026-02-03T13:50:29.826364Z",
+    "updated_at": "2026-04-11T00:00:00.000000Z",
+    "generated_by": "house-orchestrator-generator"
+  }
+}

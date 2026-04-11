@@ -1,0 +1,153 @@
+{
+  "version": "1.0.0",
+  "fighters": [
+    {
+      "id": "blue",
+      "displayName": "Blue Blitz",
+      "subtitle": "All-Round Starter",
+      "description": "Stable recovery, easy launch control, and a forgiving item kit for first drops.",
+      "sourceFile": "/Users/davidcaballero/Library/CloudStorage/GoogleDrive-thegeneralist.ai@gmail.com/My Drive/Assets/3d-generated-assets/tencent-hunyuen3/3-1/code-platformer-reboot/blue.glb",
+      "mirroredSourceFile": "/fighters/official-v1/blue.glb",
+      "mirroredRuntimeFile": "/fighters/rigged-v1/blue/blue-runtime.glb",
+      "provenancePath": "/Users/davidcaballero/Library/CloudStorage/GoogleDrive-thegeneralist.ai@gmail.com/My Drive/Assets/3d-generated-assets/tencent-hunyuen3/3-1/code-platformer-reboot/blue.glb",
+      "animationSetVersion": "pending-rigging-palace-v1",
+      "runtimeRig": {
+        "producerHouse": "rigging-palace",
+        "manifestFile": "/fighters/rigged-v1/blue/runtime-manifest.json",
+        "runtimeGlb": "/fighters/rigged-v1/blue/blue-runtime.glb",
+        "exportStatus": "pending",
+        "animationSetVersion": "pending-rigging-palace-v1",
+        "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
+      },
+      "unlockRule": { "type": "starter" },
+      "weightClass": "medium",
+      "itemAffinity": "neutral",
+      "movementProfile": {
+        "runSpeed": 8.2,
+        "acceleration": 29,
+        "airSpeed": 7.2,
+        "airAcceleration": 20,
+        "jumpVelocity": 15.2,
+        "doubleJumpVelocity": 14.4,
+        "weight": 1
+      },
+      "knockbackProfile": {
+        "baseAttack": 13,
+        "stompAttack": 16,
+        "launchResistance": 1,
+        "recoveryBias": 1
+      }
+    },
+    {
+      "id": "red",
+      "displayName": "Red Rampart",
+      "subtitle": "Bruiser Starter",
+      "description": "Heavier body, stronger strike angles, and great hazard control when fights get messy.",
+      "sourceFile": "/Users/davidcaballero/Library/CloudStorage/GoogleDrive-thegeneralist.ai@gmail.com/My Drive/Assets/3d-generated-assets/tencent-hunyuen3/3-1/code-platformer-reboot/red.glb",
+      "mirroredSourceFile": "/fighters/official-v1/red.glb",
+      "mirroredRuntimeFile": "/fighters/rigged-v1/red/red-runtime.glb",
+      "provenancePath": "/Users/davidcaballero/Library/CloudStorage/GoogleDrive-thegeneralist.ai@gmail.com/My Drive/Assets/3d-generated-assets/tencent-hunyuen3/3-1/code-platformer-reboot/red.glb",
+      "animationSetVersion": "pending-rigging-palace-v1",
+      "runtimeRig": {
+        "producerHouse": "rigging-palace",
+        "manifestFile": "/fighters/rigged-v1/red/runtime-manifest.json",
+        "runtimeGlb": "/fighters/rigged-v1/red/red-runtime.glb",
+        "exportStatus": "pending",
+        "animationSetVersion": "pending-rigging-palace-v1",
+        "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
+      },
+      "unlockRule": { "type": "starter" },
+      "weightClass": "heavy",
+      "itemAffinity": "hazard-control",
+      "movementProfile": {
+        "runSpeed": 7.3,
+        "acceleration": 24,
+        "airSpeed": 6.1,
+        "airAcceleration": 15,
+        "jumpVelocity": 14.2,
+        "doubleJumpVelocity": 13.6,
+        "weight": 1.22
+      },
+      "knockbackProfile": {
+        "baseAttack": 16,
+        "stompAttack": 18,
+        "launchResistance": 1.18,
+        "recoveryBias": 0.86
+      }
+    },
+    {
+      "id": "pink",
+      "displayName": "Pink Skylark",
+      "subtitle": "Aerial Unlock",
+      "description": "Light frame, fast air steering, and the cleanest recovery path once Survival is cleared.",
+      "sourceFile": "/Users/davidcaballero/Library/CloudStorage/GoogleDrive-thegeneralist.ai@gmail.com/My Drive/Assets/3d-generated-assets/tencent-hunyuen3/3-1/code-platformer-reboot/pink.glb",
+      "mirroredSourceFile": "/fighters/official-v1/pink.glb",
+      "mirroredRuntimeFile": "/fighters/rigged-v1/pink/pink-runtime.glb",
+      "provenancePath": "/Users/davidcaballero/Library/CloudStorage/GoogleDrive-thegeneralist.ai@gmail.com/My Drive/Assets/3d-generated-assets/tencent-hunyuen3/3-1/code-platformer-reboot/pink.glb",
+      "animationSetVersion": "pending-rigging-palace-v1",
+      "runtimeRig": {
+        "producerHouse": "rigging-palace",
+        "manifestFile": "/fighters/rigged-v1/pink/runtime-manifest.json",
+        "runtimeGlb": "/fighters/rigged-v1/pink/pink-runtime.glb",
+        "exportStatus": "pending",
+        "animationSetVersion": "pending-rigging-palace-v1",
+        "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
+      },
+      "unlockRule": { "type": "complete_survival", "target": 1 },
+      "weightClass": "light",
+      "itemAffinity": "recovery",
+      "movementProfile": {
+        "runSpeed": 8.6,
+        "acceleration": 31,
+        "airSpeed": 8.6,
+        "airAcceleration": 26,
+        "jumpVelocity": 15.6,
+        "doubleJumpVelocity": 15.4,
+        "weight": 0.88
+      },
+      "knockbackProfile": {
+        "baseAttack": 12,
+        "stompAttack": 17,
+        "launchResistance": 0.88,
+        "recoveryBias": 1.3
+      }
+    },
+    {
+      "id": "black",
+      "displayName": "Black Hex",
+      "subtitle": "Trickster Unlock",
+      "description": "Uses shell lines, bombs, and trap drops to turn the stage into a puzzle after 10 total ring-outs.",
+      "sourceFile": "/Users/davidcaballero/Library/CloudStorage/GoogleDrive-thegeneralist.ai@gmail.com/My Drive/Assets/3d-generated-assets/tencent-hunyuen3/3-1/code-platformer-reboot/black.glb",
+      "mirroredSourceFile": "/fighters/official-v1/black.glb",
+      "mirroredRuntimeFile": "/fighters/rigged-v1/black/black-runtime.glb",
+      "provenancePath": "/Users/davidcaballero/Library/CloudStorage/GoogleDrive-thegeneralist.ai@gmail.com/My Drive/Assets/3d-generated-assets/tencent-hunyuen3/3-1/code-platformer-reboot/black.glb",
+      "animationSetVersion": "pending-rigging-palace-v1",
+      "runtimeRig": {
+        "producerHouse": "rigging-palace",
+        "manifestFile": "/fighters/rigged-v1/black/runtime-manifest.json",
+        "runtimeGlb": "/fighters/rigged-v1/black/black-runtime.glb",
+        "exportStatus": "pending",
+        "animationSetVersion": "pending-rigging-palace-v1",
+        "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
+      },
+      "unlockRule": { "type": "total_ringouts", "target": 10 },
+      "weightClass": "medium",
+      "itemAffinity": "trickster",
+      "movementProfile": {
+        "runSpeed": 7.8,
+        "acceleration": 27,
+        "airSpeed": 7.4,
+        "airAcceleration": 18,
+        "jumpVelocity": 14.8,
+        "doubleJumpVelocity": 14.4,
+        "weight": 0.98
+      },
+      "knockbackProfile": {
+        "baseAttack": 14,
+        "stompAttack": 15,
+        "launchResistance": 0.96,
+        "recoveryBias": 1.05
+      }
+    }
+  ]
+}

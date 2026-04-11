@@ -3,9 +3,8 @@
 Local Agent Workflow CLI
 
 This tool mirrors the GitHub workflows found in `.github/workflows/agents-*.yml`
-and `.github/workflows/agent-auto-execute.yml`. It now shells out to the local
-Claude, Codex, Gemini CLI, and Jules agents so the same automation can happen
-outside of GitHub Actions.
+and `.github/workflows/agent-auto-execute.yml`. It now calls the local MLX
+gateway so the same automation can happen outside of GitHub Actions.
 """
 
 from __future__ import annotations
@@ -16,6 +15,7 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+import httpx
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date
@@ -37,14 +37,14 @@ except ImportError as exc:
 ROOT = Path(__file__).resolve().parent.parent
 AGENTS_DIR = ROOT / "agentship-x-htdi"
 PROMPTS_DIR = AGENTS_DIR / "prompts"
-GEMINI_TRIAGE_LIBRARY = PROMPTS_DIR / "gemini_triage.json"
+MLX_TRIAGE_LIBRARY = PROMPTS_DIR / "mlx_triage.json"
 WORKFLOWS_DIR = ROOT / ".github" / "workflows"
 PYTHON = os.environ.get("PYTHON", sys.executable)
-CLAUDE_MODEL = "claude-sonnet-4-5-20250929"
-CODEX_MODEL = "gpt-5.1-codex"
-GEMINI_MODEL = "gemini-2.5-flash"
-JULES_USAGE_FILE = AGENTS_DIR / "logs" / "jules-usage.json"
-JULES_DAILY_LIMIT = 15
+MLX_GATEWAY_URL = os.environ.get("MLX_GATEWAY_URL", "http://localhost:8090")
+MLX_MODEL = os.environ.get(
+    "MLX_MODEL",
+    "/Users/davidcaballero/core-x-kbllr_0/model-zoo/models/text/gpt-oss-20b-mxfp4-q8",
+)
 console = Console()
 BANNER = r"""
    ____ ___   ____  ______   ____  _       ____  _   _ _______ ____   _____ _____ ____  
@@ -199,7 +199,7 @@ class OpenTask:
 
 
 @dataclass
-class GeminiTriageTemplate:
+class MlxTriageTemplate:
     key: str
     title: str
     description: str
@@ -267,21 +267,21 @@ def select_task(tasks: List[OpenTask]) -> Optional[OpenTask]:
     return select_task_with_projects(tasks)
 
 
-def load_gemini_triage_templates() -> List[GeminiTriageTemplate]:
-    if not GEMINI_TRIAGE_LIBRARY.exists():
+def load_mlx_triage_templates() -> List[MlxTriageTemplate]:
+    if not MLX_TRIAGE_LIBRARY.exists():
         return []
     try:
-        data = json.loads(GEMINI_TRIAGE_LIBRARY.read_text(encoding="utf-8"))
+        data = json.loads(MLX_TRIAGE_LIBRARY.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         console.print(
             Panel(
-                f"Could not parse {GEMINI_TRIAGE_LIBRARY.relative_to(ROOT)}:\n{exc}",
-                title="Gemini triage library error",
+                f"Could not parse {MLX_TRIAGE_LIBRARY.relative_to(ROOT)}:\n{exc}",
+                title="MLX triage library error",
                 border_style="red",
             )
         )
         return []
-    templates: List[GeminiTriageTemplate] = []
+    templates: List[MlxTriageTemplate] = []
     for entry in data:
         if not isinstance(entry, dict):
             continue
@@ -291,7 +291,7 @@ def load_gemini_triage_templates() -> List[GeminiTriageTemplate]:
         if not key or not title or not script:
             continue
         templates.append(
-            GeminiTriageTemplate(
+            MlxTriageTemplate(
                 key=key,
                 title=title,
                 description=entry.get("description", "").strip(),
@@ -303,15 +303,15 @@ def load_gemini_triage_templates() -> List[GeminiTriageTemplate]:
     return templates
 
 
-def select_gemini_triage_template(templates: List[GeminiTriageTemplate]) -> Optional[GeminiTriageTemplate]:
+def select_mlx_triage_template(templates: List[MlxTriageTemplate]) -> Optional[MlxTriageTemplate]:
     if not templates:
         console.print(
-            "[yellow]Gemini triage library not found (agents/prompts/gemini_triage.json). "
+            "[yellow]MLX triage library not found (agents/prompts/mlx_triage.json). "
             "Create it to enable predefined flows.[/]"
         )
         return None
     table = Table(
-        title="Gemini triage workflows",
+        title="MLX triage workflows",
         header_style="bold magenta",
         box=box.SIMPLE_HEAVY,
         border_style="magenta",
@@ -326,7 +326,7 @@ def select_gemini_triage_template(templates: List[GeminiTriageTemplate]) -> Opti
     console.print(table)
 
     while True:
-        choice = console.input("Gemini triage selection: ").strip()
+        choice = console.input("MLX triage selection: ").strip()
         if not choice:
             return None
         if choice.isdigit():
@@ -336,7 +336,7 @@ def select_gemini_triage_template(templates: List[GeminiTriageTemplate]) -> Opti
         console.print("[red]Invalid selection. Try again.[/]")
 
 
-def describe_gemini_template(template: GeminiTriageTemplate) -> None:
+def describe_mlx_template(template: MlxTriageTemplate) -> None:
     checklist = "\n".join(f"- {item}" for item in template.checklist) if template.checklist else "n/a"
     references = "\n".join(f"- {item}" for item in template.references) if template.references else "n/a"
     body = textwrap.dedent(
@@ -355,12 +355,12 @@ def describe_gemini_template(template: GeminiTriageTemplate) -> None:
         {references}
         """
     ).strip()
-    console.print(Panel(body, title="Gemini triage workflow applied", border_style="cyan"))
+    console.print(Panel(body, title="MLX triage workflow applied", border_style="cyan"))
 
 
-def prepend_gemini_triage_prompt(base_prompt: str, template: GeminiTriageTemplate) -> str:
+def prepend_mlx_triage_prompt(base_prompt: str, template: MlxTriageTemplate) -> str:
     sections = [
-        f"### Gemini Triage Workflow: {template.title}",
+        f"### MLX Triage Workflow: {template.title}",
         f"Scenario: {template.description or 'n/a'}",
         "Workflow Script:",
         textwrap.dedent(template.script).strip(),
@@ -500,48 +500,6 @@ def compose_prompt(task: OpenTask, table_text: str) -> str:
     )
 
 
-def load_jules_usage() -> Dict[str, int]:
-    if not JULES_USAGE_FILE.exists():
-        return {}
-    try:
-        return json.loads(JULES_USAGE_FILE.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return {}
-
-
-def save_jules_usage(usage: Dict[str, int]) -> None:
-    JULES_USAGE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    JULES_USAGE_FILE.write_text(json.dumps(usage, indent=2), encoding="utf-8")
-
-
-def jules_runs_today() -> int:
-    usage = load_jules_usage()
-    return int(usage.get(date.today().isoformat(), 0))
-
-
-def record_jules_run() -> None:
-    usage = load_jules_usage()
-    today_key = date.today().isoformat()
-    usage[today_key] = int(usage.get(today_key, 0)) + 1
-    save_jules_usage(usage)
-
-
-def ensure_jules_quota_ack() -> bool:
-    used = jules_runs_today()
-    remaining = max(0, JULES_DAILY_LIMIT - used)
-    console.print(
-        Panel.fit(
-            f"Jules runs are asynchronous with a free tier limit of [bold]{JULES_DAILY_LIMIT}[/] per day.\n"
-            f"Used today: [bold]{used}[/] • Remaining: [bold]{remaining}[/]",
-            title="Jules Quota",
-            border_style="magenta",
-        )
-    )
-    if remaining <= 0:
-        return prompt_yes_no("Daily Jules quota reached. Send task to Jules anyway?", False)
-    return True
-
-
 def save_summary(path: Path, agent_label: str, task: OpenTask, summary: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(f"# {agent_label} Task: {task.task_id}\n\n{summary.strip()}\n", encoding="utf-8")
@@ -572,89 +530,33 @@ def _run_cli(command: List[str], agent_label: str, *, input_text: str | None = N
     return result.stdout.strip()
 
 
-def run_claude_cli(task: OpenTask, prompt: str, output: Path) -> None:
-    command = ["claude", "--print", "--model", CLAUDE_MODEL, prompt]
-    summary = _run_cli(command, "Claude")
-    save_summary(output, "Claude", task, summary)
-
-
-def run_codex_cli(task: OpenTask, prompt: str, output: Path) -> None:
-    with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        tmp_path = Path(tmp.name)
-    command = [
-        "codex",
-        "exec",
-        "--model",
-        CODEX_MODEL,
-        "--output-last-message",
-        str(tmp_path),
-        prompt,
-    ]
-    stdout = _run_cli(command, "Codex")
-    if tmp_path.exists():
-        summary = tmp_path.read_text(encoding="utf-8").strip()
-        tmp_path.unlink(missing_ok=True)
-        if not summary:
-            summary = stdout.strip()
-    else:
-        summary = stdout.strip()
-    if not summary:
-        summary = "Codex CLI completed without returning a final message."
-    save_summary(output, "Codex", task, summary)
-
-
-def run_gemini_cli(task: OpenTask, prompt: str, output: Path) -> None:
-    command = ["gemini", "--model", GEMINI_MODEL, "--prompt", prompt, "--output-format", "text"]
-    summary = _run_cli(command, "Gemini")
-    save_summary(output, "Gemini", task, summary)
-
-
-def run_jules_cli(task: OpenTask, prompt: str, output: Path) -> None:
-    if not ensure_jules_quota_ack():
-        raise RuntimeError("Jules run skipped by user (quota reached).")
-    description = textwrap.dedent(
-        f"""{task.task_id} - {task.title}
-
-Priority: {task.priority or 'n/a'}
-Notes: {task.notes or 'None'}
-
-Detailed instructions:
-{prompt}
-"""
-    ).strip()
-    command = ["jules", "new", "--repo", str(ROOT), description]
-    summary = _run_cli(command, "Jules")
-    save_summary(output, "Jules", task, summary)
-    record_jules_run()
-    used = jules_runs_today()
-    remaining = max(0, JULES_DAILY_LIMIT - used)
-    print(f"Jules run dispatched asynchronously. {remaining} run(s) remaining today.")
+def run_mlx_gateway(task: OpenTask, prompt: str, output: Path) -> None:
+    payload = {
+        "model": MLX_MODEL,
+        "messages": [
+            {"role": "system", "content": "You are a precise engineering assistant."},
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.2,
+    }
+    req = httpx.post(
+        f"{MLX_GATEWAY_URL.rstrip('/')}/v1/chat/completions",
+        json=payload,
+        timeout=60.0,
+    )
+    if req.status_code >= 400:
+        raise RuntimeError(f"MLX gateway failed ({req.status_code}): {req.text}")
+    data = req.json()
+    summary = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+    save_summary(output, "MLX Gateway", task, summary or "(empty response)")
 
 
 MODEL_RUNNERS: Dict[str, Dict[str, object]] = {
-    "claude": {
-        "label": "Claude Sonnet 4.5 (Claude CLI)",
-        "workflow": ".github/workflows/agents-claude.yml",
-        "handler": run_claude_cli,
-        "output": AGENTS_DIR / "audits" / "claude-summary.md",
-    },
-    "codex": {
-        "label": "OpenAI via Codex CLI",
-        "workflow": ".github/workflows/agents-codex.yml",
-        "handler": run_codex_cli,
-        "output": AGENTS_DIR / "audits" / "openai-summary.md",
-    },
-    "gemini": {
-        "label": "Gemini 2.5 Flash (Gemini CLI)",
-        "workflow": ".github/workflows/agents-gemini.yml",
-        "handler": run_gemini_cli,
-        "output": ROOT / "gemini-output.md",
-    },
-    "jules": {
-        "label": "Jules (Google asynchronous agent)",
-        "workflow": ".github/workflows/agents-jules-bridge.yml",
-        "handler": run_jules_cli,
-        "output": AGENTS_DIR / "audits" / "jules-summary.md",
+    "mlx": {
+        "label": "MLX Local Gateway",
+        "workflow": ".github/workflows/agents-mlx.yml",
+        "handler": run_mlx_gateway,
+        "output": ROOT / "mlx-output.md",
     },
 }
 
@@ -682,19 +584,19 @@ def run_model_mode(tasks: List[OpenTask]) -> None:
     base_prompt = compose_prompt(task, table_text)
     prompts_by_runner: Dict[str, str] = {key: base_prompt for key in model_keys}
 
-    if "gemini" in model_keys:
-        templates = load_gemini_triage_templates()
+    if "mlx" in model_keys:
+        templates = load_mlx_triage_templates()
         if not templates:
             console.print(
-                "[yellow]No Gemini triage templates found (agents/prompts/gemini_triage.json). Using base prompt.[/]"
+                "[yellow]No MLX triage templates found (agents/prompts/mlx_triage.json). Using base prompt.[/]"
             )
         else:
-            selection = select_gemini_triage_template(templates)
+            selection = select_mlx_triage_template(templates)
             if selection:
-                describe_gemini_template(selection)
-                prompts_by_runner["gemini"] = prepend_gemini_triage_prompt(base_prompt, selection)
+                describe_mlx_template(selection)
+                prompts_by_runner["mlx"] = prepend_mlx_triage_prompt(base_prompt, selection)
             else:
-                console.print("[yellow]Gemini triage workflow skipped.[/]")
+                console.print("[yellow]MLX triage workflow skipped.[/]")
 
     successes = 0
     for model_key in model_keys:
@@ -804,7 +706,7 @@ def main() -> None:
     print_banner()
     display_task_catalog(tasks)
     actions = [
-        ("Run model task(s) via Claude/Codex/Gemini/Jules", run_model_mode),
+        ("Run model task(s) via MLX local gateway", run_model_mode),
         ("Prepare task via agent_auto_execute", lambda _: run_auto_executor()),
         ("Print workflow summary", lambda _: print_workflow_summary()),
         ("Quit", None),

@@ -1,0 +1,92 @@
+{
+  "version": "1.0.0",
+  "stages": [
+    {
+      "id": "balanced",
+      "displayName": "Bubble Borough",
+      "theme": "balanced",
+      "description": "A centered toy plaza with safe recoveries, bumper edges, and quick mid-stage contests.",
+      "blastZone": { "left": -16, "right": 16, "bottom": -10, "top": 18 },
+      "spawnPoints": [
+        { "x": -8, "y": 3 },
+        { "x": 8, "y": 3 },
+        { "x": -3, "y": 8 },
+        { "x": 3, "y": 8 }
+      ],
+      "itemSpawns": [
+        { "x": -10, "y": 2, "type": "movement-boost" },
+        { "x": 10, "y": 2, "type": "temporary-shield" },
+        { "x": -5, "y": 6, "type": "bomb-throwable" },
+        { "x": 5, "y": 6, "type": "shell-projectile" },
+        { "x": 0, "y": 10, "type": "spring-trap" }
+      ],
+      "platforms": [
+        { "x": 0, "y": 0, "width": 14, "height": 1.4, "kind": "main" },
+        { "x": -9.5, "y": 1.2, "width": 4.2, "height": 0.9, "kind": "ledge" },
+        { "x": 9.5, "y": 1.2, "width": 4.2, "height": 0.9, "kind": "ledge" },
+        { "x": -5, "y": 5.2, "width": 4.2, "height": 0.8, "kind": "lift" },
+        { "x": 5, "y": 5.2, "width": 4.2, "height": 0.8, "kind": "lift" },
+        { "x": 0, "y": 9, "width": 5.8, "height": 0.8, "kind": "tower" }
+      ],
+      "hazardFloor": -7.8
+    },
+    {
+      "id": "vertical",
+      "displayName": "Kite Stack",
+      "theme": "vertical",
+      "description": "Stacked toy shelves reward double-jumps, top-route recoveries, and aerial ring-outs.",
+      "blastZone": { "left": -15, "right": 15, "bottom": -11, "top": 21 },
+      "spawnPoints": [
+        { "x": -7, "y": 2.8 },
+        { "x": 7, "y": 2.8 },
+        { "x": -4, "y": 9.4 },
+        { "x": 4, "y": 13.5 }
+      ],
+      "itemSpawns": [
+        { "x": -8, "y": 2, "type": "temporary-shield" },
+        { "x": 8, "y": 2, "type": "movement-boost" },
+        { "x": -3.5, "y": 7.4, "type": "shell-projectile" },
+        { "x": 3.5, "y": 11.4, "type": "bomb-throwable" },
+        { "x": 0, "y": 15.3, "type": "spring-trap" }
+      ],
+      "platforms": [
+        { "x": 0, "y": 0, "width": 10.8, "height": 1.4, "kind": "main" },
+        { "x": -8.2, "y": 1.2, "width": 3.4, "height": 0.8, "kind": "step" },
+        { "x": 8.2, "y": 1.2, "width": 3.4, "height": 0.8, "kind": "step" },
+        { "x": -4, "y": 6.3, "width": 4.8, "height": 0.8, "kind": "step" },
+        { "x": 3.6, "y": 10.3, "width": 4.4, "height": 0.8, "kind": "step" },
+        { "x": 0, "y": 14.3, "width": 4.6, "height": 0.8, "kind": "crown" }
+      ],
+      "hazardFloor": -8.8
+    },
+    {
+      "id": "hazard",
+      "displayName": "Clockwork Drop",
+      "theme": "hazard",
+      "description": "A toy-factory drop zone with bumper arms, moving danger, and fast ring-out pressure.",
+      "blastZone": { "left": -17, "right": 17, "bottom": -12, "top": 19 },
+      "spawnPoints": [
+        { "x": -9, "y": 3 },
+        { "x": 9, "y": 3 },
+        { "x": -2, "y": 8 },
+        { "x": 2, "y": 8 }
+      ],
+      "itemSpawns": [
+        { "x": -10, "y": 2.4, "type": "bomb-throwable" },
+        { "x": 10, "y": 2.4, "type": "shell-projectile" },
+        { "x": -5, "y": 7, "type": "movement-boost" },
+        { "x": 5, "y": 7, "type": "temporary-shield" },
+        { "x": 0, "y": 10.4, "type": "spring-trap" }
+      ],
+      "platforms": [
+        { "x": 0, "y": 0, "width": 12, "height": 1.4, "kind": "main" },
+        { "x": -10.6, "y": 0.6, "width": 3.2, "height": 0.8, "kind": "bumper" },
+        { "x": 10.6, "y": 0.6, "width": 3.2, "height": 0.8, "kind": "bumper" },
+        { "x": -5.5, "y": 5.8, "width": 3.6, "height": 0.8, "kind": "danger" },
+        { "x": 5.5, "y": 5.8, "width": 3.6, "height": 0.8, "kind": "danger" },
+        { "x": 0, "y": 9.6, "width": 5.4, "height": 0.8, "kind": "crown" }
+      ],
+      "hazardFloor": -8.3
+    }
+  ]
+}

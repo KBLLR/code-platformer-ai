@@ -1,12 +1,14 @@
 {
-  "name": "code-platformer-2",
+  "name": "code-platformer-ai",
   "version": "1.0.0",
   "type": "module",
-  "description": "CODE Platformer 2 - 2.5D Multiplayer Platformer with Three.js, Vite, and Tailwind",
+  "description": "Toybox Arena - greenfield 2.5D fantasy toybox platform battler on Three.js and Vite",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test:smoke": "node scripts/validate-toybox-smoke.mjs",
+    "validate:contracts": "node scripts/validate-toybox-content.mjs",
     "agents:update": "python agentship-x-htdi/scripts/generate_audit.py && python agentship-x-htdi/scripts/generate_sitemap.py && python agentship-x-htdi/scripts/collect_opentasks.py",
     "agents:cli": "python scripts/agent_cli.py",
     "agents:sync": "python agentship-x-htdi/scripts/sync_with_lab.py",

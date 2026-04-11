@@ -1,0 +1,141 @@
+Original prompt: make the world generator integration real and production ready by turning `world-generative-labs` into a real publish pipeline and wiring `code-platformer-AI` to consume published world packs cleanly.
+
+- 2026-03-08: confirmed the active runtime seam is `src/main.js` -> `src/LobbyScene.js` / `src/MatchScene.js` with `src/StageGenerator.js` and root `src/ArenaConfig.js`.
+- 2026-03-08: decided against cross-origin GLB loading as the default dev path; the consumption contract will mirror approved world packs from `model-zoo` into this house’s `public/world-packs`.
+- TODO: keep the world-pack adapter thin and avoid changing the legacy / classic / viverse modes.
+
+- 2026-03-08: implemented canonical publisher script in world-generative-labs and added game-side world pack adapter + sync script.
+- 2026-03-08: investigated `npm run dev` failure and found `public/agent-gallery.html` contained two HTML documents accidentally concatenated together, which broke Vite's inline-module parsing.
+- 2026-03-08: confirmed unrelated dirty worktree changes exist under `rigging-pipeline/` plus image assets and left them untouched.
+- 2026-03-08: replaced the broken gallery flow with root-level Vite entries `agent-gallery.html` and `agent-card-view.html`, both loading `agents/profiles/*.json` and optional `agents/profiles/models/*` assets via `import.meta.glob(...)`.
+- 2026-03-08: updated `index.html` so the main menu only links to `/agent-gallery.html`.
+- 2026-03-08: added Vite middleware redirects from legacy `/public/agent-gallery.html` and `/public/agent-card-view.html?...` to the new entry pages, then removed the shadowing files from `public/`.
+- 2026-03-08: verification:
+  - `npm run build` succeeds.
+  - `curl -I http://127.0.0.1:4173/agent-gallery.html` returns `200 OK`.
+  - `curl -I http://127.0.0.1:4173/public/agent-gallery.html` returns `302 Found` with `Location: /agent-gallery.html`.
+  - `curl -I 'http://127.0.0.1:4173/public/agent-card-view.html?profile=claude-sonnet-4-5.json'` returns `302 Found` with the query string preserved.
+- 2026-03-08: screenshot/browser automation verification was attempted but blocked because the shared `develop-web-game` Playwright client is missing the `playwright` package in its own environment, and the built-in Playwright browser tool could not launch due to an existing Chrome MCP session on this machine.
+- 2026-03-08: Claude handoff:
+  - pushed work is being split into coherent commits for world-pack loading, agent gallery repair, and rigging pipeline upgrades.
+  - loose visual artifacts like `code-platformer-worldpack.png` and `rigging-palace-*.png` are intentionally not part of the product commits; if they matter on this machine, check the local git stash after pull/teleport.
+- 2026-03-08: fixed a real boot bug in `src/main.js` by handling the already-loaded DOM case instead of waiting only on `DOMContentLoaded`.
+- 2026-03-08: aligned `src/A2AClient.js` with the canonical Core-X Event Bus base URL (`8085`) and message shape (`context.share` over `/events`).
+- 2026-03-08: root docs now carry the cross-ecosystem handoff for the next Claude session:
+  - `/Users/davidcaballero/core-x-kbllr_0/core-x/docs/audit/2026-03-08-ecosystem-change-audit.md`
+  - `/Users/davidcaballero/core-x-kbllr_0/core-x/docs/ops/2026-03-08-claude-rigging-palace-handoff.md`
+- 2026-03-08: next Claude scope is explicit:
+  - preserve this repo's world-pack consumer path and gallery/A2A fixes
+  - use `rigging-pipeline/` only as the migration source for Blender MCP + rig/export code
+  - move authoritative rigging ownership into `/Users/davidcaballero/core-x-kbllr_0/houses/rigging-palace`
+  - do not connect or symlink to `emergence-lab`
+  - make this repo consumer-only for approved rigged character assets
+- 2026-03-08: rigging-pipeline/ removed — all rigging executor code migrated to rigging-palace.
+  - BlenderMCPClient, RiggingPipeline, gltf-skin-fix, process_character.py, enhance_rig.py now live in rigging-palace/scripts/lib/ and studio/blender/
+  - code-platformer-AI is now consumer-only for character assets (CharacterLoader.js + WorldPackAdapter.js)
+  - npm run build verified clean after removal
+- 2026-03-08: world-pack runtime pass:
+  - preserved spawn marker Y values from published world packs instead of flattening them to `0`
+  - direct `?worldpack=...` URLs now bypass onboarding so world runs can be tested/shared directly
+  - StageGenerator now applies a world render profile, loads `collision.glb` when present, and uses the render GLB as collision fallback only when a dedicated collision asset is absent
+  - CharacterController now raycasts recursively against nested world collision meshes, only falls back to a flat ground when no colliders exist, and uses arena-sized movement bounds instead of the old fixed `24`
+  - MatchScene now spawns players at world-pack Y coordinates, kills players who fall below the hazard floor, and exposes `window.render_game_to_text()` for automated world verification
+  - follow-up fix: world-pack spawn heights are now normalized by the same imported GLB Y offset as the render/collision assets, which keeps published markers and stage geometry in the same coordinate space
+  - verification:
+    - `npm run build` passes
+    - Playwright world-pack smoke capture succeeds against `http://127.0.0.1:5173/?worldpack=/world-packs/floating-bastion/world-pack.json`
+    - idle snapshot shows all 12 players spawned on the authored island surface at `y≈12.3`
+- 2026-03-08: expanded the authored arena family and synced it into the game.
+  - new published worlds from `world-generative-labs`: `ember-crown`, `floating-bastion`, `reef-atoll`, `verdant-terraces`
+  - runtime now has atmosphere presets for `ember-dusk`, `jade-mist`, and `reef-night`
+  - `model-zoo/metadata/world-packs.index.json` and this house's `public/world-packs/index.json` now expose all 4 packs
+  - Playwright idle smoke verification passed for `ember-crown` at `http://127.0.0.1:5173/?worldpack=/world-packs/ember-crown/world-pack.json`
+- 2026-03-09: added a dedicated WebGPU/TSL material lab to `world-generative-labs` without changing this house's WebGL runtime.
+  - new `Materials` tab in the world house workbench
+  - isolated `three/webgpu` + `three/tsl` preview lane with recipe switching for `moss-bastion`, `ember-crown`, `terrace-foliage`, and `reef-bloom`
+  - verified on the live house dev server at `http://127.0.0.1:5192/`
+  - native WebGPU backend is active on this Mac; no console errors during recipe switching
+- 2026-03-09: refit the `world-generative-labs` shell to match the existing lab language more closely.
+  - switched the house chrome away from the bespoke blue glass dashboard styling
+  - aligned the shell toward the neutral monochrome house pattern used by `avatar-labs`, `audio-lab`, and `visual-composition-lab`
+  - kept the real tabs/workbench and world pipeline logic intact instead of reverting to a static landing page
+- 2026-03-09: formalized the `world-generative-labs` experiment model.
+  - canonical architecture doc added at `/Users/davidcaballero/core-x-kbllr_0/core-x/docs/architecture/world-generative-labs-experiment-model.md`
+  - clarified that the house is a lab of reusable experiments/modules, not one product surface
+  - clarified dual-use rule: human-facing UI plus canonical machine-readable artifacts; endpoints are required when a lane becomes long-running, publishable, or orchestrator-driven
+- TODO:
+  - verify how well current `collision.glb` authoring matches the visible island surfaces during actual play
+  - if movement still feels wrong on authored worlds, next step should be a dedicated traversal/collision adapter rather than reintroducing flat-ground hacks
+  - current gameplay runtime is still WebGL; if/when we move to WebGPU, the shared world-pack render contract now has hooks for `textureStrategy`, `shaderProfile`, `preferredRenderer`, and `authoringMaterialMode`
+  - if the material lab becomes heavy, next optimization is to code-split the `Materials` tab further so the main world workbench loads without the WebGPU preview bundle
+
+- 2026-04-11: greenfield reboot in progress, with the main boot path now replaced by `Toybox Arena`, a side-view 2.5D platform battler.
+  - new runtime boots through `src/app/ToyboxArenaApp.js` and no longer enters the old BR lobby/match flow from `src/main.js`
+  - new product shell tabs are `Play`, `Fighters`, `Challenges`, `Settings`
+  - official starter roster is mirrored locally from Tencent Google Drive into `public/fighters/official-v1/{blue,red,pink,black}.glb`
+  - authoritative local manifests:
+    - `public/fighters/catalog.json`
+    - `public/stages/index.json`
+    - `public/modes/index.json`
+    - `public/challenges/index.json`
+  - new runtime systems:
+    - `src/game/ToyboxMatch.js`
+    - `src/render/ToyboxRenderer.js`
+    - `src/render/GLTFAssetLoader.js`
+    - `src/render/StageFactory.js`
+    - `src/input/ActionMap.js`
+    - `src/ui/ToyboxShell.js`
+  - new validation scripts:
+    - `scripts/validate-toybox-content.mjs`
+    - `scripts/validate-toybox-smoke.mjs`
+- 2026-04-11: verification for reboot pass:
+  - `npm run validate:contracts` passes
+  - `npm run test:smoke` passes
+  - `npm run build` passes
+  - browser screenshots captured with Playwright CLI:
+    - shell: `output/playwright/toybox-home-delayed.png`
+    - live autostart match: `output/playwright/toybox-match.png`
+- 2026-04-11: notable fixes during reboot pass:
+  - fixed `three` SkeletonUtils import shape by using named `clone`
+  - prevented shared fighter GLTF geometry disposal across cloned instances
+  - fixed preview-stage hazard floor drift
+  - added `window.render_game_to_text()` and `window.advanceTime(ms)` hooks for future browser-game automation
+  - added URL-driven autostart for verification:
+    - `?autostart=1&mode=<id>&stage=<id>&fighter=<id>`
+- TODO for next pass:
+  - add real animation playback if the Tencent GLBs ship clips; current movement relies on pose motion, tilt, bounce, and squash rather than authored animation states
+  - add proper scripted browser interaction; the MCP Playwright tool is broken on this machine because it expects `/.playwright-mcp`, and the local wrapper expects `playwright-cli`
+  - improve the shell’s right-side world composition so the preview feels less empty on very wide viewports
+  - decide whether to remove or archive the old BR files once the reboot is considered stable
+- 2026-04-11: Phase 2 cleanup and rigged-fighter contract pass completed.
+  - source tree reduced to the active Toybox runtime only:
+    - `src/app`
+    - `src/content`
+    - `src/game`
+    - `src/input`
+    - `src/render`
+    - `src/ui/ToyboxShell.js`
+    - `src/main.js`
+  - deleted the unreachable battle-royale runtime, old UI surfaces, old HTML entrypoints, old validation flows, old root gameplay modules, and the unused `img2level_mini_app`
+  - `public/fighters/catalog.json` now carries:
+    - Tencent source path
+    - mirrored source asset path
+    - rigged runtime export path
+    - rigging-palace runtime manifest path
+    - animation set version
+  - added per-fighter runtime manifests under `public/fighters/rigged-v1/*/runtime-manifest.json`
+  - `src/render/GLTFAssetLoader.js` now prefers rigged runtime manifests and falls back to procedural animation clips when palace exports are still pending
+  - `src/game/ToyboxMatch.js` now emits explicit animation states and animation nonces for renderer-driven playback
+  - `src/render/ToyboxRenderer.js` now drives fighter presentation objects instead of raw meshes
+  - `src/ui/ToyboxShell.js` now surfaces rigging/export status in the roster UI
+  - verification:
+    - `npm run validate:contracts` passes
+    - `npm run test:smoke` passes
+    - `npm run build` passes
+    - browser shell screenshot: `output/web-game/shell-phase2/shot-0.png`
+    - browser match screenshot: `output/web-game/match-phase2-direct.png`
+    - browser live match state dump confirms active animation states (`land`, `pickup`, `fall`)
+- TODO next:
+  - finish the blocked `rigging-palace` export path for `blue`, `red`, `pink`, `black`; current runtime manifests remain `pending`
+  - once palace exports are available, promote manifests to `ready` and replace procedural fallback with real clip playback
+  - split the main bundle if chunk size matters for production

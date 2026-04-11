@@ -1,202 +1,24 @@
 import "./styles/index.css";
-import { initGame } from "@/Game.js";
-import { initGameViverse } from "@/GameViverse.js"; // <--- NEW: Import VIVERSE game
-import { GetUrlParam } from "@/util.js";
-import { Mainmenu, LvlSelect, CharSelect } from "@/menus.js";
-import { loadGameConfig } from "@/game_config.js";
-import { Sounds } from "@/sounds.js"; // <--- NEW: Import Sounds
-import { Onboarding } from "@/onboarding.js"; // <--- NEW: Import Onboarding
+import { ToyboxArenaApp } from "./app/ToyboxArenaApp.js";
 
-console.log(`[main.js] Started game in '${import.meta.env.MODE}' mode`);
-
-const canvas = document.getElementById("game-canvas");
-const gameHud = document.getElementById("game-hud");
-
-let selectedLevel = 0;
-let selectedCharacterCount = 0;
-
-async function startGame(lvl = 0, characterCount = 0, humanPlayerCount = 1) {
-  console.log(
-    `[main.js] startGame called with level: ${lvl}, character count: ${characterCount}, human players: ${humanPlayerCount}`,
-  );
-  await loadGameConfig();
-  console.log("[main.js] Game config loaded.");
-
-  // Hide all menus and show game HUD
-  const menuWrap = document.getElementsByClassName("menu-wrap")[0];
-  const lvlSelectWrap = document.getElementsByClassName("lvl-select-wrap")[0];
-  const charSelect = document.getElementById("character-select");
-
-  if (menuWrap) menuWrap.style.display = "none";
-  if (lvlSelectWrap) lvlSelectWrap.style.display = "none";
-  if (charSelect) {
-    charSelect.style.display = "none";
-    charSelect.classList.add("hidden");
+async function boot() {
+  const canvas = document.getElementById("game-canvas");
+  const uiContainer = document.getElementById("ui-container");
+  if (!canvas || !uiContainer) {
+    throw new Error("Toybox Arena boot failed: missing root DOM nodes");
   }
 
-  // Show game HUD and ensure canvas is visible
-  if (gameHud) {
-    gameHud.classList.remove("hidden");
-    gameHud.style.display = "block";
-  }
+  const app = new ToyboxArenaApp({ canvas, uiContainer });
+  await app.init();
+  app.start();
 
-  // Make sure canvas is visible and in front
-  if (canvas) {
-    canvas.style.display = "block";
-    canvas.style.position = "fixed";
-    canvas.style.top = "0";
-    canvas.style.left = "0";
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
-    canvas.style.zIndex = "1";
-  }
-
-  console.log("[main.js] All menus hidden, game starting...");
-
-  // Initialize audio context and load sounds
-  try {
-    // Create audio context on user interaction
-    const initAudio = () => {
-      if (window.AudioContext || window.webkitAudioContext) {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-        // Resume audio context if suspended
-        if (audioContext.state === 'suspended') {
-          audioContext.resume();
-        }
-
-        console.log("[main.js] Audio context initialized:", audioContext.state);
-      }
-    };
-
-    // Initialize audio on first user interaction
-    document.addEventListener('click', initAudio, { once: true });
-    document.addEventListener('keydown', initAudio, { once: true });
-
-    // Load and play background music
-    await Sounds.LoadSounds(() => {
-      console.log("[main.js] All sounds initialized.");
-      try {
-        Sounds.Play("theme", { loop: true, volume: 0.15 });
-      } catch (error) {
-        console.warn("[main.js] Could not play background music:", error);
-      }
-    });
-  } catch (error) {
-    console.warn("[main.js] Sound system failed to initialize:", error);
-  }
-
-  // Check if VIVERSE mode should be used (URL param or default for this branch)
-  const useViverse = GetUrlParam("viverse") !== "false"; // Default to VIVERSE on this branch
-
-  if (useViverse) {
-    console.log("[main.js] Starting VIVERSE 3D Arena mode...");
-    initGameViverse(canvas, {
-      lvl,
-      character: characterCount > 0 ? characterCount : 1,
-      humanPlayers: humanPlayerCount || 1
-    });
-    console.log("[main.js] initGameViverse initiated.");
-  } else {
-    console.log("[main.js] Starting classic 2.5D platformer mode...");
-    initGame(canvas, {
-      lvl,
-      character: characterCount > 0 ? characterCount : 1,
-      humanPlayers: humanPlayerCount || 1
-    });
-    console.log("[main.js] initGame initiated.");
-  }
+  window.__toyboxApp = app;
+  window.render_game_to_text = () => app.renderGameToText();
+  window.advanceTime = (ms) => app.advanceTime(ms);
 }
 
-// Wait for DOM to be ready
-document.addEventListener('DOMContentLoaded', initializeApp);
-
-function initializeApp() {
-  console.log("[main.js] DOM ready, initializing app...");
-  
-  // Check URL state first
-  const state = GetUrlParam("state");
-  
-  if (state === "game") {
-    console.log("[main.js] URL param 'state=game' detected. Bypassing menus.");
-    const lvlPar = GetUrlParam("lvl");
-    let lvl = lvlPar ? parseInt(lvlPar) : 0;
-    if (isNaN(lvl)) lvl = 0;
-    startGame(lvl, 1); // Start with 1 player by default if bypassing menus
-  } else if (state === "onboarding") {
-    console.log("[main.js] Onboarding state detected.");
-    setupOnboardingFlow();
-  } else {
-    // Check authentication and onboarding status
-    if (!Onboarding.isLoggedIn()) {
-      console.log("[main.js] User not logged in, redirecting to landing page.");
-      window.location.href = 'landing.html';
-      return;
-    }
-    
-    if (!Onboarding.hasCompletedOnboarding()) {
-      console.log("[main.js] User logged in but hasn't completed onboarding.");
-      setupOnboardingFlow();
-    } else {
-      console.log("[main.js] User authenticated and onboarded, starting menu flow.");
-      setupMenuFlow();
-    }
-  }
-}
-
-async function setupOnboardingFlow() {
-  console.log("[main.js] Setting up onboarding flow...");
-  
-  const onboarding = new Onboarding();
-  window.onboarding = onboarding; // Make globally accessible for button clicks
-  
-  await onboarding.Show();
-  
-  onboarding.OnComplete((startMode) => {
-    console.log(`[main.js] Onboarding completed with mode: ${startMode}`);
-    
-    if (startMode === 'practice') {
-      // Start practice game directly
-      startGame(0, 1, 1); // Level 0, 1 character, 1 human player
-    } else {
-      // Show menu flow for multiplayer
-      setupMenuFlow();
-    }
-  });
-}
-
-async function setupMenuFlow() {
-  const mainmenu = new Mainmenu();
-  await mainmenu.Show(); // Will set menu-wrap to 'block'
-  console.log("[main.js] Mainmenu.Show() called.");
-
-  mainmenu.OnButton("start", async () => {
-    console.log("[main.js] Mainmenu 'start' button clicked. Hiding main menu.");
-    // mainmenu.Hide() is called by OnButton internally
-
-    const lvlSelect = new LvlSelect();
-    await lvlSelect.Show(); // Will set lvl-select-wrap to 'block' and load assets
-    console.log("[main.js] LvlSelect.Show() called.");
-
-    lvlSelect.OnLvlSelect(async (lvl) => {
-      selectedLevel = lvl;
-      console.log(
-        `[main.js] Level selected: ${selectedLevel}. Hiding level select.`,
-      );
-      // lvlSelect.Hide() is called by OnLvlSelect internally
-
-      const charSelect = new CharSelect();
-      await charSelect.Show(); // Will set character-select to 'flex' and load assets
-      console.log("[main.js] CharSelect.Show() called.");
-
-      charSelect.OnStartGame((humanPlayerCount) => {
-        // Receive the actual player count from CharSelect
-        selectedCharacterCount = humanPlayerCount || 2;
-        console.log(
-          `[main.js] CharSelect 'START' button clicked. Starting game with level ${selectedLevel}, ${selectedCharacterCount} human players.`,
-        );
-        startGame(selectedLevel, selectedCharacterCount, humanPlayerCount);
-      });
-    });
-  });
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => void boot(), { once: true });
+} else {
+  void boot();
 }

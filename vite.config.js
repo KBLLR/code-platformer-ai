@@ -28,8 +28,6 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
       "@styles": path.resolve(__dirname, "./src/styles"),
       "@ui": path.resolve(__dirname, "./src/ui"),
-      "@weapons": path.resolve(__dirname, "./src/weapons"),
-      "@weapon_spawns": path.resolve(__dirname, "./src/weapon_spawns"),
       "@data": path.resolve(__dirname, "./public/data"),
       "@assets": path.resolve(__dirname, "./public/assets"),
     },

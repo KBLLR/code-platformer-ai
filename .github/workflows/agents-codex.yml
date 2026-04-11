@@ -40,7 +40,7 @@ jobs:
           opentasks = Path("agentship-x-htdi/OPENTASKS.md").read_text()
 
           response = client.chat.completions.create(
-              model="gpt-4",
+              model="/Users/davidcaballero/core-x-kbllr_0/model-zoo/models//Users/davidcaballero/core-x-kbllr_0/model-zoo/models/text/gpt-oss-20b-mxfp4-q8",
               messages=[
                   {"role": "system", "content": "You are a code agent helping execute tasks in a repository."},
                   {"role": "user", "content": f"""Execute this task: {task}
