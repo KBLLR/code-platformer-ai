@@ -1,49 +1,33 @@
-# code-platformer-AI Agents
+# code-platformer-ai Agents
 
-## Paradigm (House-Level)
+## Paradigm
 
 - House ID: `code-platformer-ai`
-- Role: Core-X-native 3D Battle Royale House
-- Status/Type: active · ui
-- This house participates in the Core-X ecosystem by emitting and consuming **OpenResponses** events via the Event Bus. No local schema forks.
+- Role: `Toybox Arena` runtime house
+- Status/Type: `active · ui`
+- Product lane: 2.5D platform battler, offline bots-first
 
-## Sources of Truth (No Split Brain)
+## Product Truth
 
-- `/registries/houses.registry.json`
-- `/registries/agents.registry.json`
-- `/registries/services.registry.json`
-- `/registries/models.registry.json` (model-zoo)
-- Event Bus: `http://localhost:8085/events` (SSE) and `POST http://localhost:8085/emit`
+- Boot from [src/main.js](/Users/davidcaballero/core-x-kbllr_0/houses/code-platformer-AI/src/main.js)
+- Runtime shell: [src/app/ToyboxArenaApp.js](/Users/davidcaballero/core-x-kbllr_0/houses/code-platformer-AI/src/app/ToyboxArenaApp.js)
+- Do not route new work into removed battle-royale scenes or world-pack gameplay
 
-## Interfaces
+## Fighter Pipeline
 
-- No registered endpoints.
-
-## Services
-
-- No registered services.
-
-## Orchestration & Linking
-
-- Orchestrator: none registered
-- Local link: n/a
-- Dev script: listed in registry
-
-## Communication (OpenResponses)
-
-- Emit events using the canonical OpenResponses schema (no local copies).
-- Subscribe to the Event Bus SSE stream for activity.
-- Use `response.*` and `tool.*` events for agent activity and tool calls.
-
-## RAG / Knowledge (if applicable)
-
-- Collection naming: `house:code-platformer-ai:<collection>`
-- Use gateway `http://localhost:8090` for RAG (`/v1/search`, `/v1/documents`). Direct 8092 is admin-only.
+- Source roster meshes:
+  - `blue`
+  - `red`
+  - `pink`
+  - `black`
+- Source mirrors live under [public/fighters/official-v1](/Users/davidcaballero/core-x-kbllr_0/houses/code-platformer-AI/public/fighters/official-v1)
+- Rigged runtime exports are owned by `rigging-palace`
+- Toybox consumes [public/fighters/catalog.json](/Users/davidcaballero/core-x-kbllr_0/houses/code-platformer-AI/public/fighters/catalog.json) plus per-fighter rigged runtime manifests
 
 ## Runtime / Dev
 
-- Run `npm install` then `npm run dev` (vite).
-
-## Notes
-
-- If you add new endpoints/services, update `/registries/houses.registry.json` and regenerate registries.
+- Install: `npm install`
+- Dev: `npm run dev`
+- Contracts: `npm run validate:contracts`
+- Smoke: `npm run test:smoke`
+- Build: `npm run build`

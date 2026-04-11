@@ -1,0 +1,15 @@
+{
+  "fighterId": "black",
+  "producerHouse": "rigging-palace",
+  "sourceModel": "/fighters/official-v1/black.glb",
+  "runtimeGlb": "/fighters/rigged-v1/black/black-runtime.glb",
+  "exportStatus": "pending",
+  "animationSetVersion": "pending-rigging-palace-v1",
+  "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"],
+  "availableClips": [],
+  "notes": [
+    "Official Tencent source mesh mirrored into Toybox Arena.",
+    "Rigging Palace intake exists for black; animated runtime export is not published yet.",
+    "Toybox Arena uses procedural animation fallback until this manifest is marked ready."
+  ]
+}

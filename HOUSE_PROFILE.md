@@ -1,48 +1,33 @@
-# House Profile: code-platformer-2
-**ID:** `code-platformer-AI`
-**Version:** 1.0.0
-**Status:** Active (Profiled)
+# House Profile: code-platformer-ai
 
-> CODE Platformer 2 - 2.5D Multiplayer Platformer with Three.js, Vite, and Tailwind
+## Identity
 
----
+- House ID: `code-platformer-ai`
+- Product: `Toybox Arena`
+- Status: `active`
+- Product type: `ui`
 
-## 1. Identity & Purpose
-**Role:** [Derived from README/Manifest]
-# CODE Platformer AI
+## Mission
 
-## Overview
+Build and ship a browser-native 2.5D platform battler with a clean Three.js runtime, local-first content manifests, and a fighter pipeline that consumes approved rigged exports from `rigging-palace`.
 
-**Cube Clash: Battle Arena** is a 3D multiplayer platformer battle game built with Three.js and WebGPU. Battle with friends in fast-paced arena combat with platforming mechanics, weapon pickups, and up to 4-player local multiplayer support.
+## Active Runtime
 
-### Features
+- Boot: [src/main.js](/Users/davidcaballero/core-x-kbllr_0/houses/code-platformer-AI/src/main.js)
+- Shell: [src/ui/ToyboxShell.js](/Users/davidcaballero/core-x-kbllr_0/houses/code-platformer-AI/src/ui/ToyboxShell.js)
+- Simulation: [src/game/ToyboxMatch.js](/Users/davidcaballero/core-x-kbllr_0/houses/code-platformer-AI/src/game/ToyboxMatch.js)
+- Render: [src/render/ToyboxRenderer.js](/Users/davidcaballero/core-x-kbllr_0/houses/code-platformer-AI/src/render/ToyboxRenderer.js)
 
-- **WebGPU Graphics** - Modern GPU acceleration with WebGL fallback
-- **4-Player Multiplayer** - Local co-op with keyboard + gamepad support
-- **Combat System** - 4 weapon types (Bow, Gun, Shotgun, Minigun)
-- **Multiple Arenas** - CODE, Google, Ballpit, Basement, and VR themed levels
-- **3D Characters** - GLB models with dynamic animations
-- **Physics Engine** - Jumping, platforms, and projectile physics
+## Content Contracts
 
-### Quick Start
+- Fighters: [public/fighters/catalog.json](/Users/davidcaballero/core-x-kbllr_0/houses/code-platformer-AI/public/fighters/catalog.json)
+- Stages: [public/stages/index.json](/Users/davidcaballero/core-x-kbllr_0/houses/code-platformer-AI/public/stages/index.json)
+- Modes: [public/modes/index.json](/Users/davidcaballero/core-x-kbllr_0/houses/code-platformer-AI/public/modes/index.json)
+- Challenges: [public/challenges/index.json](/Users/davidcaballero/core-x-kbllr_0/houses/code-platformer-AI/public/challenges/index.json)
 
-```bash
-# Install dependencies
-npm install
+## Runtime Constraints
 
-## 2. Technology Stack
-**Core Dependencies:**
-- `@pmndrs/viverse`
-- `gsap`
-- `three`
-
-## 3. Agents & Capability
-**Registered Agents:**
-- `game-dev-specialist`
-- `ui-ux-engineer`
-- `graphics-optimizer`
-
-## 4. Audit Notes
-- [ ] Verify utility
-- [ ] Check for bitrot
-- [ ] Confirm Rules compliance
+- No active battle-royale product path
+- No live dependency on event bus for local match play
+- `rigging-palace` owns rigged export production
+- Tencent `black/blue/pink/red.glb` files remain the source-of-truth starter roster meshes

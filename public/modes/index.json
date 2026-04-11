@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "modes": [
+    {
+      "id": "tdm",
+      "displayName": "Toy Team Clash",
+      "description": "2v2 with quick respawns and a shared team score race.",
+      "defaultStageId": "balanced",
+      "botCount": 3,
+      "scoreLimit": 8,
+      "respawns": true
+    },
+    {
+      "id": "ffa",
+      "displayName": "Freefall FFA",
+      "description": "Every fighter for themselves with fast re-entry and clean ring-out scoring.",
+      "defaultStageId": "hazard",
+      "botCount": 3,
+      "scoreLimit": 6,
+      "respawns": true
+    },
+    {
+      "id": "survival",
+      "displayName": "Survival Showdown",
+      "description": "No respawns. Hazards rise, space collapses, and the last fighter standing wins.",
+      "defaultStageId": "vertical",
+      "botCount": 3,
+      "scoreLimit": 1,
+      "respawns": false
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "challenges": [
+    {
+      "id": "unlock-pink",
+      "displayName": "Survival Graduate",
+      "description": "Complete one Survival match to unlock Pink Skylark.",
+      "type": "complete_survival",
+      "target": 1,
+      "rewardFighterId": "pink"
+    },
+    {
+      "id": "unlock-black",
+      "displayName": "Ring-Out Trickster",
+      "description": "Earn 10 total ring-outs across all modes to unlock Black Hex.",
+      "type": "total_ringouts",
+      "target": 10,
+      "rewardFighterId": "black"
+    }
+  ]
+}

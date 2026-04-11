@@ -1,21 +1,21 @@
 {
   "$schema": "../../../htdi-collective-agency/schemas/house-orchestrator.schema.json",
-  "id": "orchestrator:code-platformer-AI",
-  "house_id": "code-platformer-AI",
-  "name": "Code Platformer Ai Orchestrator",
-  "version": "1.0.0",
+  "id": "orchestrator:code-platformer-ai",
+  "house_id": "code-platformer-ai",
+  "name": "Toybox Arena Orchestrator",
+  "version": "2.0.0",
   "status": "active",
   "personality": {
     "voice": "technical",
     "tone": "professional",
-    "style_guide": "Clear, concise communication focused on the house's domain.",
+    "style_guide": "Clear, concise communication focused on fighter gameplay, browser runtime quality, and content contract safety.",
     "pronouns": "we/our",
     "signature_phrases": [],
-    "avatar": "/assets/code-platformer-AI.png",
+    "avatar": "/assets/toybox-arena.png",
     "theme": {
-      "primary_color": "#3B82F6",
-      "secondary_color": "#6366F1",
-      "icon": "code"
+      "primary_color": "#ffb84d",
+      "secondary_color": "#ff6f61",
+      "icon": "toybox"
     }
   },
   "shared_resources": {
@@ -28,7 +28,7 @@
     },
     "knowledge": {
       "collections": [
-        "house:code-platformer-AI:docs"
+        "house:code-platformer-ai:toybox-docs"
       ],
       "embeddings_model": "/Users/davidcaballero/core-x-kbllr_0/model-zoo/models/embeddings/all-minilm-l6-v2-4bit",
       "rag_endpoint": "http://localhost:8090/v1/search",
@@ -48,7 +48,7 @@
   "agents": {
     "roster": [
       {
-        "agent_id": "code-platformer-AI:orchestrator",
+        "agent_id": "code-platformer-ai:orchestrator",
         "role_in_house": "lead",
         "delegation_priority": 100,
         "capabilities": [
@@ -58,7 +58,7 @@
         ]
       },
       {
-        "agent_id": "code-platformer-AI:worker",
+        "agent_id": "code-platformer-ai:worker",
         "role_in_house": "worker",
         "delegation_priority": 80,
         "capabilities": [
@@ -67,12 +67,14 @@
         ]
       }
     ],
-    "default_agent": "code-platformer-AI:orchestrator",
+    "default_agent": "code-platformer-ai:orchestrator",
     "routing_rules": []
   },
   "capabilities": {
     "domains": [
-      "code"
+      "gaming",
+      "runtime",
+      "content"
     ],
     "input_types": [
       "text"
@@ -85,12 +87,14 @@
     "max_context_window": 32768
   },
   "council_integration": {
-    "council_member_id": "council:code-platformer-AI",
+    "council_member_id": "council:code-platformer-ai",
     "broadcast_events": [
       "response.in_progress",
       "response.output_text.delta",
       "response.completed",
-      "council.task.completed"
+      "council.task.completed",
+      "code-platformer-ai.toybox.match.started",
+      "code-platformer-ai.toybox.match.completed"
     ],
     "subscribe_events": [
       "council.task.delegated",
@@ -100,7 +104,8 @@
     ],
     "voting_weight": 0.1,
     "delegation_accepts": [
-      "code"
+      "code",
+      "gaming"
     ]
   },
   "workflows": {
@@ -108,13 +113,12 @@
   },
   "endpoints": {
     "base_url": "http://localhost:3008",
-    "chat": "/v1/chat/completions",
     "responses": "/v1/responses",
     "capabilities": "/capabilities"
   },
   "_envelope": {
     "created_at": "2026-02-03T13:50:29.826364Z",
-    "updated_at": "2026-02-03T13:50:29.826364Z",
+    "updated_at": "2026-04-11T00:00:00.000000Z",
     "generated_by": "house-orchestrator-generator"
   }
 }

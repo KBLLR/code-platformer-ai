@@ -1,97 +1,17 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Cube Clash: Battle Arena</title>
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-            crossorigin="anonymous"
-            referrerpolicy="no-referrer"
-        />
-        <script src="https://cdn.jsdelivr.net/npm/webvr-polyfill@latest/build/webvr-polyfill.js"></script>
-        <script type="module" src="/src/main.js"></script>
-        <link rel="stylesheet" href="/src/styles/index.css" />
-        <script src="https://cdn.tailwindcss.com"></script>
-        <style>
-            @keyframes fade-in {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-            @keyframes scale-in {
-                from { transform: scale(0.8); opacity: 0; }
-                to { transform: scale(1); opacity: 1; }
-            }
-            .animate-fade-in {
-                animation: fade-in 0.5s ease-out;
-            }
-            .animate-scale-in {
-                animation: scale-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            }
-        </style>
-    </head>
-    <body>
-        <!-- NEW: Added #game-wrap container -->
-        <div id="game-wrap">
-            <div id="game-container">
-                <canvas id="game-canvas"></canvas>
-            </div>
-
-            <div id="ui-container">
-                <!-- Main Menu -->
-                <div class="menu-wrap" style="display: block">
-                    <div class="logo"></div>
-                    <div class="menu">
-                        <div class="bt start">START</div>
-                        <div class="bt settings">SETTINGS</div>
-                        <div class="bt agents" onclick="window.location.href='/agent-gallery.html'">AGENTS</div>
-                        <div class="bt exit">EXIT</div>
-                    </div>
-                    <div class="players pl0"></div>
-                    <div class="players pl1"></div>
-                    <div class="lamp lamp0"></div>
-                    <div class="lamp lamp1"></div>
-                    <div class="floor"></div>
-                    <div class="lvl-players"></div>
-                </div>
-
-                <!-- Level Select -->
-                <div class="lvl-select-wrap" style="display: none">
-                    <div class="logo"></div>
-                    <div class="lvl-select-frame" data-lvl="0" style="pointer-events: auto;">LEVEL 1</div>
-                    <div class="lvl-select-frame lvl1" data-lvl="1" style="pointer-events: auto;">LEVEL 2</div>
-                    <div class="lvl-select-frame lvl2" data-lvl="2" style="pointer-events: auto;">LEVEL 3</div>
-                    <div class="lvl-select-frame lvl3" data-lvl="3" style="pointer-events: auto;">LEVEL 4</div>
-                    <div class="foreground"></div>
-                </div>
-
-                <!-- Character Select -->
-                <div
-                    id="character-select"
-                    class="hidden w-full h-full flex flex-col items-center justify-center bg-black bg-opacity-90"
-                    style="pointer-events: auto;"
-                >
-                    <h1 class="text-4xl mb-8 text-yellow-400">
-                        SELECT CHARACTER
-                    </h1>
-                    <div
-                        id="character-grid"
-                        class="grid grid-cols-4 gap-6 w-3/4"
-                    ></div>
-                    <button
-                        id="start-game"
-                        class="mt-8 px-6 py-3 bg-green-600 rounded-lg text-white hover:bg-green-700 transition"
-                        style="pointer-events: auto; cursor: pointer;"
-                    >
-                        START GAME
-                    </button>
-                </div>
-
-                <!-- Modern Game HUD (populated by ModernGameHUD.js) -->
-                <div id="game-hud" class="hidden"></div>
-            </div>
-        </div>
-        <!-- END NEW: #game-wrap -->
-    </body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Toybox Arena</title>
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <div id="game-wrap">
+      <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+      </div>
+      <div id="ui-container"></div>
+    </div>
+  </body>
 </html>

@@ -1,27 +1,29 @@
 {
   "house_id": "code-platformer-ai",
-  "name": "Code Platformer AI",
-  "version": "1.0.0",
+  "name": "Toybox Arena",
+  "version": "2.0.0",
   "status": "active",
   "purpose": {
     "domain": "gaming",
-    "mission": "Develop AI-assisted multiplayer platformer systems spanning mechanics, HUD, assets, and runtime tuning.",
+    "mission": "Ship a browser-native 2.5D toybox platform battler with offline bots, local-first content, and rigged fighter exports from rigging-palace.",
     "target_users": [
       "game developers",
-      "creative technologists"
+      "creative technologists",
+      "local playtesters"
     ],
     "key_outcomes": [
-      "Rapid gameplay iteration",
-      "Integrated code-and-content generation loops"
+      "Readable side-view combat",
+      "Fast fighter and stage iteration",
+      "Reliable runtime content contracts"
     ]
   },
   "personality": {
-    "voice": "Code Platformer AI acts as a focused gaming collaborator inside the unified Core-X interface.",
+    "voice": "Toybox Arena is a focused browser-game house that prioritizes game feel, stage readability, and clean runtime contracts.",
     "tone": "professional",
     "theme": {
-      "primary_color": "#0f172a",
-      "secondary_color": "#334155",
-      "icon": "code-platformer-ai"
+      "primary_color": "#ffb84d",
+      "secondary_color": "#ff6f61",
+      "icon": "toybox-arena"
     }
   },
   "agents": {
@@ -32,8 +34,8 @@
         "capabilities": [
           "game-systems",
           "three-js",
-          "physics",
-          "multiplayer"
+          "combat-tuning",
+          "offline-bots"
         ]
       },
       {
@@ -41,134 +43,59 @@
         "role_in_house": "specialist",
         "capabilities": [
           "ui-development",
-          "tailwind",
-          "user-interaction"
+          "shell-design",
+          "playtest-readability"
         ]
       },
       {
         "agent_id": "code-platformer-ai:graphics-optimizer",
         "role_in_house": "specialist",
         "capabilities": [
-          "webgpu",
           "three-js-optimization",
           "asset-loading",
-          "performance"
+          "animation-runtime"
         ]
       }
     ],
-    "default_agent": "code-platformer-ai:game-dev-specialist",
-    "routing_rules": [
-      {
-        "pattern": "game-systems",
-        "capability": "game-systems",
-        "agent_id": "code-platformer-ai:game-dev-specialist"
-      },
-      {
-        "pattern": "ui-development",
-        "capability": "ui-development",
-        "agent_id": "code-platformer-ai:ui-ux-engineer"
-      },
-      {
-        "pattern": "webgpu",
-        "capability": "webgpu",
-        "agent_id": "code-platformer-ai:graphics-optimizer"
-      },
-      {
-        "pattern": "*",
-        "capability": "orchestration",
-        "agent_id": "code-platformer-ai:game-dev-specialist"
-      }
-    ]
+    "default_agent": "code-platformer-ai:game-dev-specialist"
   },
   "capabilities": {
     "domains": [
       "gaming",
       "game-systems",
       "three-js",
-      "physics",
-      "multiplayer",
-      "ui-development",
-      "tailwind"
+      "animation-runtime",
+      "ui-development"
     ],
-    "input_types": [
-      "audio",
-      "file",
-      "image",
-      "text",
-      "voice"
-    ],
-    "output_types": [
-      "3d",
-      "audio",
-      "image",
-      "structured",
-      "text",
-      "voice"
-    ],
+    "input_types": ["file", "image", "text"],
+    "output_types": ["3d", "structured", "text"],
     "streaming": true,
     "tool_calling": true
   },
   "dependencies": {
     "services": [
-      "gateway",
-      "mlx-llm",
-      "mlx-rag",
-      "mlx-vision",
-      "mlx-embed",
-      "mlx-audio",
-      "event-bus"
+      "rigging-palace"
     ],
-    "models": [
-      "text/qwen2.5-14b-4bit"
-    ],
+    "models": [],
     "houses": [
-      "avatar-labs",
-      "memory-labs",
-      "flash-ui-mlx"
+      "rigging-palace"
     ],
-    "mcp_servers": [
-      "house-functions",
-      "mlx-rag"
-    ]
-  },
-  "skills": {
-    "house_skills": [
-      "game-systems-implementation",
-      "render-optimization",
-      "ui-development"
-    ],
-    "shared_skills": [
-      "core-ops",
-      "mlx-chat",
-      "design-principles",
-      "semantic-streaming"
-    ]
+    "mcp_servers": []
   },
   "ui_modes": [
     "chat",
     "canvas",
-    "code",
-    "flow"
+    "code"
   ],
   "council_integration": {
     "broadcast_events": [
-      "code-platformer-ai.status",
-      "code-platformer-ai.match.started",
-      "code-platformer-ai.match.completed",
-      "code-platformer-ai.arena.generated",
-      "code-platformer-ai.asset.validation.failed",
-      "task.complete",
-      "health.pong"
+      "code-platformer-ai.toybox.status",
+      "code-platformer-ai.toybox.match.started",
+      "code-platformer-ai.toybox.match.completed"
     ],
     "subscribe_events": [
-      "task.request",
-      "council.directive",
-      "health.ping"
+      "task.request"
     ],
     "voting_weight": 0.7
-  },
-  "health": {
-    "endpoint": "/health",
-    "port": 8090
   }
 }
