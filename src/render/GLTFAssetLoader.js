@@ -2,7 +2,8 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
-import { REQUIRED_RUNTIME_CLIPS, validateRiggedRuntimeManifest } from "../content/contracts.js";
+import { REQUIRED_RUNTIME_CLIPS } from "../content/contracts.js";
+import { resolveFighterDistributionLayers } from "../content/fighterDistribution.js";
 
 const FIGHTER_COLORS = {
   blue: "#4f7cff",
@@ -326,7 +327,6 @@ export class GLTFAssetLoader {
     this.loader = new GLTFLoader();
     this.loader.setMeshoptDecoder(MeshoptDecoder);
     this.templateCache = new Map();
-    this.runtimeManifestCache = new Map();
   }
 
   async createFighterInstance(fighterDefinition) {
@@ -362,75 +362,51 @@ export class GLTFAssetLoader {
   }
 
   async _loadTemplate(fighterDefinition) {
-    const runtimeManifest = await this._getRuntimeManifest(fighterDefinition);
-    const attemptedUrls = [];
-    const candidates = [];
+    const distributionLayers = await resolveFighterDistributionLayers(fighterDefinition);
+    let fallbackRuntimeManifest = distributionLayers.at(-1)?.runtimeManifest ?? distributionLayers[0]?.runtimeManifest ?? null;
 
-    if (runtimeManifest.exportStatus === "ready") {
-      candidates.push({
-        url: runtimeManifest.runtimeGlb,
-        assetSource: "rigged-runtime",
-      });
-    }
+    for (const layer of distributionLayers) {
+      const candidates = [];
+      if (layer.runtimeManifest.exportStatus === "ready" && layer.runtimeGlbUrl) {
+        candidates.push({
+          url: layer.runtimeGlbUrl,
+          assetSource: layer.source,
+          runtimeManifest: layer.runtimeManifest,
+        });
+      }
 
-    candidates.push({
-      url: fighterDefinition.mirroredSourceFile,
-      assetSource: "source-mirror",
-    });
+      if (layer.sourceModelUrl) {
+        candidates.push({
+          url: layer.sourceModelUrl,
+          assetSource: layer.source,
+          runtimeManifest: layer.runtimeManifest,
+        });
+      }
 
-    for (const candidate of candidates) {
-      attemptedUrls.push(candidate.url);
-      try {
-        const gltf = await this._loadScene(candidate.url);
-        return {
-          scene: normalizeTemplate(gltf.scene),
-          clips: buildClipMap(gltf.animations, runtimeManifest),
-          runtimeManifest,
-          assetSource: candidate.assetSource,
-          proceduralFallback: !gltf.animations?.length,
-        };
-      } catch (error) {
-        console.warn(`[ToyboxArena] Failed to load ${fighterDefinition.id} from ${candidate.url}: ${error.message}`);
+      for (const candidate of candidates) {
+        fallbackRuntimeManifest = candidate.runtimeManifest;
+        try {
+          const gltf = await this._loadScene(candidate.url);
+          return {
+            scene: normalizeTemplate(gltf.scene),
+            clips: buildClipMap(gltf.animations, candidate.runtimeManifest),
+            runtimeManifest: candidate.runtimeManifest,
+            assetSource: candidate.assetSource,
+            proceduralFallback: !gltf.animations?.length,
+          };
+        } catch (error) {
+          console.warn(`[ToyboxArena] Failed to load ${fighterDefinition.id} from ${candidate.url}: ${error.message}`);
+        }
       }
     }
 
     return {
       scene: normalizeTemplate(createFallbackModel(fighterDefinition.id)),
-      clips: buildClipMap([], runtimeManifest),
-      runtimeManifest,
-      assetSource: attemptedUrls.join(", "),
+      clips: buildClipMap([], fallbackRuntimeManifest),
+      runtimeManifest: fallbackRuntimeManifest,
+      assetSource: "procedural",
       proceduralFallback: true,
     };
-  }
-
-  async _getRuntimeManifest(fighterDefinition) {
-    if (!this.runtimeManifestCache.has(fighterDefinition.id)) {
-      this.runtimeManifestCache.set(fighterDefinition.id, this._loadRuntimeManifest(fighterDefinition));
-    }
-    return this.runtimeManifestCache.get(fighterDefinition.id);
-  }
-
-  async _loadRuntimeManifest(fighterDefinition) {
-    const fallbackManifest = validateRiggedRuntimeManifest({
-      fighterId: fighterDefinition.id,
-      producerHouse: fighterDefinition.runtimeRig.producerHouse,
-      sourceModel: fighterDefinition.mirroredSourceFile,
-      runtimeGlb: fighterDefinition.mirroredRuntimeFile,
-      exportStatus: fighterDefinition.runtimeRig.exportStatus,
-      animationSetVersion: fighterDefinition.animationSetVersion,
-      requiredClips: fighterDefinition.runtimeRig.requiredClips,
-      availableClips: [],
-    }, fighterDefinition.id);
-
-    try {
-      const response = await fetch(fighterDefinition.runtimeRig.manifestFile, { cache: "no-store" });
-      if (!response.ok) {
-        return fallbackManifest;
-      }
-      return validateRiggedRuntimeManifest(await response.json(), fighterDefinition.id);
-    } catch {
-      return fallbackManifest;
-    }
   }
 
   async _loadScene(url) {

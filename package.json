@@ -6,11 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:release": "npm run sync:fighters && npm run validate:contracts && npm run validate:assets -- --strict && npm run test:smoke && vite build",
     "preview": "vite preview",
+    "sync:fighters": "node scripts/sync-fighter-assets.mjs",
+    "validate:assets": "node scripts/validate-fighter-assets.mjs",
     "test:smoke": "node scripts/validate-toybox-smoke.mjs",
     "validate:contracts": "node scripts/validate-toybox-content.mjs"
   },
   "dependencies": {
+    "@corex/warehouse-client": "file:../../warehouse/client",
     "@pmndrs/viverse": "^0.2.6",
     "gsap": "^3.12.7",
     "three": "^0.181.0"

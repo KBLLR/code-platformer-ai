@@ -11,6 +11,10 @@ export const REQUIRED_RUNTIME_CLIPS = [
   "ringout",
 ];
 
+export const FIGHTER_ASSET_PACK_VERSION = "toybox-fighters-v1";
+export const PRODUCER_RELEASE_MANIFEST_SCHEMA = "toybox-fighter-release-manifest-v1";
+export const CONSUMER_SNAPSHOT_INDEX_SCHEMA = "toybox-fighter-consumer-index-v1";
+
 const FIGHTER_UNLOCK_TYPES = new Set(["starter", "complete_survival", "total_ringouts"]);
 const MODE_IDS = new Set(["tdm", "ffa", "survival"]);
 const RUNTIME_EXPORT_STATUSES = new Set(["pending", "ready", "stale", "error"]);
@@ -100,6 +104,75 @@ function normalizeRuntimeRig(runtimeRig, fighterId) {
   };
 }
 
+function normalizeDistribution(distribution, fighterId) {
+  const normalized = distribution ?? {};
+  assertString(normalized.releaseManifestItemId, `distribution.releaseManifestItemId for "${fighterId}"`);
+  assertString(normalized.assetPackVersion, `distribution.assetPackVersion for "${fighterId}"`);
+  assertString(normalized.snapshotRoot, `distribution.snapshotRoot for "${fighterId}"`);
+  assert(
+    normalized.snapshotRoot === `/fighters/distribution-v1/${fighterId}`,
+    `distribution.snapshotRoot for "${fighterId}" must be "/fighters/distribution-v1/${fighterId}"`,
+  );
+  return normalized;
+}
+
+function normalizeProducerAssetRef(asset, label, { required = false } = {}) {
+  if (asset == null) {
+    assert(!required, `${label} is required`);
+    return null;
+  }
+  assert(asset && typeof asset === "object", `${label} must be an object`);
+  assertString(asset.itemId, `${label}.itemId`);
+  assertString(asset.path, `${label}.path`);
+  assertString(asset.filename, `${label}.filename`);
+  assertString(asset.checksum, `${label}.checksum`);
+  if (asset.mimeType != null) {
+    assertString(asset.mimeType, `${label}.mimeType`);
+  }
+  return {
+    itemId: asset.itemId,
+    path: asset.path,
+    filename: asset.filename,
+    checksum: asset.checksum,
+    mimeType: asset.mimeType ?? null,
+  };
+}
+
+function normalizeConsumerAssetRef(asset, label, { required = false } = {}) {
+  if (asset == null) {
+    assert(!required, `${label} is required`);
+    return null;
+  }
+  assert(asset && typeof asset === "object", `${label} must be an object`);
+  assertString(asset.itemId, `${label}.itemId`);
+  assertString(asset.checksum, `${label}.checksum`);
+  assertString(asset.localUrl, `${label}.localUrl`);
+  if (asset.filename != null) {
+    assertString(asset.filename, `${label}.filename`);
+  }
+  if (asset.warehousePath != null) {
+    assertString(asset.warehousePath, `${label}.warehousePath`);
+  }
+  return {
+    itemId: asset.itemId,
+    checksum: asset.checksum,
+    localUrl: asset.localUrl,
+    filename: asset.filename ?? null,
+    warehousePath: asset.warehousePath ?? null,
+  };
+}
+
+function normalizeMotionClipMap(value, label, normalizer) {
+  const normalized = value ?? {};
+  assert(normalized && typeof normalized === "object" && !Array.isArray(normalized), `${label} must be an object`);
+  const entries = {};
+  for (const [clipName, clipAsset] of Object.entries(normalized)) {
+    assertString(clipName, `${label} key`);
+    entries[clipName] = normalizer(clipAsset, `${label}.${clipName}`, { required: true });
+  }
+  return entries;
+}
+
 export function validateRiggedRuntimeManifest(manifest, expectedFighterId = null) {
   assert(manifest && typeof manifest === "object", "rigged runtime manifest must be an object");
   assertString(manifest.fighterId, "runtime manifest fighterId");
@@ -141,6 +214,140 @@ export function validateRiggedRuntimeManifest(manifest, expectedFighterId = null
   };
 }
 
+export function validateProducerReleaseManifest(manifest, expectedFighterId = null) {
+  assert(manifest && typeof manifest === "object", "producer release manifest must be an object");
+  assertString(manifest.schemaVersion, "producer release manifest schemaVersion");
+  assert(
+    manifest.schemaVersion === PRODUCER_RELEASE_MANIFEST_SCHEMA,
+    `Unsupported producer release manifest schemaVersion: ${manifest.schemaVersion}`,
+  );
+  assertString(manifest.fighterId, "producer release manifest fighterId");
+  if (expectedFighterId) {
+    assert(
+      manifest.fighterId === expectedFighterId,
+      `producer release manifest fighterId mismatch: expected "${expectedFighterId}", got "${manifest.fighterId}"`,
+    );
+  }
+  assertString(manifest.consumerHouse, `consumerHouse for "${manifest.fighterId}"`);
+  assert(manifest.consumerHouse === "code-platformer-ai", `consumerHouse for "${manifest.fighterId}" must be "code-platformer-ai"`);
+  assertString(manifest.assetPackVersion, `assetPackVersion for "${manifest.fighterId}"`);
+  assertString(manifest.producerHouse, `producerHouse for "${manifest.fighterId}"`);
+  assertString(manifest.exportStatus, `exportStatus for "${manifest.fighterId}"`);
+  assert(
+    RUNTIME_EXPORT_STATUSES.has(manifest.exportStatus),
+    `Unsupported exportStatus for "${manifest.fighterId}": ${manifest.exportStatus}`,
+  );
+  const requiredClips = normalizeStringArray(
+    manifest.requiredClips ?? REQUIRED_RUNTIME_CLIPS,
+    `requiredClips for "${manifest.fighterId}"`,
+  );
+  REQUIRED_RUNTIME_CLIPS.forEach((clip) => {
+    assert(requiredClips.includes(clip), `requiredClips for "${manifest.fighterId}" missing "${clip}"`);
+  });
+  const availableClips = normalizeStringArray(
+    manifest.availableClips ?? [],
+    `availableClips for "${manifest.fighterId}"`,
+  );
+  const assets = manifest.assets ?? {};
+  assert(assets && typeof assets === "object" && !Array.isArray(assets), `assets for "${manifest.fighterId}" must be an object`);
+  const normalizedAssets = {
+    sourceModel: normalizeProducerAssetRef(assets.sourceModel, `assets.sourceModel for "${manifest.fighterId}"`, { required: true }),
+    runtimeManifest: normalizeProducerAssetRef(assets.runtimeManifest, `assets.runtimeManifest for "${manifest.fighterId}"`, { required: true }),
+    runtimeGlb: normalizeProducerAssetRef(
+      assets.runtimeGlb,
+      `assets.runtimeGlb for "${manifest.fighterId}"`,
+      { required: manifest.exportStatus === "ready" },
+    ),
+    textures: (assets.textures ?? []).map((asset, index) =>
+      normalizeProducerAssetRef(asset, `assets.textures[${index}] for "${manifest.fighterId}"`, { required: true })),
+    motionClips: normalizeMotionClipMap(
+      assets.motionClips,
+      `assets.motionClips for "${manifest.fighterId}"`,
+      normalizeProducerAssetRef,
+    ),
+  };
+
+  if (manifest.exportStatus === "ready") {
+    requiredClips.forEach((clip) => {
+      assert(availableClips.includes(clip), `ready producer release manifest for "${manifest.fighterId}" missing clip "${clip}"`);
+    });
+  }
+
+  return {
+    ...manifest,
+    requiredClips,
+    availableClips,
+    assets: normalizedAssets,
+  };
+}
+
+export function validateConsumerSnapshotIndex(index, expectedFighterId = null) {
+  assert(index && typeof index === "object", "consumer snapshot index must be an object");
+  assertString(index.schemaVersion, "consumer snapshot index schemaVersion");
+  assert(
+    index.schemaVersion === CONSUMER_SNAPSHOT_INDEX_SCHEMA,
+    `Unsupported consumer snapshot index schemaVersion: ${index.schemaVersion}`,
+  );
+  assertString(index.fighterId, "consumer snapshot index fighterId");
+  if (expectedFighterId) {
+    assert(
+      index.fighterId === expectedFighterId,
+      `consumer snapshot index fighterId mismatch: expected "${expectedFighterId}", got "${index.fighterId}"`,
+    );
+  }
+  assertString(index.releaseManifestItemId, `releaseManifestItemId for "${index.fighterId}"`);
+  assertString(index.assetPackVersion, `assetPackVersion for "${index.fighterId}"`);
+  assertString(index.snapshotRoot, `snapshotRoot for "${index.fighterId}"`);
+  assertString(index.generatedAt, `generatedAt for "${index.fighterId}"`);
+  assertString(index.exportStatus, `exportStatus for "${index.fighterId}"`);
+  assert(
+    RUNTIME_EXPORT_STATUSES.has(index.exportStatus),
+    `Unsupported exportStatus for "${index.fighterId}": ${index.exportStatus}`,
+  );
+  const requiredClips = normalizeStringArray(
+    index.requiredClips ?? REQUIRED_RUNTIME_CLIPS,
+    `requiredClips for "${index.fighterId}"`,
+  );
+  REQUIRED_RUNTIME_CLIPS.forEach((clip) => {
+    assert(requiredClips.includes(clip), `requiredClips for "${index.fighterId}" missing "${clip}"`);
+  });
+  const availableClips = normalizeStringArray(
+    index.availableClips ?? [],
+    `availableClips for "${index.fighterId}"`,
+  );
+  const assets = index.assets ?? {};
+  assert(assets && typeof assets === "object" && !Array.isArray(assets), `assets for "${index.fighterId}" must be an object`);
+  const normalizedAssets = {
+    sourceModel: normalizeConsumerAssetRef(assets.sourceModel, `assets.sourceModel for "${index.fighterId}"`, { required: true }),
+    runtimeManifest: normalizeConsumerAssetRef(assets.runtimeManifest, `assets.runtimeManifest for "${index.fighterId}"`, { required: true }),
+    runtimeGlb: normalizeConsumerAssetRef(
+      assets.runtimeGlb,
+      `assets.runtimeGlb for "${index.fighterId}"`,
+      { required: index.exportStatus === "ready" },
+    ),
+    textures: (assets.textures ?? []).map((asset, indexPosition) =>
+      normalizeConsumerAssetRef(asset, `assets.textures[${indexPosition}] for "${index.fighterId}"`, { required: true })),
+    motionClips: normalizeMotionClipMap(
+      assets.motionClips,
+      `assets.motionClips for "${index.fighterId}"`,
+      normalizeConsumerAssetRef,
+    ),
+  };
+
+  if (index.exportStatus === "ready") {
+    requiredClips.forEach((clip) => {
+      assert(availableClips.includes(clip), `ready consumer snapshot index for "${index.fighterId}" missing clip "${clip}"`);
+    });
+  }
+
+  return {
+    ...index,
+    requiredClips,
+    availableClips,
+    assets: normalizedAssets,
+  };
+}
+
 export function validateFighterCatalog(catalog) {
   const fighters = catalog?.fighters ?? [];
   assert(Array.isArray(fighters) && fighters.length > 0, "fighters catalog must include at least one fighter");
@@ -160,6 +367,7 @@ export function validateFighterCatalog(catalog) {
     assertString(fighter.description, `description for "${fighter.id}"`);
     assertString(fighter.animationSetVersion, `animationSetVersion for "${fighter.id}"`);
     const runtimeRig = normalizeRuntimeRig(fighter.runtimeRig, fighter.id);
+    const distribution = normalizeDistribution(fighter.distribution, fighter.id);
     assert(
       runtimeRig.runtimeGlb === fighter.mirroredRuntimeFile,
       `mirroredRuntimeFile mismatch for "${fighter.id}"`,
@@ -174,6 +382,7 @@ export function validateFighterCatalog(catalog) {
       movementProfile: normalizeMovementProfile(fighter.movementProfile, fighter.id),
       knockbackProfile: normalizeKnockbackProfile(fighter.knockbackProfile, fighter.id),
       runtimeRig,
+      distribution,
     };
   });
 }

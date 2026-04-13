@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "toybox-fighter-release-manifest-v1",
+  "fighterId": "red",
+  "consumerHouse": "code-platformer-ai",
+  "assetPackVersion": "toybox-fighters-v1",
+  "producerHouse": "rigging-palace",
+  "exportStatus": "pending",
+  "requiredClips": [
+    "idle",
+    "run",
+    "jump_start",
+    "fall",
+    "land",
+    "attack",
+    "stomp",
+    "pickup",
+    "throw",
+    "ringout"
+  ],
+  "availableClips": [],
+  "assets": {
+    "sourceModel": {
+      "itemId": "7259f4fe2c45a2c0",
+      "path": "houses/code-platformer-AI/public/fighters/official-v1/red.glb",
+      "filename": "red.glb",
+      "checksum": "8bb1e80035faa11459070cb397b7642a8dcc37ff5b5c83e754471e176c4dba00",
+      "mimeType": "model/gltf-binary"
+    },
+    "runtimeManifest": {
+      "itemId": "92b2db7c946d4b89",
+      "path": "houses/code-platformer-AI/public/fighters/rigged-v1/red/runtime-manifest.json",
+      "filename": "runtime-manifest.json",
+      "checksum": "b3ad31d17530782bcd5fc4ae6c9e558dda8a0b2e95c4ed8917d29ae66106b4ca",
+      "mimeType": "application/json; charset=utf-8"
+    },
+    "runtimeGlb": null,
+    "textures": [],
+    "motionClips": {}
+  }
+}

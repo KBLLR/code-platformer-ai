@@ -19,6 +19,11 @@
         "animationSetVersion": "pending-rigging-palace-v1",
         "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
       },
+      "distribution": {
+        "releaseManifestItemId": "c91fb0a6ed74b8e7",
+        "assetPackVersion": "toybox-fighters-v1",
+        "snapshotRoot": "/fighters/distribution-v1/blue"
+      },
       "unlockRule": { "type": "starter" },
       "weightClass": "medium",
       "itemAffinity": "neutral",
@@ -55,6 +60,11 @@
         "exportStatus": "pending",
         "animationSetVersion": "pending-rigging-palace-v1",
         "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
+      },
+      "distribution": {
+        "releaseManifestItemId": "ceb6e544e1e06c3c",
+        "assetPackVersion": "toybox-fighters-v1",
+        "snapshotRoot": "/fighters/distribution-v1/red"
       },
       "unlockRule": { "type": "starter" },
       "weightClass": "heavy",
@@ -93,6 +103,11 @@
         "animationSetVersion": "pending-rigging-palace-v1",
         "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
       },
+      "distribution": {
+        "releaseManifestItemId": "e532305729e3ca38",
+        "assetPackVersion": "toybox-fighters-v1",
+        "snapshotRoot": "/fighters/distribution-v1/pink"
+      },
       "unlockRule": { "type": "complete_survival", "target": 1 },
       "weightClass": "light",
       "itemAffinity": "recovery",
@@ -129,6 +144,11 @@
         "exportStatus": "pending",
         "animationSetVersion": "pending-rigging-palace-v1",
         "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
+      },
+      "distribution": {
+        "releaseManifestItemId": "9089154a4b5bd734",
+        "assetPackVersion": "toybox-fighters-v1",
+        "snapshotRoot": "/fighters/distribution-v1/black"
       },
       "unlockRule": { "type": "total_ringouts", "target": 10 },
       "weightClass": "medium",
