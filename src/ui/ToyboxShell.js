@@ -244,6 +244,8 @@ export class ToyboxShell {
   constructor(container, callbacks) {
     this.container = container;
     this.callbacks = callbacks;
+    this.shellMarkup = "";
+    this.hudMarkup = "";
     this.shellEl = document.createElement("div");
     this.shellEl.className = "toybox-shell";
     this.hudEl = document.createElement("div");
@@ -275,7 +277,7 @@ export class ToyboxShell {
     if (state.activeTab === "challenges") tabMarkup = renderChallengesTab(state);
     if (state.activeTab === "settings") tabMarkup = renderSettingsTab(state);
 
-    this.shellEl.innerHTML = `
+    const markup = `
       <div class="toybox-shell__frame">
         <header class="toybox-shell__header">
           <div class="toybox-brand">
@@ -298,6 +300,11 @@ export class ToyboxShell {
         ${tabMarkup}
       </div>
     `;
+
+    if (markup !== this.shellMarkup) {
+      this.shellEl.innerHTML = markup;
+      this.shellMarkup = markup;
+    }
   }
 
   renderHud(snapshot, state) {
@@ -312,7 +319,7 @@ export class ToyboxShell {
       || human.x > snapshot.stage.blastZone.right - 3
       || human.y < snapshot.hazardFloor + 4;
 
-    this.hudEl.innerHTML = `
+    const markup = `
       <div class="toybox-hud__top">
         <div class="toybox-hud-chip">
           <span>${snapshot.mode.displayName}</span>
@@ -364,5 +371,10 @@ export class ToyboxShell {
         </div>
       ` : ""}
     `;
+
+    if (markup !== this.hudMarkup) {
+      this.hudEl.innerHTML = markup;
+      this.hudMarkup = markup;
+    }
   }
 }
