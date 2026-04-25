@@ -1,15 +1,32 @@
 {
   "fighterId": "pink",
-  "producerHouse": "rigging-palace",
+  "producerHouse": "rigging-portal",
   "sourceModel": "/fighters/official-v1/pink.glb",
   "runtimeGlb": "/fighters/rigged-v1/pink/pink-runtime.glb",
-  "exportStatus": "pending",
-  "animationSetVersion": "pending-rigging-palace-v1",
-  "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"],
-  "availableClips": [],
-  "notes": [
-    "Official Tencent source mesh mirrored into Toybox Arena.",
-    "Rigging Palace intake exists for pink; animated runtime export is not published yet.",
-    "Toybox Arena uses procedural animation fallback until this manifest is marked ready."
+  "exportStatus": "ready",
+  "animationSetVersion": "warehouse-20260425034849",
+  "requiredClips": [
+    "idle",
+    "run",
+    "jump_start",
+    "fall",
+    "land",
+    "attack",
+    "stomp",
+    "pickup",
+    "throw",
+    "ringout"
+  ],
+  "availableClips": [
+    "idle",
+    "run",
+    "jump_start",
+    "fall",
+    "land",
+    "attack",
+    "stomp",
+    "pickup",
+    "throw",
+    "ringout"
   ]
 }

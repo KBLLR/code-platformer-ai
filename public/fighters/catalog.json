@@ -10,13 +10,13 @@
       "mirroredSourceFile": "/fighters/official-v1/blue.glb",
       "mirroredRuntimeFile": "/fighters/rigged-v1/blue/blue-runtime.glb",
       "provenancePath": "/Users/davidcaballero/Library/CloudStorage/GoogleDrive-thegeneralist.ai@gmail.com/My Drive/Assets/3d-generated-assets/tencent-hunyuen3/3-1/code-platformer-reboot/blue.glb",
-      "animationSetVersion": "pending-rigging-palace-v1",
+      "animationSetVersion": "pending-rigging-portal-v1",
       "runtimeRig": {
-        "producerHouse": "rigging-palace",
+        "producerHouse": "rigging-portal",
         "manifestFile": "/fighters/rigged-v1/blue/runtime-manifest.json",
         "runtimeGlb": "/fighters/rigged-v1/blue/blue-runtime.glb",
         "exportStatus": "pending",
-        "animationSetVersion": "pending-rigging-palace-v1",
+        "animationSetVersion": "pending-rigging-portal-v1",
         "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
       },
       "distribution": {
@@ -52,13 +52,13 @@
       "mirroredSourceFile": "/fighters/official-v1/red.glb",
       "mirroredRuntimeFile": "/fighters/rigged-v1/red/red-runtime.glb",
       "provenancePath": "/Users/davidcaballero/Library/CloudStorage/GoogleDrive-thegeneralist.ai@gmail.com/My Drive/Assets/3d-generated-assets/tencent-hunyuen3/3-1/code-platformer-reboot/red.glb",
-      "animationSetVersion": "pending-rigging-palace-v1",
+      "animationSetVersion": "pending-rigging-portal-v1",
       "runtimeRig": {
-        "producerHouse": "rigging-palace",
+        "producerHouse": "rigging-portal",
         "manifestFile": "/fighters/rigged-v1/red/runtime-manifest.json",
         "runtimeGlb": "/fighters/rigged-v1/red/red-runtime.glb",
         "exportStatus": "pending",
-        "animationSetVersion": "pending-rigging-palace-v1",
+        "animationSetVersion": "pending-rigging-portal-v1",
         "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
       },
       "distribution": {
@@ -94,13 +94,13 @@
       "mirroredSourceFile": "/fighters/official-v1/pink.glb",
       "mirroredRuntimeFile": "/fighters/rigged-v1/pink/pink-runtime.glb",
       "provenancePath": "/Users/davidcaballero/Library/CloudStorage/GoogleDrive-thegeneralist.ai@gmail.com/My Drive/Assets/3d-generated-assets/tencent-hunyuen3/3-1/code-platformer-reboot/pink.glb",
-      "animationSetVersion": "pending-rigging-palace-v1",
+      "animationSetVersion": "pending-rigging-portal-v1",
       "runtimeRig": {
-        "producerHouse": "rigging-palace",
+        "producerHouse": "rigging-portal",
         "manifestFile": "/fighters/rigged-v1/pink/runtime-manifest.json",
         "runtimeGlb": "/fighters/rigged-v1/pink/pink-runtime.glb",
         "exportStatus": "pending",
-        "animationSetVersion": "pending-rigging-palace-v1",
+        "animationSetVersion": "pending-rigging-portal-v1",
         "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
       },
       "distribution": {
@@ -136,13 +136,13 @@
       "mirroredSourceFile": "/fighters/official-v1/black.glb",
       "mirroredRuntimeFile": "/fighters/rigged-v1/black/black-runtime.glb",
       "provenancePath": "/Users/davidcaballero/Library/CloudStorage/GoogleDrive-thegeneralist.ai@gmail.com/My Drive/Assets/3d-generated-assets/tencent-hunyuen3/3-1/code-platformer-reboot/black.glb",
-      "animationSetVersion": "pending-rigging-palace-v1",
+      "animationSetVersion": "pending-rigging-portal-v1",
       "runtimeRig": {
-        "producerHouse": "rigging-palace",
+        "producerHouse": "rigging-portal",
         "manifestFile": "/fighters/rigged-v1/black/runtime-manifest.json",
         "runtimeGlb": "/fighters/rigged-v1/black/black-runtime.glb",
         "exportStatus": "pending",
-        "animationSetVersion": "pending-rigging-palace-v1",
+        "animationSetVersion": "pending-rigging-portal-v1",
         "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
       },
       "distribution": {
