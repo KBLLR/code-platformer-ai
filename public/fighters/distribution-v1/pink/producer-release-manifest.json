@@ -30,16 +30,16 @@
     "ringout"
   ],
   "upstreamRiggingReceipt": {
-    "receiptPath": "houses/rigging-portal/exports/publish-receipts/2026-04-25T03-49-16-480Z-warehouse-pink.json",
+    "receiptPath": "houses/rigging-portal/exports/publish-receipts/2026-04-25T03-57-10-208Z-warehouse-pink.json",
     "characterId": "pink",
-    "releaseManifestItemId": "7a4aa956155519fc",
+    "releaseManifestItemId": "d10e54d2147135d1",
     "sourceId": "modal-s3-rigging",
     "category": "rigged-character"
   },
   "assets": {
     "sourceModel": {
-      "itemId": "20f603263460660b",
-      "path": "houses/rigging-portal/releases/pink/warehouse-20260425034849/model.glb",
+      "itemId": "33c30af449cc13cd",
+      "path": "houses/rigging-portal/releases/pink/warehouse-20260425035642/model.glb",
       "filename": "model.glb",
       "checksum": "872027a5256703d71644028c058d40dd05def591285fe10c6b945810fc1c1b47",
       "mimeType": "model/gltf-binary"
@@ -48,12 +48,12 @@
       "itemId": "71c89c0625efd1fa",
       "path": "houses/code-platformer-AI/public/fighters/rigged-v1/pink/runtime-manifest.json",
       "filename": "runtime-manifest.json",
-      "checksum": "6a22ab18fa8316c2fda6a618c4f8c28431a2cf3e42f306fbb2f83b06eb063c6a",
+      "checksum": "0b4a58b851c497458bf77c78eb6402db98e6ced6f24b41a53b2d934663a390cc",
       "mimeType": "application/json; charset=utf-8"
     },
     "runtimeGlb": {
-      "itemId": "20f603263460660b",
-      "path": "houses/rigging-portal/releases/pink/warehouse-20260425034849/model.glb",
+      "itemId": "33c30af449cc13cd",
+      "path": "houses/rigging-portal/releases/pink/warehouse-20260425035642/model.glb",
       "filename": "model.glb",
       "checksum": "872027a5256703d71644028c058d40dd05def591285fe10c6b945810fc1c1b47",
       "mimeType": "model/gltf-binary"

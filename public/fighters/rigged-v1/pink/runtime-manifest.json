@@ -4,7 +4,7 @@
   "sourceModel": "/fighters/official-v1/pink.glb",
   "runtimeGlb": "/fighters/rigged-v1/pink/pink-runtime.glb",
   "exportStatus": "ready",
-  "animationSetVersion": "warehouse-20260425034849",
+  "animationSetVersion": "warehouse-20260425035642",
   "requiredClips": [
     "idle",
     "run",

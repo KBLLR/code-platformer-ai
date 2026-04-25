@@ -4,7 +4,7 @@
   "sourceModel": "/fighters/official-v1/red.glb",
   "runtimeGlb": "/fighters/rigged-v1/red/red-runtime.glb",
   "exportStatus": "ready",
-  "animationSetVersion": "warehouse-20260425034916",
+  "animationSetVersion": "warehouse-20260425035710",
   "requiredClips": [
     "idle",
     "run",
