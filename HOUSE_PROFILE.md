@@ -9,7 +9,7 @@
 
 ## Mission
 
-Build and ship a browser-native 2.5D platform battler with a clean Three.js runtime, local-first content manifests, and a fighter pipeline that consumes approved rigged exports from `rigging-palace`.
+Build and ship a browser-native 2.5D platform battler with a clean Three.js runtime, local-first content manifests, and a fighter pipeline that consumes approved rigged exports from `rigging-portal`.
 
 ## Active Runtime
 
@@ -29,5 +29,5 @@ Build and ship a browser-native 2.5D platform battler with a clean Three.js runt
 
 - No active battle-royale product path
 - No live dependency on event bus for local match play
-- `rigging-palace` owns rigged export production
+- `rigging-portal` owns rigged export production
 - Tencent `black/blue/pink/red.glb` files remain the source-of-truth starter roster meshes

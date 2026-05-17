@@ -10,7 +10,7 @@
 - Items: movement boost, temporary shield, bomb, shell projectile, spring trap
 - Input: keyboard + gamepad parity
 - Roster: official Tencent starter source meshes `blue`, `red`, `pink`, `black`
-- Animation pipeline: `rigging-palace` owns rigged runtime exports; Toybox falls back to procedural playback until those exports are ready
+- Animation pipeline: `rigging-portal` owns rigged runtime exports; Toybox falls back to procedural playback until those exports are ready
 
 ## Runtime
 
@@ -47,4 +47,4 @@ npm run build
 
 - The old battle-royale runtime is no longer the product path.
 - If a rigged export is missing or stale, the runtime uses the Tencent source mesh plus procedural animation clips as a temporary fallback.
-- If `rigging-palace` publishes ready exports later, Toybox will prefer the rigged runtime manifest automatically.
+- If `rigging-portal` publishes ready exports later, Toybox will prefer the rigged runtime manifest automatically.

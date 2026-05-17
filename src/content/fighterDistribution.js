@@ -6,10 +6,29 @@ import {
 } from "./contracts.js";
 
 const DEFAULT_WAREHOUSE_URL = "http://127.0.0.1:5202";
+const FIGHTER_ASSET_SOURCES = new Set(["auto", "warehouse", "snapshot", "source-mirror"]);
 
-let warehouseClient = null;
+const warehouseClients = new Map();
 
-function warehouseBaseUrl() {
+export function normalizeFighterRuntimeSettings(settings = {}) {
+  const fighterAssetSource = FIGHTER_ASSET_SOURCES.has(settings?.fighterAssetSource)
+    ? settings.fighterAssetSource
+    : "auto";
+  const warehouseUrlOverride = typeof settings?.warehouseUrlOverride === "string"
+    ? settings.warehouseUrlOverride.trim()
+    : "";
+
+  return {
+    fighterAssetSource,
+    warehouseUrlOverride,
+  };
+}
+
+function warehouseBaseUrl(runtimeSettings) {
+  if (runtimeSettings.warehouseUrlOverride) {
+    return runtimeSettings.warehouseUrlOverride;
+  }
+
   const configured = import.meta.env.VITE_WAREHOUSE_URL;
   if (typeof configured === "string" && configured.trim().length > 0) {
     return configured.trim();
@@ -17,13 +36,12 @@ function warehouseBaseUrl() {
   return DEFAULT_WAREHOUSE_URL;
 }
 
-function getWarehouseClient() {
-  if (!warehouseClient) {
-    warehouseClient = createWarehouseClient({
-      baseUrl: warehouseBaseUrl(),
-    });
+function getWarehouseClient(runtimeSettings) {
+  const baseUrl = warehouseBaseUrl(runtimeSettings);
+  if (!warehouseClients.has(baseUrl)) {
+    warehouseClients.set(baseUrl, createWarehouseClient({ baseUrl }));
   }
-  return warehouseClient;
+  return warehouseClients.get(baseUrl);
 }
 
 async function loadJson(url) {
@@ -50,11 +68,11 @@ function buildFallbackRuntimeManifest(fighterDefinition) {
   );
 }
 
-async function resolveWarehouseDistribution(fighterDefinition) {
+async function resolveWarehouseDistribution(fighterDefinition, runtimeSettings) {
   const releaseManifestItemId = fighterDefinition.distribution?.releaseManifestItemId;
   if (!releaseManifestItemId) return null;
 
-  const client = getWarehouseClient();
+  const client = getWarehouseClient(runtimeSettings);
   const releaseManifestUrl = await client.resolveUrl(releaseManifestItemId);
   const releaseManifest = validateProducerReleaseManifest(
     await loadJson(releaseManifestUrl),
@@ -124,11 +142,27 @@ async function resolveSourceMirrorDistribution(fighterDefinition) {
   };
 }
 
-export async function resolveFighterDistributionLayers(fighterDefinition) {
+function applySourcePreference(layers, fighterAssetSource) {
+  if (fighterAssetSource === "auto") return layers;
+
+  const preferred = [];
+  const fallback = [];
+  for (const layer of layers) {
+    if (layer.source === fighterAssetSource) {
+      preferred.push(layer);
+      continue;
+    }
+    fallback.push(layer);
+  }
+  return [...preferred, ...fallback];
+}
+
+export async function resolveFighterDistributionLayers(fighterDefinition, runtimeSettings = {}) {
+  const normalizedSettings = normalizeFighterRuntimeSettings(runtimeSettings);
   const layers = [];
 
   try {
-    const warehouseDistribution = await resolveWarehouseDistribution(fighterDefinition);
+    const warehouseDistribution = await resolveWarehouseDistribution(fighterDefinition, normalizedSettings);
     if (warehouseDistribution) {
       layers.push(warehouseDistribution);
     }
@@ -150,10 +184,10 @@ export async function resolveFighterDistributionLayers(fighterDefinition) {
   }
 
   layers.push(await resolveSourceMirrorDistribution(fighterDefinition));
-  return layers;
+  return applySourcePreference(layers, normalizedSettings.fighterAssetSource);
 }
 
-export async function resolveFighterDistribution(fighterDefinition) {
-  const layers = await resolveFighterDistributionLayers(fighterDefinition);
+export async function resolveFighterDistribution(fighterDefinition, runtimeSettings = {}) {
+  const layers = await resolveFighterDistributionLayers(fighterDefinition, runtimeSettings);
   return layers[0];
 }

@@ -1,5 +1,13 @@
 import { getBindingSummary } from "../input/ActionMap.js";
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function unlockCopy(fighter) {
   if (fighter.unlockRule.type === "starter") return "Available at first boot";
   if (fighter.unlockRule.type === "complete_survival") return `Unlock: complete ${fighter.unlockRule.target} Survival match`;
@@ -194,6 +202,7 @@ function renderChallengesTab(state) {
 function renderSettingsTab(state) {
   const bindings = getBindingSummary();
   const { settings } = state.profile;
+  const warehouseUrlOverride = escapeHtml(settings.warehouseUrlOverride ?? "");
   return `
     <section class="toybox-panel">
       <div class="toybox-panel__header">
@@ -235,6 +244,29 @@ function renderSettingsTab(state) {
             <span>Screen Shake</span>
           </label>
         </article>
+        <article class="toybox-card">
+          <div class="toybox-card__title">Fighter Runtime</div>
+          <div class="toybox-card__body">Choose which fighter delivery layer Toybox should try first. Changes apply to shell previews immediately and to new matches after the next start.</div>
+          <label class="toybox-setting-input">
+            <span>Source Priority</span>
+            <select data-setting="fighterAssetSource">
+              <option value="auto" ${settings.fighterAssetSource === "auto" ? "selected" : ""}>Auto: warehouse, snapshot, source mirror</option>
+              <option value="warehouse" ${settings.fighterAssetSource === "warehouse" ? "selected" : ""}>Prefer warehouse</option>
+              <option value="snapshot" ${settings.fighterAssetSource === "snapshot" ? "selected" : ""}>Prefer local snapshot</option>
+              <option value="source-mirror" ${settings.fighterAssetSource === "source-mirror" ? "selected" : ""}>Prefer source mirror</option>
+            </select>
+          </label>
+          <label class="toybox-setting-input">
+            <span>Warehouse URL Override</span>
+            <input
+              type="text"
+              value="${warehouseUrlOverride}"
+              placeholder="Empty uses VITE_WAREHOUSE_URL or http://127.0.0.1:5202"
+              data-setting="warehouseUrlOverride"
+            />
+          </label>
+          <div class="toybox-card__meta">Leave the URL empty to keep the env/default warehouse endpoint. Current matches keep their already loaded fighter assets.</div>
+        </article>
       </div>
     </section>
   `;
@@ -263,7 +295,12 @@ export class ToyboxShell {
     this.container.addEventListener("change", (event) => {
       const field = event.target.closest("[data-setting]");
       if (!field) return;
-      const value = field.type === "checkbox" ? field.checked : Number(field.value);
+      let value = field.value;
+      if (field.type === "checkbox") {
+        value = field.checked;
+      } else if (field.type === "range" || field.type === "number") {
+        value = Number(field.value);
+      }
       this.callbacks.onSetting?.(field.dataset.setting, value);
     });
   }

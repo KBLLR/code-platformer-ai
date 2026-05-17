@@ -68,6 +68,14 @@ export class ToyboxRenderer {
     this.previewPresentation = null;
   }
 
+  setRuntimeSettings(settings) {
+    const changed = this.assets.setRuntimeSettings(settings);
+    if (changed) {
+      this.previewKey = "";
+    }
+    return changed;
+  }
+
   async init() {
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,

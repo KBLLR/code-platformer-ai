@@ -3,7 +3,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { REQUIRED_RUNTIME_CLIPS } from "../content/contracts.js";
-import { resolveFighterDistributionLayers } from "../content/fighterDistribution.js";
+import { normalizeFighterRuntimeSettings, resolveFighterDistributionLayers } from "../content/fighterDistribution.js";
 
 const FIGHTER_COLORS = {
   blue: "#4f7cff",
@@ -327,6 +327,17 @@ export class GLTFAssetLoader {
     this.loader = new GLTFLoader();
     this.loader.setMeshoptDecoder(MeshoptDecoder);
     this.templateCache = new Map();
+    this.runtimeSettings = normalizeFighterRuntimeSettings();
+  }
+
+  setRuntimeSettings(settings) {
+    const nextSettings = normalizeFighterRuntimeSettings(settings);
+    const changed = nextSettings.fighterAssetSource !== this.runtimeSettings.fighterAssetSource
+      || nextSettings.warehouseUrlOverride !== this.runtimeSettings.warehouseUrlOverride;
+    if (!changed) return false;
+    this.runtimeSettings = nextSettings;
+    this.templateCache.clear();
+    return true;
   }
 
   async createFighterInstance(fighterDefinition) {
@@ -362,7 +373,7 @@ export class GLTFAssetLoader {
   }
 
   async _loadTemplate(fighterDefinition) {
-    const distributionLayers = await resolveFighterDistributionLayers(fighterDefinition);
+    const distributionLayers = await resolveFighterDistributionLayers(fighterDefinition, this.runtimeSettings);
     let fallbackRuntimeManifest = distributionLayers.at(-1)?.runtimeManifest ?? distributionLayers[0]?.runtimeManifest ?? null;
 
     for (const layer of distributionLayers) {

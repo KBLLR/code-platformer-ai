@@ -447,6 +447,8 @@ export function createDefaultUnlockProfile() {
       reducedMotion: false,
       gamepadPrompts: true,
       screenShake: true,
+      fighterAssetSource: "auto",
+      warehouseUrlOverride: "",
     },
   };
 }
