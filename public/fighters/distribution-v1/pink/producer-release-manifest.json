@@ -3,8 +3,8 @@
   "fighterId": "pink",
   "consumerHouse": "code-platformer-ai",
   "assetPackVersion": "toybox-fighters-v1",
-  "producerHouse": "rigging-palace",
-  "exportStatus": "pending",
+  "producerHouse": "rigging-portal",
+  "exportStatus": "ready",
   "requiredClips": [
     "idle",
     "run",
@@ -17,23 +17,47 @@
     "throw",
     "ringout"
   ],
-  "availableClips": [],
+  "availableClips": [
+    "idle",
+    "run",
+    "jump_start",
+    "fall",
+    "land",
+    "attack",
+    "stomp",
+    "pickup",
+    "throw",
+    "ringout"
+  ],
+  "upstreamRiggingReceipt": {
+    "receiptPath": "houses/rigging-portal/exports/publish-receipts/2026-04-25T03-57-10-208Z-warehouse-pink.json",
+    "characterId": "pink",
+    "releaseManifestItemId": "d10e54d2147135d1",
+    "sourceId": "modal-s3-rigging",
+    "category": "rigged-character"
+  },
   "assets": {
     "sourceModel": {
-      "itemId": "25e0d879d0be9fdd",
-      "path": "houses/code-platformer-AI/public/fighters/official-v1/pink.glb",
-      "filename": "pink.glb",
-      "checksum": "0120083e0984da12fc3486f44e4005904527b518b14e0bdae23754803877f7bd",
+      "itemId": "33c30af449cc13cd",
+      "path": "houses/rigging-portal/releases/pink/warehouse-20260425035642/model.glb",
+      "filename": "model.glb",
+      "checksum": "872027a5256703d71644028c058d40dd05def591285fe10c6b945810fc1c1b47",
       "mimeType": "model/gltf-binary"
     },
     "runtimeManifest": {
       "itemId": "71c89c0625efd1fa",
       "path": "houses/code-platformer-AI/public/fighters/rigged-v1/pink/runtime-manifest.json",
       "filename": "runtime-manifest.json",
-      "checksum": "5575706af94469f81d92d329d4ea49df81be2ad75e70514ea4c076ced8d62661",
+      "checksum": "0b4a58b851c497458bf77c78eb6402db98e6ced6f24b41a53b2d934663a390cc",
       "mimeType": "application/json; charset=utf-8"
     },
-    "runtimeGlb": null,
+    "runtimeGlb": {
+      "itemId": "33c30af449cc13cd",
+      "path": "houses/rigging-portal/releases/pink/warehouse-20260425035642/model.glb",
+      "filename": "model.glb",
+      "checksum": "872027a5256703d71644028c058d40dd05def591285fe10c6b945810fc1c1b47",
+      "mimeType": "model/gltf-binary"
+    },
     "textures": [],
     "motionClips": {}
   }

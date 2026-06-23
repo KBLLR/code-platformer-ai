@@ -15,10 +15,11 @@ export class ToyboxArenaApp {
     this.input = new ActionMap(window);
     this.shell = new ToyboxShell(uiContainer, {
       onAction: (action, value) => void this._handleAction(action, value),
-      onSetting: (setting, value) => this._handleSetting(setting, value),
+      onSetting: (setting, value) => void this._handleSetting(setting, value),
     });
     this.content = null;
     this.profile = loadProfile();
+    this.renderer.setRuntimeSettings(this.profile.settings);
     this.unlockState = null;
     this.activeTab = "play";
     this.selectedModeId = "tdm";
@@ -195,9 +196,19 @@ export class ToyboxArenaApp {
     }
   }
 
-  _handleSetting(setting, value) {
-    this.profile.settings[setting] = value;
+  async _handleSetting(setting, value) {
+    const nextValue = setting === "warehouseUrlOverride" && typeof value === "string"
+      ? value.trim()
+      : value;
+    this.profile.settings[setting] = nextValue;
     saveProfile(this.profile);
+
+    if (setting === "fighterAssetSource" || setting === "warehouseUrlOverride") {
+      this.renderer.setRuntimeSettings(this.profile.settings);
+      if (!this.match) {
+        await this._refreshShell();
+      }
+    }
   }
 
   async _startMatch() {

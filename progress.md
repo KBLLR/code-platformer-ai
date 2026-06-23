@@ -18,20 +18,20 @@ Original prompt: make the world generator integration real and production ready 
 - 2026-03-08: screenshot/browser automation verification was attempted but blocked because the shared `develop-web-game` Playwright client is missing the `playwright` package in its own environment, and the built-in Playwright browser tool could not launch due to an existing Chrome MCP session on this machine.
 - 2026-03-08: Claude handoff:
   - pushed work is being split into coherent commits for world-pack loading, agent gallery repair, and rigging pipeline upgrades.
-  - loose visual artifacts like `code-platformer-worldpack.png` and `rigging-palace-*.png` are intentionally not part of the product commits; if they matter on this machine, check the local git stash after pull/teleport.
+  - loose visual artifacts like `code-platformer-worldpack.png` and `rigging-portal-*.png` are intentionally not part of the product commits; if they matter on this machine, check the local git stash after pull/teleport.
 - 2026-03-08: fixed a real boot bug in `src/main.js` by handling the already-loaded DOM case instead of waiting only on `DOMContentLoaded`.
 - 2026-03-08: aligned `src/A2AClient.js` with the canonical Core-X Event Bus base URL (`8085`) and message shape (`context.share` over `/events`).
 - 2026-03-08: root docs now carry the cross-ecosystem handoff for the next Claude session:
   - `/Users/davidcaballero/core-x-kbllr_0/core-x/docs/audit/2026-03-08-ecosystem-change-audit.md`
-  - `/Users/davidcaballero/core-x-kbllr_0/core-x/docs/ops/2026-03-08-claude-rigging-palace-handoff.md`
+  - `/Users/davidcaballero/core-x-kbllr_0/core-x/docs/ops/2026-03-08-claude-rigging-portal-handoff.md`
 - 2026-03-08: next Claude scope is explicit:
   - preserve this repo's world-pack consumer path and gallery/A2A fixes
   - use `rigging-pipeline/` only as the migration source for Blender MCP + rig/export code
-  - move authoritative rigging ownership into `/Users/davidcaballero/core-x-kbllr_0/houses/rigging-palace`
+  - move authoritative rigging ownership into `/Users/davidcaballero/core-x-kbllr_0/houses/rigging-portal`
   - do not connect or symlink to `emergence-lab`
   - make this repo consumer-only for approved rigged character assets
-- 2026-03-08: rigging-pipeline/ removed — all rigging executor code migrated to rigging-palace.
-  - BlenderMCPClient, RiggingPipeline, gltf-skin-fix, process_character.py, enhance_rig.py now live in rigging-palace/scripts/lib/ and studio/blender/
+- 2026-03-08: rigging-pipeline/ removed — all rigging executor code migrated to rigging-portal.
+  - BlenderMCPClient, RiggingPipeline, gltf-skin-fix, process_character.py, enhance_rig.py now live in rigging-portal/scripts/lib/ and studio/blender/
   - code-platformer-AI is now consumer-only for character assets (CharacterLoader.js + WorldPackAdapter.js)
   - npm run build verified clean after removal
 - 2026-03-08: world-pack runtime pass:
@@ -121,7 +121,7 @@ Original prompt: make the world generator integration real and production ready 
     - Tencent source path
     - mirrored source asset path
     - rigged runtime export path
-    - rigging-palace runtime manifest path
+    - rigging-portal runtime manifest path
     - animation set version
   - added per-fighter runtime manifests under `public/fighters/rigged-v1/*/runtime-manifest.json`
   - `src/render/GLTFAssetLoader.js` now prefers rigged runtime manifests and falls back to procedural animation clips when palace exports are still pending
@@ -136,6 +136,6 @@ Original prompt: make the world generator integration real and production ready 
     - browser match screenshot: `output/web-game/match-phase2-direct.png`
     - browser live match state dump confirms active animation states (`land`, `pickup`, `fall`)
 - TODO next:
-  - finish the blocked `rigging-palace` export path for `blue`, `red`, `pink`, `black`; current runtime manifests remain `pending`
+  - finish the blocked `rigging-portal` export path for `blue`, `red`, `pink`, `black`; current runtime manifests remain `pending`
   - once palace exports are available, promote manifests to `ready` and replace procedural fallback with real clip playback
   - split the main bundle if chunk size matters for production

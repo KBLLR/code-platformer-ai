@@ -3,9 +3,10 @@
   "name": "Toybox Arena",
   "version": "2.0.0",
   "status": "active",
+  "tier": "house",
   "purpose": {
     "domain": "gaming",
-    "mission": "Ship a browser-native 2.5D toybox platform battler with offline bots, local-first content, and rigged fighter exports from rigging-palace.",
+    "mission": "Ship a browser-native 2.5D toybox platform battler with offline bots, local-first content, and rigged fighter exports from rigging-portal.",
     "target_users": [
       "game developers",
       "creative technologists",
@@ -67,18 +68,24 @@
       "animation-runtime",
       "ui-development"
     ],
-    "input_types": ["file", "image", "text"],
-    "output_types": ["3d", "structured", "text"],
+    "input_types": [
+      "file",
+      "image",
+      "text"
+    ],
+    "output_types": [
+      "3d",
+      "structured",
+      "text"
+    ],
     "streaming": true,
     "tool_calling": true
   },
   "dependencies": {
-    "services": [
-      "rigging-palace"
-    ],
+    "services": [],
     "models": [],
     "houses": [
-      "rigging-palace"
+      "rigging-portal"
     ],
     "mcp_servers": []
   },

@@ -65,7 +65,7 @@
       "type": "tool",
       "status": "active",
       "name": "Rigged Runtime Contract",
-      "description": "Validate the per-fighter runtime manifest produced by rigging-palace",
+      "description": "Validate the per-fighter runtime manifest produced by rigging-portal",
       "category": "asset-pipeline",
       "entry_point": "./src/interfaces/RiggedRuntimeFighter.js"
     }

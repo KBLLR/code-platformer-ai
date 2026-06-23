@@ -3,8 +3,8 @@
   "fighterId": "black",
   "consumerHouse": "code-platformer-ai",
   "assetPackVersion": "toybox-fighters-v1",
-  "producerHouse": "rigging-palace",
-  "exportStatus": "pending",
+  "producerHouse": "rigging-portal",
+  "exportStatus": "ready",
   "requiredClips": [
     "idle",
     "run",
@@ -17,23 +17,47 @@
     "throw",
     "ringout"
   ],
-  "availableClips": [],
+  "availableClips": [
+    "idle",
+    "run",
+    "jump_start",
+    "fall",
+    "land",
+    "attack",
+    "stomp",
+    "pickup",
+    "throw",
+    "ringout"
+  ],
+  "upstreamRiggingReceipt": {
+    "receiptPath": "houses/rigging-portal/exports/publish-receipts/2026-04-25T03-56-13-709Z-warehouse-black.json",
+    "characterId": "black",
+    "releaseManifestItemId": "6c48529cce87e2c3",
+    "sourceId": "modal-s3-rigging",
+    "category": "rigged-character"
+  },
   "assets": {
     "sourceModel": {
-      "itemId": "c40c970377139aef",
-      "path": "houses/code-platformer-AI/public/fighters/official-v1/black.glb",
-      "filename": "black.glb",
-      "checksum": "94f31e1b6fec30a25868adebda6aeb1ff04ce865b3ee21d3d1e319b183f85dd7",
+      "itemId": "433c30203fab7234",
+      "path": "houses/rigging-portal/releases/black/warehouse-20260425035545/model.glb",
+      "filename": "model.glb",
+      "checksum": "2ac9fe9c9a576342ac65a583cdbc9b378820b53013792b5ac2446b0346b586af",
       "mimeType": "model/gltf-binary"
     },
     "runtimeManifest": {
       "itemId": "de39c218048a38db",
       "path": "houses/code-platformer-AI/public/fighters/rigged-v1/black/runtime-manifest.json",
       "filename": "runtime-manifest.json",
-      "checksum": "774cc50c21a8b6b623d97a56acafadedc7cfd3d2771b91b4f42b01eb7eccf6bc",
+      "checksum": "507d1b239a2c450c619b0f29f1c07fe13daaadb5d39841e23b2f9d49b4a4c0c4",
       "mimeType": "application/json; charset=utf-8"
     },
-    "runtimeGlb": null,
+    "runtimeGlb": {
+      "itemId": "433c30203fab7234",
+      "path": "houses/rigging-portal/releases/black/warehouse-20260425035545/model.glb",
+      "filename": "model.glb",
+      "checksum": "2ac9fe9c9a576342ac65a583cdbc9b378820b53013792b5ac2446b0346b586af",
+      "mimeType": "model/gltf-binary"
+    },
     "textures": [],
     "motionClips": {}
   }
