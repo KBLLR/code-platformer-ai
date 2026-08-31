@@ -10,18 +10,37 @@
  * can consume an identical contract.
  */
 
-/** One-shot actions the character can perform. */
+/**
+ * One-shot actions the *control contract* supports.
+ *
+ * This is the input vocabulary and is independent of whether a given character
+ * has a clip for it. `kick` and `push` are bound and recognized even though no
+ * character in either repository currently animates them.
+ */
 export const ONE_SHOT_ACTIONS = ["jump", "punch", "kick", "push"] as const;
 export type OneShotAction = (typeof ONE_SHOT_ACTIONS)[number];
 
-/** Continuous locomotion states blended by movement magnitude. */
-export const LOCOMOTION_STATES = ["idle", "walk", "run"] as const;
+/** Continuous locomotion states blended by movement magnitude and sprint. */
+export const LOCOMOTION_STATES = ["idle", "walk", "run", "sprint"] as const;
 export type LocomotionState = (typeof LOCOMOTION_STATES)[number];
+
+/**
+ * Animation stages of a jump, in order.
+ *
+ * A jump is one logical action to the input layer but three clips on the
+ * character. Characters that only ship `jump` still work: the sequence uses
+ * whichever stages resolve.
+ */
+export const JUMP_STAGES = ["jump", "fall", "land"] as const;
+export type JumpStage = (typeof JUMP_STAGES)[number];
 
 /** Every clip the state machine can ask a character for. */
 export const SEMANTIC_MOTIONS = [
   ...LOCOMOTION_STATES,
-  ...ONE_SHOT_ACTIONS,
+  ...JUMP_STAGES,
+  "punch",
+  "kick",
+  "push",
 ] as const;
 export type SemanticMotion = (typeof SEMANTIC_MOTIONS)[number];
 

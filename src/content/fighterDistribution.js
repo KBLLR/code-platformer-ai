@@ -157,16 +157,52 @@ function applySourcePreference(layers, fighterAssetSource) {
   return [...preferred, ...fallback];
 }
 
-export async function resolveFighterDistributionLayers(fighterDefinition, runtimeSettings = {}) {
+/**
+ * Classify why a layer failed.
+ *
+ * A CORS rejection and an unsynced snapshot both surfaced as "no character"
+ * before, so a blocked warehouse fetch was indistinguishable from a missing
+ * file — and once the procedural capsules rendered, both looked like a
+ * successful load.
+ */
+function classifyLayerFailure(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  if (/cors|access-control|opaque|cross-origin/i.test(message)) {
+    return { outcome: "cors", detail: "blocked by CORS policy" };
+  }
+  if (/404|not found|enoent|missing/i.test(message)) {
+    return { outcome: "missing", detail: "not present" };
+  }
+  if (/schema|invalid|parse|json/i.test(message)) {
+    return { outcome: "invalid", detail: "failed validation" };
+  }
+  return { outcome: "unavailable", detail: message.slice(0, 120) };
+}
+
+/**
+ * Resolve layers and record why each one succeeded or failed.
+ *
+ * Additive: `resolveFighterDistributionLayers` keeps its existing contract and
+ * the warehouse → snapshot → source-mirror ordering is unchanged.
+ */
+export async function resolveFighterDistributionLayersWithDiagnostics(
+  fighterDefinition,
+  runtimeSettings = {},
+) {
   const normalizedSettings = normalizeFighterRuntimeSettings(runtimeSettings);
   const layers = [];
+  const diagnostics = [];
 
   try {
     const warehouseDistribution = await resolveWarehouseDistribution(fighterDefinition, normalizedSettings);
     if (warehouseDistribution) {
       layers.push(warehouseDistribution);
+      diagnostics.push({ layer: "warehouse", outcome: "success" });
+    } else {
+      diagnostics.push({ layer: "warehouse", outcome: "not-attempted", detail: "no release item" });
     }
   } catch (error) {
+    diagnostics.push({ layer: "warehouse", ...classifyLayerFailure(error) });
     console.warn(
       `[ToyboxArena] Warehouse resolution failed for ${fighterDefinition.id}: ${error instanceof Error ? error.message : String(error)}`,
     );
@@ -176,15 +212,36 @@ export async function resolveFighterDistributionLayers(fighterDefinition, runtim
     const snapshotDistribution = await resolveSnapshotDistribution(fighterDefinition);
     if (snapshotDistribution) {
       layers.push(snapshotDistribution);
+      diagnostics.push({ layer: "snapshot", outcome: "success" });
+    } else {
+      diagnostics.push({ layer: "snapshot", outcome: "not-attempted", detail: "no snapshotRoot" });
     }
   } catch (error) {
+    diagnostics.push({ layer: "snapshot", ...classifyLayerFailure(error) });
     console.warn(
       `[ToyboxArena] Snapshot fallback failed for ${fighterDefinition.id}: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 
-  layers.push(await resolveSourceMirrorDistribution(fighterDefinition));
-  return applySourcePreference(layers, normalizedSettings.fighterAssetSource);
+  try {
+    layers.push(await resolveSourceMirrorDistribution(fighterDefinition));
+    diagnostics.push({ layer: "source-mirror", outcome: "success" });
+  } catch (error) {
+    diagnostics.push({ layer: "source-mirror", ...classifyLayerFailure(error) });
+  }
+
+  return {
+    layers: applySourcePreference(layers, normalizedSettings.fighterAssetSource),
+    diagnostics,
+  };
+}
+
+export async function resolveFighterDistributionLayers(fighterDefinition, runtimeSettings = {}) {
+  const { layers } = await resolveFighterDistributionLayersWithDiagnostics(
+    fighterDefinition,
+    runtimeSettings,
+  );
+  return layers;
 }
 
 export async function resolveFighterDistribution(fighterDefinition, runtimeSettings = {}) {

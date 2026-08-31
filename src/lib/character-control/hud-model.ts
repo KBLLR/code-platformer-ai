@@ -20,11 +20,46 @@ export interface HudRow {
   readonly tone: "normal" | "warn" | "good";
 }
 
+/** Which distribution layer the loaded character actually came from. */
+export type CharacterSource =
+  | "warehouse"
+  | "snapshot"
+  | "source-mirror"
+  | "procedural-fallback";
+
+export type LayerOutcome =
+  | "success"
+  | "missing"
+  | "cors"
+  | "unavailable"
+  | "invalid"
+  | "not-attempted";
+
+/**
+ * Why each distribution layer succeeded or failed.
+ *
+ * Recorded because a CORS or sync failure previously looked identical to a
+ * successful load: the capsules rendered and nothing said the real character
+ * had never arrived.
+ */
+export interface DistributionDiagnostics {
+  readonly source: CharacterSource;
+  readonly layers: ReadonlyArray<{
+    readonly layer: "warehouse" | "snapshot" | "source-mirror";
+    readonly outcome: LayerOutcome;
+    readonly detail?: string;
+  }>;
+  readonly fallbackUsed: boolean;
+  readonly fallbackReason?: string;
+}
+
 export interface HudModel {
   readonly rows: readonly HudRow[];
   readonly missingMotions: readonly SemanticMotion[];
+  readonly unavailableActions: readonly string[];
   readonly calibrationPrompt: string | null;
   readonly needsCalibration: boolean;
+  readonly characterSource: CharacterSource | null;
 }
 
 function percent(value: number): string {
@@ -37,9 +72,43 @@ export function buildHudModel(input: {
   motion: CharacterMotionState | null;
   calibration: CalibrationState;
   boundClips?: Record<string, string | null>;
+  distribution?: DistributionDiagnostics;
+  characterId?: string;
 }): HudModel {
-  const { snapshot, profile, motion, calibration } = input;
+  const { snapshot, profile, motion, calibration, distribution } = input;
   const rows: HudRow[] = [];
+
+  if (input.characterId) {
+    rows.push({ label: "character", value: input.characterId, tone: "normal" });
+  }
+
+  if (distribution) {
+    // A procedural fallback is a failure state, not a successful load.
+    rows.push({
+      label: "character source",
+      value: distribution.source,
+      tone: distribution.source === "procedural-fallback" ? "warn" : "good",
+    });
+    if (distribution.fallbackUsed && distribution.fallbackReason) {
+      rows.push({
+        label: "  fallback reason",
+        value: distribution.fallbackReason,
+        tone: "warn",
+      });
+    }
+    for (const layer of distribution.layers) {
+      rows.push({
+        label: `  ${layer.layer}`,
+        value: layer.detail ? `${layer.outcome} · ${layer.detail}` : layer.outcome,
+        tone:
+          layer.outcome === "success"
+            ? "good"
+            : layer.outcome === "not-attempted"
+              ? "normal"
+              : "warn",
+      });
+    }
+  }
 
   rows.push({
     label: "controller",
@@ -88,13 +157,22 @@ export function buildHudModel(input: {
       tone: "normal",
     });
     rows.push({
-      label: "  idle / walk / run",
-      value: `${percent(motion.weights.idle)} · ${percent(motion.weights.walk)} · ${percent(motion.weights.run)}`,
+      label: "  idle/walk/run/sprint",
+      value: [
+        percent(motion.weights.idle),
+        percent(motion.weights.walk),
+        percent(motion.weights.run),
+        percent(motion.weights.sprint),
+      ].join(" · "),
       tone: "normal",
     });
     rows.push({
       label: "action",
-      value: motion.activeAction ?? "—",
+      value: motion.activeAction
+        ? motion.activeStage && motion.activeStage !== motion.activeAction
+          ? `${motion.activeAction} · ${motion.activeStage}`
+          : motion.activeAction
+        : "—",
       tone: "normal",
     });
     rows.push({
@@ -128,6 +206,18 @@ export function buildHudModel(input: {
   }
 
   const missing = motion?.missingMotions ?? [];
+  const unavailable = motion?.unavailableActions ?? [];
+
+  // Actions the pad will recognize but the character cannot animate. Stated
+  // explicitly so a dead button reads as a known gap rather than a broken input.
+  for (const action of unavailable) {
+    rows.push({
+      label: `${action.toUpperCase()}`,
+      value: "CLIP UNAVAILABLE",
+      tone: "warn",
+    });
+  }
+
   const needsCalibration = Boolean(
     snapshot.connected && profile && !isProfileComplete(profile),
   );
@@ -135,10 +225,12 @@ export function buildHudModel(input: {
   return {
     rows,
     missingMotions: missing,
+    unavailableActions: unavailable,
     calibrationPrompt:
       calibration.active && calibration.awaiting
         ? `Press the button for ${calibration.awaiting.toUpperCase()}`
         : null,
     needsCalibration,
+    characterSource: distribution?.source ?? null,
   };
 }

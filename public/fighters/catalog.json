@@ -17,14 +17,27 @@
         "runtimeGlb": "/fighters/rigged-v1/blue/blue-runtime.glb",
         "exportStatus": "pending",
         "animationSetVersion": "pending-rigging-portal-v1",
-        "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
+        "requiredClips": [
+          "idle",
+          "run",
+          "jump_start",
+          "fall",
+          "land",
+          "attack",
+          "stomp",
+          "pickup",
+          "throw",
+          "ringout"
+        ]
       },
       "distribution": {
         "releaseManifestItemId": "c91fb0a6ed74b8e7",
         "assetPackVersion": "toybox-fighters-v1",
         "snapshotRoot": "/fighters/distribution-v1/blue"
       },
-      "unlockRule": { "type": "starter" },
+      "unlockRule": {
+        "type": "starter"
+      },
       "weightClass": "medium",
       "itemAffinity": "neutral",
       "movementProfile": {
@@ -59,14 +72,27 @@
         "runtimeGlb": "/fighters/rigged-v1/red/red-runtime.glb",
         "exportStatus": "pending",
         "animationSetVersion": "pending-rigging-portal-v1",
-        "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
+        "requiredClips": [
+          "idle",
+          "run",
+          "jump_start",
+          "fall",
+          "land",
+          "attack",
+          "stomp",
+          "pickup",
+          "throw",
+          "ringout"
+        ]
       },
       "distribution": {
         "releaseManifestItemId": "ceb6e544e1e06c3c",
         "assetPackVersion": "toybox-fighters-v1",
         "snapshotRoot": "/fighters/distribution-v1/red"
       },
-      "unlockRule": { "type": "starter" },
+      "unlockRule": {
+        "type": "starter"
+      },
       "weightClass": "heavy",
       "itemAffinity": "hazard-control",
       "movementProfile": {
@@ -101,14 +127,28 @@
         "runtimeGlb": "/fighters/rigged-v1/pink/pink-runtime.glb",
         "exportStatus": "pending",
         "animationSetVersion": "pending-rigging-portal-v1",
-        "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
+        "requiredClips": [
+          "idle",
+          "run",
+          "jump_start",
+          "fall",
+          "land",
+          "attack",
+          "stomp",
+          "pickup",
+          "throw",
+          "ringout"
+        ]
       },
       "distribution": {
         "releaseManifestItemId": "e532305729e3ca38",
         "assetPackVersion": "toybox-fighters-v1",
         "snapshotRoot": "/fighters/distribution-v1/pink"
       },
-      "unlockRule": { "type": "complete_survival", "target": 1 },
+      "unlockRule": {
+        "type": "complete_survival",
+        "target": 1
+      },
       "weightClass": "light",
       "itemAffinity": "recovery",
       "movementProfile": {
@@ -143,14 +183,28 @@
         "runtimeGlb": "/fighters/rigged-v1/black/black-runtime.glb",
         "exportStatus": "pending",
         "animationSetVersion": "pending-rigging-portal-v1",
-        "requiredClips": ["idle", "run", "jump_start", "fall", "land", "attack", "stomp", "pickup", "throw", "ringout"]
+        "requiredClips": [
+          "idle",
+          "run",
+          "jump_start",
+          "fall",
+          "land",
+          "attack",
+          "stomp",
+          "pickup",
+          "throw",
+          "ringout"
+        ]
       },
       "distribution": {
         "releaseManifestItemId": "9089154a4b5bd734",
         "assetPackVersion": "toybox-fighters-v1",
         "snapshotRoot": "/fighters/distribution-v1/black"
       },
-      "unlockRule": { "type": "total_ringouts", "target": 10 },
+      "unlockRule": {
+        "type": "total_ringouts",
+        "target": 10
+      },
       "weightClass": "medium",
       "itemAffinity": "trickster",
       "movementProfile": {
@@ -167,6 +221,60 @@
         "stompAttack": 15,
         "launchResistance": 0.96,
         "recoveryBias": 1.05
+      }
+    },
+    {
+      "id": "drive-char-002-proof",
+      "displayName": "Drive Char 002 (Rig Proof)",
+      "subtitle": "Development proof \u2014 Rigging Portal",
+      "description": "Bounded local proof of the real rigged character from Rigging Portal. Development only; not a distribution path and not a canonical fighter.",
+      "devProof": true,
+      "provenance": {
+        "sourceRepository": "rigging-portal",
+        "sourceArtifact": "exports/rigged/drive_char_002/viewer-runtime.glb",
+        "distributionMode": "bounded-local-snapshot",
+        "canonicalPublication": "PENDING SEPARATE MISSION",
+        "stagedBy": "scripts/link-dev-proof-character.mjs"
+      },
+      "mirroredSourceFile": "/fighters/dev-proof-v1/drive-char-002-proof/viewer-runtime.glb",
+      "mirroredRuntimeFile": "/fighters/dev-proof-v1/drive-char-002-proof/viewer-runtime.glb",
+      "animationSetVersion": "rigging-portal-drive-char-002",
+      "runtimeRig": {
+        "producerHouse": "rigging-portal",
+        "manifestFile": "/fighters/dev-proof-v1/drive-char-002-proof/runtime-motion.manifest.json",
+        "runtimeGlb": "/fighters/dev-proof-v1/drive-char-002-proof/viewer-runtime.glb",
+        "exportStatus": "ready",
+        "animationSetVersion": "rigging-portal-drive-char-002",
+        "requiredClips": [
+          "idle",
+          "walk",
+          "run",
+          "sprint",
+          "jump",
+          "fall",
+          "land",
+          "punch"
+        ]
+      },
+      "unlockRule": {
+        "type": "starter"
+      },
+      "weightClass": "medium",
+      "itemAffinity": "neutral",
+      "movementProfile": {
+        "runSpeed": 8.2,
+        "acceleration": 29,
+        "airSpeed": 7.2,
+        "airAcceleration": 20,
+        "jumpVelocity": 15.2,
+        "doubleJumpVelocity": 14.4,
+        "weight": 1
+      },
+      "knockbackProfile": {
+        "baseAttack": 13,
+        "stompAttack": 16,
+        "launchResistance": 1,
+        "recoveryBias": 1
       }
     }
   ]

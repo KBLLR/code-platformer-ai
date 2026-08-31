@@ -14,17 +14,56 @@
 
 import { SEMANTIC_MOTIONS, type SemanticMotion } from "./types";
 
-/** Accepted names per semantic motion, compared token-exact after normalizing. */
+/**
+ * Accepted names per semantic motion, compared token-exact after normalizing.
+ *
+ * `sprint` is deliberately *not* an alias of `run`: characters that ship both
+ * get two distinct blend states, and aliasing them would silently collapse a
+ * genuine sprint clip into run.
+ */
 export const MOTION_ALIASES: Readonly<Record<SemanticMotion, readonly string[]>> =
   Object.freeze({
     idle: ["idle", "idles", "idling", "breathingidle", "standing", "stand"],
     walk: ["walk", "walks", "walking", "walkforward", "walkfwd"],
-    run: ["run", "runs", "running", "jog", "jogging", "sprint", "sprinting"],
-    jump: ["jump", "jumps", "jumping", "jumpup", "leap"],
+    run: ["run", "runs", "running", "jog", "jogging"],
+    sprint: ["sprint", "sprints", "sprinting", "dash", "fastrun"],
+    jump: ["jump", "jumps", "jumping", "jumpup", "jumpstart", "leap"],
+    fall: ["fall", "falls", "falling", "airborne", "midair"],
+    land: ["land", "lands", "landing", "touchdown"],
     punch: ["punch", "punches", "punching", "boxing", "jab", "hook"],
     kick: ["kick", "kicks", "kicking", "roundhouse", "roundhousekick"],
     push: ["push", "pushes", "pushing", "shove", "shoving"],
   });
+
+/**
+ * Tokens that change what a clip *means*, vetoing an alias match.
+ *
+ * `crouch-idle` contains the token `idle`, so without this it would bind as the
+ * idle pose on any character lacking a plain `idle` clip — a crouch standing in
+ * for standing still. A qualified clip is left unmatched instead, which is
+ * visible in the HUD, rather than silently mis-posing the character.
+ */
+export const DISQUALIFYING_TOKENS: readonly string[] = Object.freeze([
+  "crouch",
+  "crouched",
+  "prone",
+  "sit",
+  "sitting",
+  "lie",
+  "lying",
+  "swim",
+  "swimming",
+  "climb",
+  "climbing",
+  "ladder",
+  "hurt",
+  "damage",
+  "block",
+  "blocked",
+  "dead",
+  "death",
+  "dying",
+]);
 
 /**
  * Split a clip name into comparable tokens.
@@ -74,6 +113,10 @@ function scoreClip(motion: SemanticMotion, clipName: string): MotionMatch | null
   if (aliases.includes(whole)) return { motion, clipName, quality: "exact" };
 
   const tokens = clipTokens(clipName);
+  // A qualifier anywhere in the name changes the meaning of the clip, so it
+  // cannot stand in for the unqualified motion.
+  if (tokens.some((token) => DISQUALIFYING_TOKENS.includes(token))) return null;
+
   for (const token of tokens) {
     if (token === motion || aliases.includes(token)) {
       return { motion, clipName, quality: "alias" };
@@ -96,15 +139,9 @@ export function resolveMotions(
     (name): name is string => typeof name === "string" && name.length > 0,
   );
 
-  const map: Record<SemanticMotion, string | null> = {
-    idle: null,
-    walk: null,
-    run: null,
-    jump: null,
-    punch: null,
-    kick: null,
-    push: null,
-  };
+  const map = Object.fromEntries(
+    SEMANTIC_MOTIONS.map((motion) => [motion, null]),
+  ) as Record<SemanticMotion, string | null>;
   const matches: MotionMatch[] = [];
   const claimed = new Set<string>();
 

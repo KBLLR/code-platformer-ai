@@ -1,0 +1,6 @@
+# Bounded development-proof assets are staged locally by
+# scripts/link-dev-proof-character.mjs and are never committed.
+# Canonical publication is a separate mission.
+*.glb
+provenance.json
+runtime-motion.manifest.json

@@ -44,6 +44,17 @@ export interface MotionConfig {
   /** How long an action request stays valid while waiting its turn. */
   readonly inputBufferMs: number;
   /**
+   * How long the airborne stage of a jump is held, in seconds.
+   *
+   * The middle stage of a three-stage jump is a loop, not a one-shot: on
+   * drive_char_002 the `fall` clip is 10.5s of sustained airborne motion, so
+   * playing it to completion would make one jump last thirteen seconds. The
+   * stage loops and exits on this timer, or earlier when the product calls
+   * `notifyGrounded()` — the character controller owns when a jump actually
+   * lands, since it owns world movement.
+   */
+  readonly jumpAirborneSeconds: number;
+  /**
    * Fraction of an action clip after which another action may interrupt it.
    * Below this the action is committed, so mashing cannot cancel every frame.
    */
@@ -72,6 +83,7 @@ export const DEFAULT_MOTION_CONFIG: MotionConfig = Object.freeze({
     turnTime: 0.12,
   }),
   inputBufferMs: 150,
+  jumpAirborneSeconds: 0.35,
   actionInterruptAfter: 0.7,
   interruptPriority: Object.freeze({
     jump: 3,

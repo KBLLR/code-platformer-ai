@@ -3,7 +3,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { REQUIRED_RUNTIME_CLIPS } from "../content/contracts.js";
-import { normalizeFighterRuntimeSettings, resolveFighterDistributionLayers } from "../content/fighterDistribution.js";
+import { normalizeFighterRuntimeSettings, resolveFighterDistributionLayersWithDiagnostics } from "../content/fighterDistribution.js";
 
 const FIGHTER_COLORS = {
   blue: "#4f7cff",
@@ -373,8 +373,10 @@ export class GLTFAssetLoader {
   }
 
   async _loadTemplate(fighterDefinition) {
-    const distributionLayers = await resolveFighterDistributionLayers(fighterDefinition, this.runtimeSettings);
+    const { layers: distributionLayers, diagnostics } =
+      await resolveFighterDistributionLayersWithDiagnostics(fighterDefinition, this.runtimeSettings);
     let fallbackRuntimeManifest = distributionLayers.at(-1)?.runtimeManifest ?? distributionLayers[0]?.runtimeManifest ?? null;
+    const loadFailures = [];
 
     for (const layer of distributionLayers) {
       const candidates = [];
@@ -404,12 +406,28 @@ export class GLTFAssetLoader {
             runtimeManifest: candidate.runtimeManifest,
             assetSource: candidate.assetSource,
             proceduralFallback: !gltf.animations?.length,
+            distribution: {
+              source: candidate.assetSource,
+              layers: diagnostics,
+              fallbackUsed: false,
+              clipCount: gltf.animations?.length ?? 0,
+            },
           };
         } catch (error) {
+          loadFailures.push(`${layer.source}: ${error.message}`);
           console.warn(`[ToyboxArena] Failed to load ${fighterDefinition.id} from ${candidate.url}: ${error.message}`);
         }
       }
     }
+
+    // Every layer failed. The capsules are a real failure state, not a
+    // successful load, so the reason travels with them.
+    const fallbackReason = loadFailures.length > 0
+      ? loadFailures[0]
+      : "no distribution layer produced a loadable asset";
+    console.warn(
+      `[ToyboxArena] ${fighterDefinition.id} fell back to procedural geometry — ${fallbackReason}`,
+    );
 
     return {
       scene: normalizeTemplate(createFallbackModel(fighterDefinition.id)),
@@ -417,6 +435,13 @@ export class GLTFAssetLoader {
       runtimeManifest: fallbackRuntimeManifest,
       assetSource: "procedural",
       proceduralFallback: true,
+      distribution: {
+        source: "procedural-fallback",
+        layers: diagnostics,
+        fallbackUsed: true,
+        fallbackReason,
+        clipCount: 0,
+      },
     };
   }
 

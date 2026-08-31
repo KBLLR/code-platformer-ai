@@ -16,6 +16,7 @@ export interface LocomotionWeights {
   readonly idle: number;
   readonly walk: number;
   readonly run: number;
+  readonly sprint: number;
 }
 
 /** Hermite smoothstep: zero derivative at both ends, so blends ease in and out. */
@@ -38,24 +39,42 @@ export function smoothstep(edge0: number, edge1: number, value: number): number 
 export function locomotionWeights(
   speed: number,
   thresholds: LocomotionThresholds,
+  sprint = 0,
 ): LocomotionWeights {
   const value = clamp01(Number.isFinite(speed) ? speed : 0);
 
   const moving = smoothstep(thresholds.idleMax, thresholds.walkFull, value);
   const running = smoothstep(thresholds.runStart, thresholds.runFull, value);
 
+  // Sprint is a separate axis, not a faster run: it is driven by an explicit
+  // modifier and can only take over from run, never from idle or walk. A
+  // character standing still with the trigger held stays idle.
+  const sprinting = clamp01(Number.isFinite(sprint) ? sprint : 0) * running;
+
   const idle = 1 - moving;
   const walk = moving * (1 - running);
-  const run = moving * running;
+  const run = moving * running * (1 - sprinting);
+  const sprintWeight = moving * running * sprinting;
 
-  return { idle: clamp01(idle), walk: clamp01(walk), run: clamp01(run) };
+  return {
+    idle: clamp01(idle),
+    walk: clamp01(walk),
+    run: clamp01(run),
+    sprint: clamp01(sprintWeight),
+  };
 }
 
 /** The dominant state, for display and for deciding what to return to. */
 export function dominantLocomotion(weights: LocomotionWeights): LocomotionState {
-  if (weights.run >= weights.walk && weights.run >= weights.idle) return "run";
-  if (weights.walk >= weights.idle) return "walk";
-  return "idle";
+  let best: LocomotionState = "idle";
+  let bestWeight = weights.idle;
+  for (const state of ["walk", "run", "sprint"] as const) {
+    if (weights[state] >= bestWeight) {
+      best = state;
+      bestWeight = weights[state];
+    }
+  }
+  return best;
 }
 
 /**
