@@ -1,3 +1,10 @@
+import { createSemanticGamepad } from "./SemanticGamepad";
+import {
+  NINTENDO_FACE_LAYOUT,
+  XBOX_FACE_LAYOUT,
+  guessFaceLayout,
+} from "../lib/character-control";
+
 const KEY_BINDINGS = {
   left: ["ArrowLeft", "KeyA"],
   right: ["ArrowRight", "KeyD"],
@@ -17,6 +24,10 @@ export class ActionMap {
     this.heldKeys = new Set();
     this.pressedKeys = new Set();
     this.connectedGamepad = null;
+    // Pad input runs through the shared profile layer so face buttons resolve
+    // by physical position and unknown pads fall back to calibration.
+    this.pad = createSemanticGamepad();
+    this.padFrame = null;
     this._boundDown = (event) => {
       if (Object.values(KEY_BINDINGS).some((keys) => keys.includes(event.code))) {
         event.preventDefault();
@@ -37,25 +48,36 @@ export class ActionMap {
   dispose() {
     this.target.removeEventListener("keydown", this._boundDown);
     this.target.removeEventListener("keyup", this._boundUp);
+    this.pad.dispose();
   }
 
-  snapshot() {
+  snapshot(nowMs = typeof performance !== "undefined" ? performance.now() : Date.now()) {
     const pad = this._pollGamepad();
+    const padFrame = this.pad.read(nowMs);
+    this.padFrame = padFrame;
+
     const moveXFromKeyboard = (anyPressed(this.heldKeys, KEY_BINDINGS.left) ? -1 : 0)
       + (anyPressed(this.heldKeys, KEY_BINDINGS.right) ? 1 : 0);
-    const moveXFromPad = pad?.axes?.[0] ?? 0;
-    const moveX = Math.abs(moveXFromPad) > 0.22 ? moveXFromPad : moveXFromKeyboard;
+    // The pad is already deadzoned radially, so any nonzero value is intent.
+    const moveX = padFrame.moveX !== 0 ? padFrame.moveX : moveXFromKeyboard;
 
     const snapshot = {
       moveX: Math.max(-1, Math.min(1, moveX)),
-      jumpPressed: this._consume(KEY_BINDINGS.jump) || this._consumePadButton(pad, 0),
-      attackPressed: this._consume(KEY_BINDINGS.attack) || this._consumePadButton(pad, 2),
-      itemPressed: this._consume(KEY_BINDINGS.item) || this._consumePadButton(pad, 1) || this._consumePadButton(pad, 7),
+      moveSpeed: padFrame.speed !== 0 ? padFrame.speed : Math.abs(moveXFromKeyboard),
+      jumpPressed: this._consume(KEY_BINDINGS.jump) || padFrame.jumpPressed,
+      attackPressed: this._consume(KEY_BINDINGS.attack) || padFrame.attackPressed,
+      itemPressed: this._consume(KEY_BINDINGS.item) || padFrame.itemPressed,
+      // Start sits in the centre cluster, which no face layout affects.
       pausePressed: this._consume(KEY_BINDINGS.pause) || this._consumePadButton(pad, 9),
     };
 
     this.pressedKeys.clear();
     return snapshot;
+  }
+
+  /** Live controller identity, for the calibration/debug overlay. */
+  gamepadSnapshot() {
+    return this.pad.snapshot();
   }
 
   _consume(keys) {
@@ -96,7 +118,21 @@ export class ActionMap {
   }
 }
 
-export function getBindingSummary() {
+/**
+ * Binding summary for the operator.
+ *
+ * The gamepad labels depend on the connected pad: South/West/East are fixed
+ * physical positions, but which letter is printed there is not. On a Nintendo
+ * layout South is **B** and East is **A**, so showing Xbox letters would point
+ * the operator at the wrong buttons. Pass the live `gamepad.id` to get labels
+ * that match the hardware in their hands.
+ */
+export function getBindingSummary(gamepadId = "") {
+  const layout = gamepadId ? guessFaceLayout(gamepadId) : XBOX_FACE_LAYOUT;
+  // Bindings follow the printed letter, so the position shown alongside it
+  // changes with the pad: A is bottom on an Xbox layout and right on a Nintendo one.
+  const positionOf = (label) => layout[label] ?? "?";
+
   return {
     keyboard: {
       move: "A / D or Left / Right",
@@ -107,10 +143,11 @@ export function getBindingSummary() {
     },
     gamepad: {
       move: "Left Stick",
-      jump: "A / South",
-      attack: "X / West",
-      item: "B / East or Right Trigger",
+      jump: `A (${positionOf("A")})`,
+      attack: `X (${positionOf("X")})`,
+      item: `B (${positionOf("B")})`,
       pause: "Start",
+      layout: layout === NINTENDO_FACE_LAYOUT ? "nintendo" : "xbox",
     },
   };
 }
