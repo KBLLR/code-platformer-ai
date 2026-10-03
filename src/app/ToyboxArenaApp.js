@@ -25,6 +25,8 @@ export class ToyboxArenaApp {
     this.unlockState = null;
     // Derived view of production state; rebuilt whenever asset resolution changes.
     this.roster = null;
+    this.lastResult = null;
+    this.lastPlayers = [];
     this.activeTab = "play";
     this.selectedModeId = "tdm";
     this.selectedStageId = "balanced";
@@ -73,6 +75,8 @@ export class ToyboxArenaApp {
       this.shell.renderHud(this.currentSnapshot, this._shellState());
 
       if (this.currentSnapshot.finished && !this._progressCommitted) {
+        this.lastResult = this.currentSnapshot.result ?? null;
+        this.lastPlayers = this.currentSnapshot.players ?? [];
         this.profile = applyMatchProgress(this.profile, this.currentSnapshot.result);
         this._refreshUnlocks();
         this._progressCommitted = true;
@@ -95,6 +99,10 @@ export class ToyboxArenaApp {
       unlockState: this.unlockState,
       roster: this.roster,
       bindings: getBindingSummary(),
+      // Results and spectate read the last finished match rather than inventing
+      // rows; absent means the screens show their empty state.
+      lastResult: this.lastResult ?? null,
+      lastPlayers: this.lastPlayers ?? [],
     };
   }
 

@@ -20,6 +20,7 @@
 
 import {
   button,
+  icon,
   dropdown,
   escapeHtml,
   field,
@@ -37,15 +38,37 @@ import { isPlayableState, isReleasedState } from "../content/rosterState.js";
 /** The chrome is built and tested against this ceiling; content supplies the rest. */
 export const SLOT_CHROME_CAPACITY = 32;
 
+// Exactly the design's rail, including its icon names. `setup` is the one
+// addition: the slot table is a required surface and the design renders it
+// inside the lobby/HUD flow, which does not survive as its own route.
 const RAIL_ITEMS = [
-  { id: "lobby", code: "LOB", name: "Lobby" },
-  { id: "roster", code: "ROS", name: "Roster" },
-  { id: "stages", code: "STG", name: "Stages" },
-  { id: "challenges", code: "UNL", name: "Unlocks" },
-  { id: "setup", code: "SET", name: "Match setup" },
-  { id: "telemetry", code: "TEL", name: "Ecosystem" },
+  { id: "lobby", code: "LOB", name: "Lobby", icon: "mode-board" },
+  { id: "roster", code: "RST", name: "Roster", icon: "users" },
+  { id: "stages", code: "STG", name: "Stages", icon: "mode-world" },
+  { id: "challenges", code: "CHL", name: "Unlocks", icon: "target" },
+  { id: "setup", code: "SET", name: "Match setup", icon: "grid" },
+  { id: "spectate", code: "SPC", name: "Spectate", icon: "eye" },
+  { id: "results", code: "RES", name: "Results", icon: "chart-bar" },
+  { id: "telemetry", code: "TEL", name: "Ecosystem", icon: "signal" },
 ];
-const RAIL_FOOTER = [{ id: "settings", code: "CFG", name: "Settings" }];
+const RAIL_FOOTER = [
+  { id: "settings", code: "SET", name: "Settings", icon: "settings" },
+  { id: "boot", code: "BOO", name: "Boot gate", icon: "lock" },
+];
+
+/** Drifting background terms on the boot gate, from the design's BOOT_TERMS. */
+const BOOT_TERMS = [
+  { text: "ring-out + knockback", x: 8, y: 18, d: 0 },
+  { text: "blast-zone.left", x: 72, y: 12, d: 1.2 },
+  { text: "toybox-fighters-v1", x: 16, y: 74, d: 2.4 },
+  { text: "rigging-portal", x: 66, y: 68, d: 0.6 },
+  { text: "spring-trap", x: 44, y: 8, d: 3.1 },
+  { text: "procedural fallback", x: 78, y: 44, d: 1.8 },
+  { text: "gateway:8090", x: 5, y: 46, d: 2.9 },
+  { text: "hazardFloor -7.8", x: 34, y: 88, d: 1.5 },
+  { text: "TDM · FFA · SURVIVAL", x: 60, y: 88, d: 3.6 },
+  { text: "catalog.json", x: 24, y: 34, d: 4.2 },
+];
 
 const SCREEN_TITLES = {
   lobby: "launcher · lobby",
@@ -55,6 +78,9 @@ const SCREEN_TITLES = {
   setup: "runtime · match setup",
   telemetry: "runtime · ecosystem",
   settings: "system · settings",
+  boot: "boot gate",
+  results: "runtime · results",
+  spectate: "runtime · spectate",
 };
 
 const SOURCE_OPTIONS = [
@@ -443,9 +469,185 @@ function renderSettings(state) {
   `;
 }
 
+
+/* -------------------------------------------------------------- boot gate */
+
+/**
+ * Boot gate, per the design: drifting system terms behind a centred card.
+ *
+ * The design wires BOTH buttons to `goLobby` — the GitHub button is a mock, it
+ * authenticates nothing. Shipping a working-looking "Continue with GitHub" in
+ * an app with no OAuth would be a fabricated capability, so the composition is
+ * kept and that path is disabled with the reason shown. The offline path is the
+ * real one, which is what this local-first house actually does.
+ */
+function renderBoot(state) {
+  const terms = BOOT_TERMS.map(
+    (term) =>
+      `<span class="cx-boot__term" style="left:${term.x}%; top:${term.y}%; animation-delay:${term.d}s">${escapeHtml(term.text)}</span>`,
+  ).join("");
+
+  return `<div class="cx-boot">
+    <div class="cx-boot__terms">${terms}</div>
+    <div class="cx-boot__card">
+      <div class="cx-boot__head">
+        <div class="cx-boot__brand">
+          <span class="cx-boot__mark"><span class="cx-boot__dot"></span></span>
+          <span class="cx-boot__brandtext">
+            <span class="cx-boot__kbllr">KBLLR</span>
+            <span class="cx-boot__eco">Core-X Ecosystem</span>
+          </span>
+        </div>
+        <div>
+          <div class="cx-boot__title">Toybox Arena</div>
+          <div class="cx-boot__house">house code-platformer-ai · tier house · v${escapeHtml(state.houseVersion ?? "2.0.0")}</div>
+        </div>
+        <p class="cx-note">Side-view 2.5D platform battler. Local-first content contracts, offline bots, rigged fighter
+        exports consumed from rigging-portal.</p>
+      </div>
+      <div class="cx-boot__actions">
+        ${button({
+          label: "Continue with GitHub",
+          variant: "primary",
+          disabled: true,
+          title: "no OAuth is wired in this local-first house — use the offline path",
+        })}
+        <div class="cx-boot__row">
+          <span class="cx-boot__svc">gateway:8090 · oauth unavailable</span>
+          ${button({ label: "continue offline · local profile", action: "go-screen", value: "lobby" })}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------------------------------------------------------- results */
+
+function renderResults(state) {
+  const result = state.lastResult ?? null;
+  const players = state.lastPlayers ?? [];
+
+  if (!result) {
+    return `<div class="cx-panel">
+      <div class="cx-panel__head"><span class="cx-panel__title">results</span></div>
+      <div class="cx-slots__empty">no match has finished yet — play a match to produce results</div>
+      <div class="cx-dev__chips">${button({ label: "match setup", action: "go-screen", value: "setup", variant: "primary" })}</div>
+    </div>`;
+  }
+
+  const rows = players
+    .map(
+      (player) => `<div class="cx-roster__row">
+        <span class="cx-roster__bar" style="background:var(--corex-platform)"></span>
+        <span class="cx-roster__name">${escapeHtml(player.displayName ?? player.fighterId)}</span>
+        <span class="cx-slots__ctl">${player.ringOuts ?? 0}</span>
+        <span class="cx-slots__ctl">${player.deaths ?? 0}</span>
+        <span class="cx-slots__ctl">${Math.round(player.damage ?? 0)}%</span>
+        <span class="cx-slots__ctl">${escapeHtml(player.teamId ?? "ffa")}</span>
+      </div>`,
+    )
+    .join("");
+
+  return `
+    <div class="cx-panel">
+      <div class="cx-panel__head">
+        <span class="cx-panel__title">${escapeHtml(state.selectedModeId)} · ${escapeHtml(state.selectedStageId)}</span>
+        <span class="cx-panel__meta">${escapeHtml(result.summary ?? "")}</span>
+      </div>
+      <div class="cx-boot__title" style="font-size:22px">${escapeHtml(result.winnerLabel ?? "No winner")}</div>
+      <div class="cx-roster__row" style="border-bottom:1px dashed var(--border)">
+        <span class="cx-roster__name cx-roster__meta">fighter</span>
+        <span class="cx-slots__ctl">ring-outs</span>
+        <span class="cx-slots__ctl">falls</span>
+        <!-- the engine tracks current damage, not a peak, so the column says so -->
+        <span class="cx-slots__ctl">damage %</span>
+        <span class="cx-slots__ctl">team</span>
+      </div>
+      <div class="cx-roster">${rows}</div>
+    </div>
+    <div class="cx-panel">
+      <div class="cx-panel__head"><span class="cx-panel__title">unlock progress</span></div>
+      <div class="cx-slots__row">
+        <span class="cx-roster__meta">total ring-outs</span>
+        <span class="cx-slots__ctl">${state.profile?.totalRingouts ?? 0}</span>
+      </div>
+    </div>
+    <div class="cx-panel">
+      <div class="cx-panel__head"><span class="cx-panel__title">broadcast</span></div>
+      <p class="cx-dev__mono">code-platformer-ai.toybox.match.completed</p>
+      <div class="cx-dev__chips">
+        ${button({ label: "Rematch", action: "rematch", variant: "primary" })}
+        ${button({ label: "Watch replay", action: "go-screen", value: "spectate" })}
+        ${button({ label: "Back to lobby", action: "go-screen", value: "lobby" })}
+      </div>
+    </div>
+  `;
+}
+
+/* --------------------------------------------------------------- spectate */
+
+function renderSpectate(state) {
+  const players = state.lastPlayers ?? [];
+  const alive = players.filter((player) => player.alive !== false).length;
+  const target = players[0] ?? null;
+
+  const targets = players.length
+    ? players
+        .map(
+          (player, index) => `<div class="cx-roster__row${index === 0 ? " is-active" : ""}">
+            <span class="cx-roster__bar" style="background:var(--corex-platform)"></span>
+            <span class="cx-roster__name">${escapeHtml(player.displayName ?? player.fighterId)}</span>
+            <span class="cx-slots__ctl">${index + 1}</span>
+          </div>`,
+        )
+        .join("")
+    : `<div class="cx-slots__empty">no match in flight — nothing to spectate</div>`;
+
+  // Ring-out events are not retained after a match, so the timeline renders only
+  // what the engine still holds rather than drawing invented marks.
+  const marks = players.length
+    ? players
+        .flatMap((player, index) =>
+          Array.from({ length: player.ringOuts ?? 0 }, (_, k) => (index + 1) / (players.length + 1) + k * 0.07),
+        )
+        .filter((position) => position < 1)
+        .map((position) => `<span class="cx-timeline__mark" style="left:${(position * 100).toFixed(1)}%"></span>`)
+        .join("")
+    : "";
+
+  return `
+    <div class="cx-panel">
+      <div class="cx-panel__head">
+        <span class="cx-spectate__eye">${icon("eye", { size: 18 })}</span>
+        <span class="cx-panel__title">spectating · follow cam</span>
+        <span class="cx-panel__meta">alive ${alive} / ${players.length}</span>
+      </div>
+      <div class="cx-boot__title" style="font-size:16px">${escapeHtml(target?.displayName ?? "—")}</div>
+    </div>
+    <div class="cx-panel">
+      <div class="cx-panel__head"><span class="cx-panel__title">camera targets</span></div>
+      <div class="cx-roster">${targets}</div>
+    </div>
+    <div class="cx-panel">
+      <div class="cx-panel__head"><span class="cx-panel__title">match timeline</span></div>
+      <div class="cx-timeline">${marks}</div>
+      <p class="cx-dev__mono">marks = ring-out events${players.length ? "" : " · none recorded"}</p>
+    </div>
+    <div class="cx-panel">
+      <div class="cx-panel__head"><span class="cx-panel__title">cam</span></div>
+      <div class="cx-dev__chips">
+        ${["follow", "wide", "free"].map((mode, i) => button({ label: mode, variant: i === 0 ? "primary" : "ghost", disabled: i !== 0, title: i === 0 ? null : "only follow-cam is implemented" })).join("")}
+      </div>
+    </div>
+  `;
+}
+
 /* ------------------------------------------------------------------ shell */
 
 const SCREENS = {
+  boot: renderBoot,
+  results: renderResults,
+  spectate: renderSpectate,
   lobby: renderLobby,
   roster: renderRoster,
   stages: renderStages,
@@ -506,6 +708,15 @@ export class ToyboxCoreXShell {
 
     const screen = SCREENS[this.screen] ? this.screen : "lobby";
     const summary = state.roster.summary;
+
+    // The boot gate is an overlay in the design (z-index 300 over the whole
+    // app), not a pane inside the shell: it is the gate you pass before the
+    // shell is yours to use. Rendering it inside the rail would make it look
+    // like just another screen.
+    if (screen === "boot") {
+      this.shellEl.innerHTML = renderBoot(state);
+      return;
+    }
 
     this.shellEl.innerHTML = `
       ${rail({ items: RAIL_ITEMS, active: screen, brand: { tag: "TBX", sub: "toybox arena" }, footer: RAIL_FOOTER, svc: `warehouse:5202 · releases ${summary.released}/${summary.total}` })}

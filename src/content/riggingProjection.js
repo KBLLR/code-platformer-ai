@@ -18,7 +18,7 @@
  * claim approval — see `assertNotReleasedByFixture`.
  */
 
-import { REVIEW_PHASES } from "./rosterState.js";
+import { CHARACTER_RIG_REVIEW_SCHEMA, REVIEW_PHASES, approvalAuthorizes } from "./rosterState.js";
 
 export const RIGGING_PROJECTION_SCHEMA = "toybox-rigging-projection-v1";
 export const RIGGING_PROJECTION_URL = "/fighters/rigging-projection.json";
@@ -75,6 +75,26 @@ export function validateRiggingProjection(document) {
         typeof entry.evidence === "string" && entry.evidence,
         `Approved projection entry "${entry.fighterId}" must cite receipt evidence`,
       );
+      // An approved entry must carry the verdict record itself, including the
+      // digest of the artifact that was approved. Without that digest the
+      // approval cannot be bound to anything, so it is rejected at the door
+      // rather than being carried into the UI as an unbindable claim.
+      const approval = entry.approval;
+      assert(approval && typeof approval === "object", `Approved entry "${entry.fighterId}" must carry an approval record`);
+      assert(
+        approval.schema === CHARACTER_RIG_REVIEW_SCHEMA,
+        `Approved entry "${entry.fighterId}" must cite ${CHARACTER_RIG_REVIEW_SCHEMA}, got "${approval.schema}"`,
+      );
+      assert(
+        typeof approval.reviewer === "string" && approval.reviewer.trim() !== "",
+        `Approved entry "${entry.fighterId}" must name a reviewer`,
+      );
+      assert(approval.promotion_allowed === true, `Approved entry "${entry.fighterId}" must have promotion_allowed=true`);
+      assert(approval.review_status === "approved", `Approved entry "${entry.fighterId}" must have review_status=approved`);
+      assert(
+        typeof approval.rig_sha256 === "string" && /^[a-f0-9]{64}$/i.test(approval.rig_sha256),
+        `Approved entry "${entry.fighterId}" must record the approved artifact digest`,
+      );
     }
     return {
       fighterId: entry.fighterId,
@@ -82,6 +102,7 @@ export function validateRiggingProjection(document) {
       evidence: entry.evidence ?? null,
       characterId: entry.characterId ?? null,
       reviewedAt: entry.reviewedAt ?? null,
+      approval: entry.approval ?? null,
     };
   });
 
@@ -131,9 +152,8 @@ export function fixtureProjection(fighters) {
 export async function loadRiggingProjection(fighters, { fetchImpl = fetch } = {}) {
   try {
     const response = await fetchImpl(RIGGING_PROJECTION_URL, { cache: "no-store" });
-    if (!response.ok) return assertNotReleasedByFixture(fixtureProjection(fighters));
-    const projection = assertNotReleasedByFixture(validateRiggingProjection(await response.json()));
-    return projection;
+    if (!response.ok) return stripFixtureApproval(assertNotReleasedByFixture(fixtureProjection(fighters)));
+    return stripFixtureApproval(assertNotReleasedByFixture(validateRiggingProjection(await response.json())));
   } catch (error) {
     // A missing or malformed projection must degrade to "nothing is approved",
     // never to "everything is fine".
@@ -142,12 +162,26 @@ export async function loadRiggingProjection(fighters, { fetchImpl = fetch } = {}
         `[ToyboxArena] rigging projection unusable, falling back to fixture: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
-    return assertNotReleasedByFixture(fixtureProjection(fighters));
+    return stripFixtureApproval(assertNotReleasedByFixture(fixtureProjection(fighters)));
   }
 }
 
 export function reviewFor(projection, fighterId) {
   const entry = projection.fighters.find((candidate) => candidate.fighterId === fighterId);
-  if (!entry) return { phase: "none", evidence: null, live: projection.live };
+  if (!entry) return { phase: "none", evidence: null, approval: null, live: projection.live };
   return { ...entry, live: projection.live };
 }
+
+/**
+ * A fixture can describe production progress but can never authorize a rig.
+ *
+ * `assertNotReleasedByFixture` already rejects a non-live projection whose
+ * phase claims approval; this strips any approval record that somehow rode
+ * along, so a fixture cannot satisfy `approvalAuthorizes` by accident.
+ */
+export function stripFixtureApproval(projection) {
+  if (projection.live) return projection;
+  return { ...projection, fighters: projection.fighters.map((entry) => ({ ...entry, approval: null })) };
+}
+
+export { approvalAuthorizes };

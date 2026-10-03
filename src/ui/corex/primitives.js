@@ -23,6 +23,27 @@
  * therefore refuses a value and a `withheld` flag at the same time.
  */
 
+import { CX_ICONS } from "./icons.js";
+
+/**
+ * A design-system icon.
+ *
+ * The DS draws every icon stroked on a 24x24 grid, so stroke/fill/viewBox are
+ * fixed here and only the name and size vary — the same contract as the
+ * design's `<x-import … .Icon name size>`. An unknown name throws rather than
+ * rendering an empty box, because a silently missing icon is a layout bug that
+ * survives review.
+ */
+export function icon(name, { size = 16, title = null } = {}) {
+  const body = CX_ICONS[name];
+  if (!body) throw new Error(`unknown Core-X icon: "${name}"`);
+  return `<svg class="cx-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter"
+    aria-hidden="${title ? "false" : "true"}"${title ? ` role="img"` : ""}>${
+      title ? `<title>${escapeHtml(title)}</title>` : ""
+    }${body}</svg>`;
+}
+
 export function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -157,6 +178,7 @@ export function rail({ items, active, brand, footer = [], svc = null, expanded =
   const row = (item) => `<button type="button"
       class="cx-rail__item${item.id === active ? " is-active" : ""}"
       data-action="go-screen" data-value="${escapeHtml(item.id)}" title="${escapeHtml(item.name)}">
+      ${item.icon ? icon(item.icon, { size: 15 }) : ""}
       <span class="cx-rail__code">${escapeHtml(item.code)}</span>
       ${expanded ? `<span class="cx-rail__name">${escapeHtml(item.name)}</span>` : ""}
     </button>`;

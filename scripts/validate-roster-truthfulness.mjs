@@ -13,6 +13,9 @@
 import process from "node:process";
 import { REQUIRED_RUNTIME_CLIPS } from "../src/content/contracts.js";
 import {
+  CHARACTER_RIG_REVIEW_SCHEMA,
+  approvalAuthorizes,
+  consumedArtifactIdentity,
   PLAYABLE_STATES,
   REVIEW_GATED_STATES,
   REVIEW_PHASES,
@@ -24,6 +27,7 @@ import {
 } from "../src/content/rosterState.js";
 import { projectSlots } from "../src/content/rosterProjection.js";
 import {
+  stripFixtureApproval,
   fixtureProjection,
   assertNotReleasedByFixture,
   receiptStatusToPhase,
@@ -53,11 +57,27 @@ const LAYER_SHAPES = {
   "warehouse released with runtime": [{ source: "warehouse", releaseItemId: "c91fb0a6ed74b8e7", runtimeGlbUrl: "wh://x-runtime.glb" }],
 };
 
+const RIG_SHA = "d".repeat(64);
+const OTHER_SHA = "e".repeat(64);
+
+/** A valid, fully-authorizing approval for RIG_SHA / job "crj_current". */
+function validApproval(overrides = {}) {
+  return {
+    schema: CHARACTER_RIG_REVIEW_SCHEMA,
+    review_status: "approved",
+    reviewer: "KBLLR",
+    promotion_allowed: true,
+    job_id: "crj_current",
+    rig_sha256: RIG_SHA,
+    ...overrides,
+  };
+}
+
 const CLIP_SHAPES = {
   unknown: null,
-  empty: { clips: [] },
-  partial: { clips: REQUIRED_RUNTIME_CLIPS.slice(0, 4) },
-  complete: { clips: [...REQUIRED_RUNTIME_CLIPS] },
+  empty: { clips: [], rigSha256: RIG_SHA, jobId: "crj_current" },
+  partial: { clips: REQUIRED_RUNTIME_CLIPS.slice(0, 4), rigSha256: RIG_SHA, jobId: "crj_current" },
+  complete: { clips: [...REQUIRED_RUNTIME_CLIPS], rigSha256: RIG_SHA, jobId: "crj_current" },
 };
 
 // ---------------------------------------------------------------------------
@@ -74,7 +94,8 @@ for (const phase of REVIEW_PHASES) {
         const where = `phase=${phase} export=${exportStatus} layers="${layerName}" clips=${clipName}`;
         let result;
         try {
-          result = deriveRosterState({ fighter: fighter("x", exportStatus), layers, review: { phase }, runtimeManifest });
+          const review = phase === "approved" ? { phase, approval: validApproval() } : { phase };
+          result = deriveRosterState({ fighter: fighter("x", exportStatus), layers, review, runtimeManifest });
         } catch (error) {
           failures.push(`derive threw for ${where}: ${error.message}`);
           continue;
@@ -125,7 +146,7 @@ for (const [layerName, layers] of Object.entries(LAYER_SHAPES)) {
   const result = deriveRosterState({
     fighter: fighter("x", "ready"),
     layers,
-    review: { phase: "awaiting_review" },
+    review: { phase: "awaiting_review", approval: null },
     runtimeManifest: CLIP_SHAPES.complete,
   });
   check(
@@ -258,6 +279,119 @@ check(
   projectSlots([entryFor("x", "PLAYABLE_REAL_MOTION")], { capacity: 32 }).filled[0].motion === "real",
   "PLAYABLE_REAL_MOTION annotates real motion",
 );
+
+
+// ---------------------------------------------------------------------------
+// 6. Approval authority. Every clause of the predicate, adversarially.
+//
+//    Each case is a way an approval has been, or could be, claimed for an
+//    artifact no human signed off on. Character id is never sufficient and is
+//    deliberately identical across all of them.
+// ---------------------------------------------------------------------------
+const consumed = { sha256: RIG_SHA, jobId: "crj_current", url: "wh://x-runtime.glb" };
+
+const REJECT_CASES = {
+  "wrong schema": validApproval({ schema: "something.else.v1" }),
+  "reviewer = null": validApproval({ reviewer: null }),
+  'reviewer = ""': validApproval({ reviewer: "" }),
+  'reviewer = "   "': validApproval({ reviewer: "   " }),
+  "promotion_allowed = false": validApproval({ promotion_allowed: false }),
+  "review_status != approved": validApproval({ review_status: "pending" }),
+  "approved job differs from consumed job": validApproval({ job_id: "crj_other" }),
+  "approved digest differs from consumed digest": validApproval({ rig_sha256: OTHER_SHA }),
+  "approval records no digest": validApproval({ rig_sha256: null }),
+  "no approval record at all": null,
+};
+
+for (const [name, approval] of Object.entries(REJECT_CASES)) {
+  const verdict = approvalAuthorizes(approval, consumed);
+  check(!verdict.authorized, `APPROVAL MISREPRESENTATION: "${name}" was authorized`);
+  check(verdict.reasons.length > 0, `"${name}" rejected without a reason`);
+
+  // and the whole derivation must degrade, not just the predicate
+  const derived = deriveRosterState({
+    fighter: fighter("x", "ready"),
+    layers: LAYER_SHAPES["warehouse released with runtime"],
+    review: { phase: "approved", approval },
+    runtimeManifest: CLIP_SHAPES.complete,
+  });
+  check(
+    derived.state === "AWAITING_REVIEW",
+    `"${name}" derived "${derived.state}" instead of degrading to AWAITING_REVIEW`,
+  );
+  check(derived.claimedPhase === "approved", `"${name}" lost the record that approval was claimed`);
+}
+
+// Consumed identity unknown ⇒ an approval cannot bind to it.
+check(
+  !approvalAuthorizes(validApproval(), { sha256: null, jobId: null }).authorized,
+  "an approval was authorized against an artifact of unknown identity",
+);
+
+// THE STALE APPROVAL RULE.
+// job A -> rig A -> approved, then job B -> rig B -> awaiting review.
+// Rig A's approval must not carry onto rig B.
+const approvalForRigA = validApproval({ job_id: "crj_A", rig_sha256: RIG_SHA });
+const consumingRigB = { clips: [...REQUIRED_RUNTIME_CLIPS], rigSha256: OTHER_SHA, jobId: "crj_B" };
+const staleCarry = deriveRosterState({
+  fighter: fighter("x", "ready"),
+  layers: LAYER_SHAPES["warehouse released with runtime"],
+  review: { phase: "approved", approval: approvalForRigA },
+  runtimeManifest: consumingRigB,
+});
+check(staleCarry.state === "AWAITING_REVIEW", `stale approval carried onto a new rig as "${staleCarry.state}"`);
+check(!staleCarry.approvalAuthorized, "stale approval was marked authorized");
+check(
+  staleCarry.approvalFailures.join(" ").includes("not the consumed artifact"),
+  "stale approval rejected for the wrong reason",
+);
+// History remains visible even though it authorizes nothing.
+check(staleCarry.claimedPhase === "approved", "historical approval was erased rather than demoted");
+
+// A stage receipt is not a verdict: nothing in the receipt vocabulary can
+// satisfy the predicate.
+check(
+  !approvalAuthorizes({ schema: "rigging-palace.stage-receipt.v1", status: "passed" }, consumed).authorized,
+  'a stage receipt with status "passed" was treated as human approval',
+);
+
+// A fixture cannot approve: the loader strips approval records from a non-live
+// projection, so even a hand-forged one cannot authorize.
+const forged = stripFixtureApproval({
+  live: false,
+  fighters: [{ fighterId: "blue", phase: "awaiting_review", approval: validApproval() }],
+});
+check(forged.fighters[0].approval === null, "a fixture projection retained an approval record");
+check(
+  !approvalAuthorizes(forged.fighters[0].approval, consumed).authorized,
+  "a fixture projection was able to authorize a rig",
+);
+
+// THE ACCEPT CASE: every clause satisfied, bound to the consumed artifact.
+const accepted = approvalAuthorizes(validApproval(), consumed);
+check(accepted.authorized, `a fully valid approval was rejected: ${accepted.reasons.join("; ")}`);
+const approvedState = deriveRosterState({
+  fighter: fighter("x", "ready"),
+  layers: LAYER_SHAPES["warehouse released with runtime"],
+  review: { phase: "approved", approval: validApproval() },
+  runtimeManifest: CLIP_SHAPES.complete,
+});
+check(
+  approvedState.state === "PLAYABLE_REAL_MOTION",
+  `a fully valid approval derived "${approvedState.state}" instead of PLAYABLE_REAL_MOTION`,
+);
+check(approvedState.approvalAuthorized, "a fully valid approval was not marked authorized");
+
+// consumedArtifactIdentity reads the producer's statement first, the layer second.
+check(
+  consumedArtifactIdentity({ rigSha256: RIG_SHA }, []).sha256 === RIG_SHA,
+  "consumed identity ignored the runtime manifest",
+);
+check(
+  consumedArtifactIdentity(null, [{ runtimeGlbUrl: "u", rigSha256: OTHER_SHA }]).sha256 === OTHER_SHA,
+  "consumed identity ignored the resolved layer",
+);
+check(consumedArtifactIdentity(null, []).sha256 === null, "unknown consumed identity was not reported as unknown");
 
 // ---------------------------------------------------------------------------
 

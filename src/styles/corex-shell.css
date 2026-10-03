@@ -193,3 +193,48 @@
   color: var(--status-amber);
   font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase;
 }
+
+/* ---------- boot gate ---------- */
+/* Full-bleed gate per the design: drifting system terms behind a centred card. */
+
+.cx-shell:has(> .cx-boot) { display: block; }
+.cx-boot {
+  position: relative; z-index: 300;
+  min-height: 100vh; width: 100%;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  background: var(--bg);
+}
+.cx-boot__terms { position: absolute; inset: 0; pointer-events: none; }
+.cx-boot__term {
+  position: absolute; white-space: nowrap; opacity: 0;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--fg3);
+  animation: cxDrift 7s infinite ease-in-out;
+}
+@keyframes cxDrift {
+  0%, 100% { opacity: 0; transform: translateY(6px); }
+  18%, 76% { opacity: 0.85; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) { .cx-boot__term { animation: none; opacity: 0.6; } }
+
+.cx-boot__card { position: relative; z-index: 10; width: min(430px, calc(100% - 32px)); border: 1px dashed var(--border-light); background: var(--mat-2-fill); backdrop-filter: blur(12px); }
+.cx-boot__head { padding: 22px 22px 16px; border-bottom: 1px dashed var(--border-light); display: flex; flex-direction: column; gap: 14px; }
+.cx-boot__brand { display: flex; align-items: center; gap: 10px; }
+.cx-boot__mark { width: 26px; height: 26px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; flex: none; }
+.cx-boot__dot { width: 9px; height: 9px; background: var(--corex-platform); box-shadow: 0 0 6px var(--corex-platform); }
+.cx-boot__brandtext { display: flex; flex-direction: column; }
+.cx-boot__kbllr { font-family: var(--font-heading); font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+.cx-boot__eco { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg3); white-space: nowrap; }
+.cx-boot__title { font-family: var(--font-heading); font-size: 30px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.05; }
+.cx-boot__house { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--fg2); margin-top: 5px; }
+.cx-boot__actions { padding: 16px 22px 22px; display: flex; flex-direction: column; gap: 12px; }
+.cx-boot__actions .cx-btn--primary { width: 100%; padding: 13px 20px; font-size: 12px; }
+.cx-boot__row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cx-boot__svc { font-family: var(--font-mono); font-size: 9px; color: var(--fg3); white-space: nowrap; }
+
+/* ---------- spectate ---------- */
+
+.cx-spectate__eye { display: inline-flex; align-items: center; color: var(--accent); }
+.cx-icon { display: block; flex: none; }
+.cx-roster__row.is-active { background: rgba(255, 255, 255, 0.04); }
+.cx-timeline { position: relative; height: 20px; border: 1px dashed var(--border-light); }
+.cx-timeline__mark { position: absolute; top: 2px; bottom: 2px; width: 1px; background: var(--status-amber); opacity: 0.8; }
