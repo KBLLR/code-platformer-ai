@@ -1,0 +1,224 @@
+/* ============================================================
+   KBLLR Core-X — Colors & Type
+   Brutalist warm-beige operational aesthetic.
+   Source of truth: ui/src/styles/core.css (penev.tech-flavored).
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500&family=Inter:wght@200;300;400;500;600;700&display=swap');
+
+:root {
+  /* ── Surface ── */
+  --bg:           #d1d1d0;                       /* warm grey, the canvas */
+  --bg-surface:   rgba(209, 209, 208, 0.85);     /* topbar / context bar */
+  --bg-elevated:  rgba(195, 195, 193, 0.60);     /* card / panel hover */
+  --bg-input:     rgba(255, 255, 255, 0.35);     /* fields */
+
+  /* ── Foreground ── */
+  --fg1:    #2d2824;        /* primary text — near-black warm */
+  --fg2:    #6b6560;        /* muted body */
+  --fg3:    #9a9a9a;        /* light label / dim */
+  --fg-dim: #b5b5b3;        /* watermark, faint meta */
+
+  /* Legacy aliases used throughout the codebase */
+  --text:        var(--fg1);
+  --text-muted:  var(--fg2);
+  --text-light:  var(--fg3);
+  --text-dim:    var(--fg-dim);
+
+  /* ── Borders ── */
+  --border:       #9a9a9a;
+  --border-light: #b5b5b3;
+
+  /* ── Brand accents ── */
+  --accent:       #2d2824;
+  --accent-hover: #1a1714;
+
+  /* ── Status (sober, muted, never neon) ── */
+  --status-green:  #3d7a45;      /* "ready", "up", "live" */
+  --status-yellow: #8a7420;      /* "pending", "warn" */
+  --status-red:    #8a3030;      /* "offline", "error" */
+  --status-amber:  #b58106;      /* tier-full / restart */
+  --status-blue:   #3d6e96;      /* tier-offline / debug */
+
+  /* ── Signal dots (orchestrator runtime) ── */
+  --signal-dot-base:   rgba(109, 109, 112, 0.55);
+  --signal-dot-active: rgba(143, 182, 255, 0.95);
+  --signal-dot-glow:   rgba(143, 182, 255, 0.45);
+
+  /* ── Shape ── */
+  --radius: 0px;                                 /* HARD RULE: no rounded corners */
+  --border-dash: 1px dashed var(--border);
+  --border-dash-light: 1px dashed var(--border-light);
+
+  /* ── Type families ── */
+  --font-heading: "Chakra Petch", sans-serif;    /* uppercase, technical labels */
+  --font-body:    "Inter", sans-serif;           /* paragraphs, content */
+  --font-mono:    "Fira Code", "SF Mono", monospace; /* code, IDs, telemetry */
+
+  /* ── Type scale (size · line-height) ── */
+  --text-xs:    10px;       /* badges, meta */
+  --text-sm:    11px;       /* small labels */
+  --text-base:  13px;       /* body */
+  --text-md:    14px;       /* default body */
+  --text-lg:    16px;
+  --text-xl:    20px;
+  --text-2xl:   24px;
+  --text-3xl:   32px;
+
+  /* ── Tracking (letter-spacing) ── */
+  --track-tight:  0;               /* @kind other */
+  --track-mono:   0.05em;
+  --track-label:  0.08em;
+  --track-heading: 0.1em;
+  --track-brand:  0.14em;          /* CORE-X wordmark */
+
+  /* ── Spacing scale (8px base, dense) ── */
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 10px;
+  --space-6: 12px;
+  --space-7: 16px;
+  --space-8: 20px;
+  --space-9: 24px;
+  --space-10: 32px;
+
+  /* ── Shadows (rarely used; only on overlays) ── */
+  --shadow-sm:  0 4px 8px rgba(16, 18, 16, 0.08);
+  --shadow-md:  0 12px 24px rgba(16, 18, 16, 0.12);
+  --shadow-lg:  0 22px 36px rgba(16, 18, 16, 0.14);
+
+  /* ── Backdrop blur ── */
+  --blur-sm: 8px;
+  --blur-md: 12px;
+  --blur-lg: 16px;
+}
+
+/* ============================================================
+   Semantic type styles — drop-in classes
+   ============================================================ */
+
+.h1 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-3xl);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--fg1);
+  line-height: 1.1;
+}
+
+.h2 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-2xl);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--fg1);
+  line-height: 1.15;
+}
+
+.h3 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: var(--text-xl);
+  letter-spacing: var(--track-heading);
+  text-transform: uppercase;
+  color: var(--fg1);
+  line-height: 1.2;
+}
+
+.h4, .section-label {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  letter-spacing: var(--track-heading);
+  text-transform: uppercase;
+  color: var(--fg2);
+}
+
+.brand {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: var(--text-md);
+  letter-spacing: var(--track-brand);
+  text-transform: uppercase;
+  color: var(--fg1);
+}
+
+.body, p {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: 1.6;
+  color: var(--fg1);
+}
+
+.body-sm {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--fg2);
+}
+
+.mono, code, pre, kbd {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--track-mono);
+  color: var(--fg1);
+}
+
+.mono-xs {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--fg2);
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--fg3);
+  letter-spacing: var(--track-mono);
+}
+
+a {
+  color: var(--fg1);
+  text-decoration: underline dashed var(--border);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  text-decoration-style: solid;
+}
+
+/* ============================================================
+   Universal reset (carried over from core.css)
+   ============================================================ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--fg1);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: 1.6;
+}
+
+/* ============================================================
+   Background grid texture — used on shell-level surfaces.
+   Apply on body or a fixed ::before pseudo.
+   ============================================================ */
+
+.bg-grid::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    repeating-linear-gradient(0deg,  transparent, transparent 99px, #9a9a9a22 99px, #9a9a9a22 100px),
+    repeating-linear-gradient(90deg, transparent, transparent 99px, #9a9a9a22 99px, #9a9a9a22 100px);
+}

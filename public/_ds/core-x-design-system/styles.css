@@ -1,0 +1,20 @@
+/* ============================================================
+   KBLLR Core-X — root stylesheet
+   Single entry point for consuming projects. Link this one file.
+
+   The ?v= query on each import is a cache-buster. Bump it whenever you
+   change a token layer, or browsers will serve a stale copy of the
+   imported file even though styles.css itself looks new.
+
+   Order matters: colors_and_type establishes the base, themes overrides
+   it per [data-theme], materials/motion/text build on both, ecosystem
+   adds identity accents that never touch chrome.
+   ============================================================ */
+
+@import url('colors_and_type.css?v=4');
+@import url('tokens/themes.css?v=4');
+@import url('tokens/materials.css?v=4');
+@import url('tokens/motion.css?v=4');
+@import url('tokens/text.css?v=4');
+@import url('tokens/ecosystem.css?v=4');
+@import url('tokens/panels.css?v=4');

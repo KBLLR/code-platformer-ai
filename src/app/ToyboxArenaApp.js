@@ -4,7 +4,9 @@ import { applyMatchProgress, loadProfile, saveProfile } from "../game/ProfileSto
 import { deriveUnlockState } from "../content/contracts.js";
 import { ActionMap } from "../input/ActionMap.js";
 import { ToyboxRenderer } from "../render/ToyboxRenderer.js";
-import { ToyboxShell } from "../ui/ToyboxShell.js";
+import { ToyboxCoreXShell } from "../ui/ToyboxCoreXShell.js";
+import { buildRosterProjection } from "../content/rosterProjection.js";
+import { getBindingSummary } from "../input/ActionMap.js";
 import { ToyboxMatch } from "../game/ToyboxMatch.js";
 
 export class ToyboxArenaApp {
@@ -13,7 +15,7 @@ export class ToyboxArenaApp {
     this.uiContainer = uiContainer;
     this.renderer = new ToyboxRenderer(canvas);
     this.input = new ActionMap(window);
-    this.shell = new ToyboxShell(uiContainer, {
+    this.shell = new ToyboxCoreXShell(uiContainer, {
       onAction: (action, value) => void this._handleAction(action, value),
       onSetting: (setting, value) => void this._handleSetting(setting, value),
     });
@@ -21,6 +23,8 @@ export class ToyboxArenaApp {
     this.profile = loadProfile();
     this.renderer.setRuntimeSettings(this.profile.settings);
     this.unlockState = null;
+    // Derived view of production state; rebuilt whenever asset resolution changes.
+    this.roster = null;
     this.activeTab = "play";
     this.selectedModeId = "tdm";
     this.selectedStageId = "balanced";
@@ -35,6 +39,7 @@ export class ToyboxArenaApp {
     this.content = await loadToyboxContent();
     await this.renderer.init();
     this._refreshUnlocks();
+    await this._refreshRoster();
     const shouldAutostart = this._applyUrlConfig();
     if (shouldAutostart) {
       await this._startMatch();
@@ -88,7 +93,20 @@ export class ToyboxArenaApp {
       content: this.content,
       profile: this.profile,
       unlockState: this.unlockState,
+      roster: this.roster,
+      bindings: getBindingSummary(),
     };
+  }
+
+  /**
+   * Rebuild the roster projection.
+   *
+   * Depends on runtime settings (which asset layer wins) and on the synced
+   * rigging projection, so it is refreshed on settings changes rather than
+   * cached for the session.
+   */
+  async _refreshRoster() {
+    this.roster = await buildRosterProjection(this.content, { runtimeSettings: this.profile.settings });
   }
 
   _refreshUnlocks() {
@@ -206,6 +224,9 @@ export class ToyboxArenaApp {
     if (setting === "fighterAssetSource" || setting === "warehouseUrlOverride") {
       this.renderer.setRuntimeSettings(this.profile.settings);
       if (!this.match) {
+        // Which layer resolves decides the derived roster state, so the
+        // projection has to be rebuilt before the shell is drawn again.
+        await this._refreshRoster();
         await this._refreshShell();
       }
     }

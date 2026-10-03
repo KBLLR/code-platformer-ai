@@ -1,0 +1,87 @@
+/* ============================================================
+   KBLLR Core-X — ECOSYSTEM ACCENTS
+   The canonical palette: 23 entities, 23 unique hexes, zero collisions.
+
+   THE RULE — ONE ENTITY, ONE HEX.
+   An accent is an identity, not a decoration. Never reuse one entity's
+   hex for another, and never tint UI chrome with an entity accent that
+   isn't the entity being shown.
+
+   LINEAGE — an institution owns its hex outright. A house in the same
+   family borrows a SHIFTED variant (±15° hue, ±10% L), never the parent's
+   exact value. That is why Core·X keeps phosphor while Avatar drifts to
+   lime and Emergence jumps to acid.
+   ============================================================ */
+
+:root {
+  /* ── Institutions · 8 ── */
+  --corex-corex:        #5cf08c;   /* @kind color */  /* phosphor-50 · runtime, operator */
+  --corex-kbllr:        #ebe2cc;   /* @kind color */  /* bone-92 · institutional */
+  --corex-spacebot:     #5ce0f0;   /* @kind color */  /* cyan-65 · operator daemon */
+  --corex-warehouse:    #f5c93d;   /* @kind color */  /* ledger-gold · provenance */
+  --corex-anthology:    #b88a5a;   /* @kind color */  /* sepia-aged · editorial archive */
+  --corex-leagentdiary: #b8d4c4;   /* @kind color */  /* sage-trace · hybrid */
+  --corex-belle:        #e89e7a;   /* @kind color */  /* belle-peach · public masthead */
+  --corex-vega:         #9eb8ff;   /* @kind color */  /* vega-blue · observatory */
+
+  /* ── Houses · 15 ── */
+  --corex-avatar:       #b6f25e;   /* @kind color */  /* avatar-lime · operator */
+  --corex-rigging:      #4ec3d4;   /* @kind color */  /* rig-teal · structure */
+  --corex-visual:       #ffd28a;   /* @kind color */  /* cinema-cream · editorial */
+  --corex-campus:       #a8e6c9;   /* @kind color */  /* mint-spatial · hybrid */
+  --corex-anja:         #f0c8d4;   /* @kind color */  /* anja-rose · personhood */
+  --corex-platform:     #8eaf90;   /* @kind color */  /* olive-loop · game loop */
+  --corex-world:        #7a8eff;   /* @kind color */  /* world-indigo · observatory */
+  --corex-moonsyc:      #c9a8ff;   /* @kind color */  /* violet-sonic · acoustic */
+  --corex-emerg:        #84ff3d;   /* @kind color */  /* emerg-acid · error state */
+  --corex-memory:       #cc8a3d;   /* @kind color */  /* memory-bronze · recall */
+  --corex-label:        #f5b89a;   /* @kind color */  /* label-peach · annotation */
+  --corex-htdi:         #ddd0b8;   /* @kind color */  /* htdi-champagne · method */
+  --corex-igi:          #d8dee8;   /* @kind color */  /* chrome-igi · 3D / AR */
+  --corex-vectra:       #ff5e6c;   /* @kind color */  /* vector-coral · vectors */
+  --corex-ember:        #ff7a3d;   /* @kind color */  /* ember-orange · robotics */
+
+  /* ── Tier accents — the two governing bands ── */
+  --corex-tier-institution: #5cf08c;   /* @kind color */
+  --corex-tier-house:       #ffb547;   /* @kind color */
+}
+
+/* ============================================================
+   Entity scope — set data-entity and the accent tokens resolve.
+   Everything inside inherits the right identity colour without any
+   component needing to know which entity it is rendering.
+
+     <section data-entity="rigging"> … </section>
+   ============================================================ */
+
+[data-entity="corex"]        { --entity: var(--corex-corex);        --entity-name: "Core·X" /* @kind other */ }
+[data-entity="kbllr"]        { --entity: var(--corex-kbllr);        --entity-name: "KBLLR" /* @kind other */ }
+[data-entity="spacebot"]     { --entity: var(--corex-spacebot);     --entity-name: "spacebot" /* @kind other */ }
+[data-entity="warehouse"]    { --entity: var(--corex-warehouse);    --entity-name: "Warehouse" /* @kind other */ }
+[data-entity="anthology"]    { --entity: var(--corex-anthology);    --entity-name: "Anthology" /* @kind other */ }
+[data-entity="leagentdiary"] { --entity: var(--corex-leagentdiary); --entity-name: "LeAgentDiary" /* @kind other */ }
+[data-entity="belle"]        { --entity: var(--corex-belle);        --entity-name: "Le Belle Époch" /* @kind other */ }
+[data-entity="vega"]         { --entity: var(--corex-vega);         --entity-name: "Vega Laboratories" /* @kind other */ }
+[data-entity="avatar"]       { --entity: var(--corex-avatar);       --entity-name: "Avatar Labs" /* @kind other */ }
+[data-entity="rigging"]      { --entity: var(--corex-rigging);      --entity-name: "Rigging Portal" /* @kind other */ }
+[data-entity="visual"]       { --entity: var(--corex-visual);       --entity-name: "Visual Composition" /* @kind other */ }
+[data-entity="campus"]       { --entity: var(--corex-campus);       --entity-name: "Smart Campus" /* @kind other */ }
+[data-entity="anja"]         { --entity: var(--corex-anja);         --entity-name: "Project Anja" /* @kind other */ }
+[data-entity="platform"]     { --entity: var(--corex-platform);     --entity-name: "Code Platformer" /* @kind other */ }
+[data-entity="world"]        { --entity: var(--corex-world);        --entity-name: "World Generative" /* @kind other */ }
+[data-entity="moonsyc"]      { --entity: var(--corex-moonsyc);      --entity-name: "Moonsyc" /* @kind other */ }
+[data-entity="emerg"]        { --entity: var(--corex-emerg);        --entity-name: "Emergence Lab" /* @kind other */ }
+[data-entity="memory"]       { --entity: var(--corex-memory);       --entity-name: "Memory Blocks" /* @kind other */ }
+[data-entity="label"]        { --entity: var(--corex-label);        --entity-name: "Label Forge" /* @kind other */ }
+[data-entity="htdi"]         { --entity: var(--corex-htdi);         --entity-name: "HTDI Project" /* @kind other */ }
+[data-entity="igi"]          { --entity: var(--corex-igi);          --entity-name: "IGI" /* @kind other */ }
+[data-entity="vectra"]       { --entity: var(--corex-vectra);       --entity-name: "V.E.C.T.R.A." /* @kind other */ }
+[data-entity="ember"]        { --entity: var(--corex-ember);        --entity-name: "E.M.B.E.R." /* @kind other */ }
+
+/* Utilities that read the scoped identity */
+.entity-fg     { color: var(--entity) }
+.entity-bg     { background: var(--entity) }
+.entity-border { border-color: var(--entity) }
+.entity-glow   { box-shadow: 0 0 6px var(--entity) }
+.entity-bar    { width: 3px; background: var(--entity); flex-shrink: 0 }
+.entity-dot    { width: 7px; height: 7px; border-radius: 50%; background: var(--entity); box-shadow: 0 0 5px var(--entity); flex-shrink: 0 }

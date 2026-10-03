@@ -1,0 +1,152 @@
+/* ============================================================
+   KBLLR Core-X — MATERIALS
+   Glass tiers, elevation scale, z-layers. Light + dark, tokenised.
+
+   RULE: material tier is chosen by HOW HIGH a surface floats, never by
+   how important it is. A flush card and a floating card differ in tier;
+   a primary and a secondary card do not.
+   ============================================================ */
+
+:root {
+  /* ── Blur steps ── */
+  --blur-none: 0px;                 /* @kind other */
+  --blur-sm:   8px;                 /* @kind other */
+  --blur-md:   12px;                /* @kind other */
+  --blur-lg:   16px;                /* @kind other */
+  --blur-xl:   24px;                /* @kind other */
+
+  /* ── Elevation — 6 steps. Warm-black, low-opacity, tight spread.
+        Never coloured, never more than one step per nesting level. ── */
+  --shadow-0: none;                                                        /* @kind shadow */
+  --shadow-1: 0 1px 2px rgba(16, 18, 16, 0.06);                            /* @kind shadow */
+  --shadow-2: 0 4px 8px rgba(16, 18, 16, 0.08);                            /* @kind shadow */
+  --shadow-3: 0 12px 24px rgba(16, 18, 16, 0.12);                          /* @kind shadow */
+  --shadow-4: 0 22px 36px rgba(16, 18, 16, 0.14);                          /* @kind shadow */
+  --shadow-5: 0 34px 60px rgba(16, 18, 16, 0.18);                          /* @kind shadow */
+
+  /* Legacy aliases */
+  --shadow-sm: var(--shadow-2);     /* @kind shadow */
+  --shadow-md: var(--shadow-3);     /* @kind shadow */
+  --shadow-lg: var(--shadow-4);     /* @kind shadow */
+
+  /* ── Edge treatments — what makes glass read as glass.
+        A top inner highlight (light catching the lip) and a bottom
+        inner shade. Apply WITH a shadow, never instead of one. ── */
+  --edge-lip: inset 0 1px 0 rgba(255, 255, 255, 0.45); /* @kind other */
+  --edge-base: inset 0 -1px 0 rgba(16, 18, 16, 0.06); /* @kind other */
+  --edge-both: inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(16,18,16,0.06); /* @kind other */
+
+  /* ── Glass tiers — light surface (warm beige) ──
+        Each tier pairs a fill, a blur and an elevation. Use the triplet. */
+  --mat-1-fill:   transparent;                        /* @kind color */
+  --mat-1-blur:   var(--blur-none);                   /* @kind other */
+  --mat-1-shadow: var(--shadow-0);                    /* @kind shadow */
+
+  --mat-2-fill:   rgba(209, 209, 208, 0.42);          /* @kind color */
+  --mat-2-blur:   var(--blur-md);                     /* @kind other */
+  --mat-2-shadow: var(--shadow-1);                    /* @kind shadow */
+
+  --mat-3-fill:   rgba(209, 209, 208, 0.62);          /* @kind color */
+  --mat-3-blur:   var(--blur-md);                     /* @kind other */
+  --mat-3-shadow: var(--shadow-2);                    /* @kind shadow */
+
+  --mat-4-fill:   rgba(209, 209, 208, 0.82);          /* @kind color */
+  --mat-4-blur:   var(--blur-lg);                     /* @kind other */
+  --mat-4-shadow: var(--shadow-3);                    /* @kind shadow */
+
+  --mat-5-fill:   rgba(213, 213, 212, 0.94);          /* @kind color */
+  --mat-5-blur:   var(--blur-xl);                     /* @kind other */
+  --mat-5-shadow: var(--shadow-4);                    /* @kind shadow */
+
+  --mat-6-fill:   rgba(216, 216, 215, 0.98);          /* @kind color */
+  --mat-6-blur:   var(--blur-xl);                     /* @kind other */
+  --mat-6-shadow: var(--shadow-5);                    /* @kind shadow */
+
+  /* Scrim behind modals */
+  --scrim: rgba(24, 24, 22, 0.42);                    /* @kind color */
+
+  /* ── Z-layers — the only legal z-index values ── */
+  --z-base:    0;                   /* @kind other */
+  --z-raised:  10;                  /* @kind other */
+  --z-sticky:  40;                  /* @kind other */
+  --z-rail:    90;                  /* @kind other */
+  --z-chrome:  100;                 /* @kind other */
+  --z-overlay: 200;                 /* @kind other */
+  --z-modal:   300;                 /* @kind other */
+  --z-toast:   400;                 /* @kind other */
+  --z-tooltip: 500;                 /* @kind other */
+}
+
+/* ── Dark tier — the runtime surface, glass over an HDRI or 3D scene.
+      Same six steps, inverted. Set [data-surface="dark"] on any subtree. ── */
+
+[data-surface="dark"] {
+  /* Re-assert the resolved colour here: an ancestor's `color: var(--fg1)`
+     computed against the LIGHT value and inherits down as a computed colour,
+     so redefining the token alone leaves dark text on a dark ground. */
+  color: var(--fg1);
+
+  --bg:           #161a18;
+  --bg-surface:   rgba(20, 22, 22, 0.78);
+  --bg-elevated:  rgba(32, 36, 34, 0.7);
+  --bg-input:     rgba(255, 255, 255, 0.07);
+
+  --fg1:    #f2f2f0;
+  --fg2:    rgba(242, 242, 240, 0.68);
+  --fg3:    rgba(242, 242, 240, 0.46);
+  --fg-dim: rgba(242, 242, 240, 0.3);
+  --text: var(--fg1); --text-muted: var(--fg2); --text-light: var(--fg3); --text-dim: var(--fg-dim);
+
+  --border:       rgba(255, 255, 255, 0.22);
+  --border-light: rgba(255, 255, 255, 0.14);
+
+  --accent:       #d8e6ff;
+  --accent-hover: #ffffff;
+
+  /* Status hues lifted for dark ground — same hue, more light */
+  --status-green:  #6cc07a;
+  --status-yellow: #d8c86a;
+  --status-red:    #d68a7a;
+  --status-amber:  #d8b86a;
+  --status-blue:   #8fb6ff;
+
+  --mat-1-fill: transparent;
+  --mat-2-fill: rgba(20, 22, 22, 0.55);
+  --mat-3-fill: rgba(20, 22, 22, 0.72);
+  --mat-4-fill: rgba(18, 20, 20, 0.86);
+  --mat-5-fill: rgba(16, 18, 18, 0.94);
+  --mat-6-fill: rgba(14, 16, 16, 0.98);
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 4px 10px rgba(0, 0, 0, 0.38);
+  --shadow-3: 0 12px 28px rgba(0, 0, 0, 0.45);
+  --shadow-4: 0 22px 44px rgba(0, 0, 0, 0.5);
+  --shadow-5: 0 34px 70px rgba(0, 0, 0, 0.58);
+
+  --edge-lip: inset 0 1px 0 rgba(255, 255, 255, 0.14); /* @kind other */
+  --edge-base: inset 0 -1px 0 rgba(0, 0, 0, 0.3); /* @kind other */
+  --edge-both: inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -1px 0 rgba(0,0,0,0.3); /* @kind other */
+
+  --scrim: rgba(6, 8, 8, 0.62);
+}
+
+/* ============================================================
+   Material utility classes — apply a whole tier in one class.
+   ============================================================ */
+
+.mat-1, .mat-2, .mat-3, .mat-4, .mat-5, .mat-6 { border: 1px dashed var(--border-light); }
+.mat-1 { background: var(--mat-1-fill); }
+.mat-2 { background: var(--mat-2-fill); backdrop-filter: blur(var(--mat-2-blur)); -webkit-backdrop-filter: blur(var(--mat-2-blur)); box-shadow: var(--mat-2-shadow); }
+.mat-3 { background: var(--mat-3-fill); backdrop-filter: blur(var(--mat-3-blur)); -webkit-backdrop-filter: blur(var(--mat-3-blur)); box-shadow: var(--mat-3-shadow), var(--edge-lip); }
+.mat-4 { background: var(--mat-4-fill); backdrop-filter: blur(var(--mat-4-blur)); -webkit-backdrop-filter: blur(var(--mat-4-blur)); box-shadow: var(--mat-4-shadow), var(--edge-both); border-color: var(--border); }
+.mat-5 { background: var(--mat-5-fill); backdrop-filter: blur(var(--mat-5-blur)); -webkit-backdrop-filter: blur(var(--mat-5-blur)); box-shadow: var(--mat-5-shadow), var(--edge-both); border-color: var(--border); border-style: solid; }
+.mat-6 { background: var(--mat-6-fill); backdrop-filter: blur(var(--mat-6-blur)); -webkit-backdrop-filter: blur(var(--mat-6-blur)); box-shadow: var(--mat-6-shadow), var(--edge-both); border-color: var(--border); border-style: solid; }
+
+/* Etched inset — for wells, code blocks, sunken tracks */
+.mat-well { background: rgba(16,18,16,0.04); box-shadow: inset 0 1px 3px rgba(16,18,16,0.1); border: 1px dashed var(--border-light); }
+[data-surface="dark"] .mat-well { background: rgba(0,0,0,0.28); box-shadow: inset 0 1px 3px rgba(0,0,0,0.4); }
+
+/* Grid texture — the subliminal blueprint. Apply to a shell, once. */
+.mat-grid { position: relative; }
+.mat-grid::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0; background: repeating-linear-gradient(0deg, transparent 0 99px, #9a9a9a22 99px 100px), repeating-linear-gradient(90deg, transparent 0 99px, #9a9a9a22 99px 100px); }
+[data-surface="dark"] .mat-grid::before { background: repeating-linear-gradient(0deg, transparent 0 99px, rgba(255,255,255,0.05) 99px 100px), repeating-linear-gradient(90deg, transparent 0 99px, rgba(255,255,255,0.05) 99px 100px); }

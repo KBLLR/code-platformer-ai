@@ -1,0 +1,71 @@
+/* ============================================================
+   KBLLR Core-X — CUE TOKENS
+   Hues for the panel taxonomy's cue systems: working mode, panel
+   category, presence. Deliberately NOT entity accents.
+
+   WHY THIS FILE EXISTS
+   An entity accent is an identity (see tokens/ecosystem.css) — it may
+   only appear on chrome that is showing that entity's content. A cue
+   answers a different question: what posture is the operator in, what
+   kind of panel is this, whose turn is it. Those are properties of the
+   UI, not of any entity, so they need their own namespace.
+
+   THE RANKING RULE
+   Cue hues are deliberately DESATURATED relative to entity accents.
+   When a cue and an identity appear on the same surface, identity must
+   win the eye. A cue is read peripherally; an identity is read directly.
+   ============================================================ */
+
+:root {
+  /* ── Working mode · 6 · the posture rail ──
+        Dash frequency carries pace; hue carries the posture itself.
+        Ordered here from calmest to most urgent. ── */
+  --corex-mode-focus:       #6b7f96;   /* @kind color */  /* slate — one artifact, everything else dimmed */
+  --corex-mode-observe:     #5f92a0;   /* @kind color */  /* cool teal-grey — watching many streams */
+  --corex-mode-operate:     #b8912f;   /* @kind color */  /* ochre — acting on the system; the only solid rail */
+  --corex-mode-create:      #b4744e;   /* @kind color */  /* terracotta — authoring */
+  --corex-mode-collaborate: #8578a3;   /* @kind color */  /* muted violet — turn-taking with a head */
+  --corex-mode-debug:       #b85a5a;   /* @kind color */  /* dulled coral — fault-finding */
+
+  /* ── Panel category · 4 tinted + 1 untinted ──
+        Applied as a low-percentage tint on border and header, never as a
+        solid border — solid is reserved for focus, selection and error.
+        `composite` is intentionally absent: it takes no tint, because it
+        is a container rather than a surface. ── */
+  --corex-cat-informative:   #6b8296;   /* @kind color */  /* read-only, observability, system */
+  --corex-cat-execution:     #a8862f;   /* @kind color */  /* mutating action, automation */
+  --corex-cat-collaborative: #8578a3;   /* @kind color */  /* 2+ agents, conversation, memory */
+  --corex-cat-media:         #a8894f;   /* @kind color */  /* content-typed media */
+
+  /* ── Presence · whose turn it is ── */
+  --corex-presence-head:     #8578a3;   /* @kind color */  /* the head is proposing */
+  --corex-presence-operator: #b8912f;   /* @kind color */  /* the operator holds the turn */
+
+  /* ── Status · outcome, not identity ──
+        Aliases onto the semantic status scale so a cue surface and a
+        status pill never disagree. ── */
+  --corex-up:   var(--status-green);    /* @kind color */
+  --corex-warn: var(--status-amber);    /* @kind color */
+  --corex-down: var(--status-red);      /* @kind color */
+}
+
+/* Lifted for dark grounds — the cue must stay legible on VECTRA without
+   becoming as loud as an identity accent. */
+[data-theme="vectra"],
+[data-theme="ember"],
+[data-surface="dark"] {
+  --corex-mode-focus:       #8fa3ba;
+  --corex-mode-observe:     #7fb3c2;
+  --corex-mode-operate:     #d8b055;
+  --corex-mode-create:      #d4956b;
+  --corex-mode-collaborate: #a596c4;
+  --corex-mode-debug:       #d67f7f;
+
+  --corex-cat-informative:   #8fa3ba;
+  --corex-cat-execution:     #c9a54f;
+  --corex-cat-collaborative: #a596c4;
+  --corex-cat-media:         #c9a76b;
+
+  --corex-presence-head:     #a596c4;
+  --corex-presence-operator: #d8b055;
+}

@@ -1,9 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="kbllr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Toybox Arena</title>
+    <!-- Core-X design system: vendored tokens, the design authority for colour,
+         type, material and motion. Loaded before the app stylesheet so the
+         shell can resolve var(--*) against it. See public/_ds/.../VENDORED.md -->
+    <link rel="stylesheet" href="/_ds/core-x-design-system/styles.css" />
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>

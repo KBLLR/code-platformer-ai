@@ -1,4 +1,5 @@
 import "./styles/index.css";
+import "./styles/corex-shell.css";
 import { ToyboxArenaApp } from "./app/ToyboxArenaApp.js";
 
 async function boot() {

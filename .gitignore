@@ -58,3 +58,8 @@ agentship-x-htdi/logs/*.json
 public/characters3D/*.glb
 public/characters3D/*.fbx
 public/characters3D/*.gltf
+
+# Synced from rigging-portal by scripts/sync-rigging-projection.mjs.
+# Local deployment state, not source: a fresh clone falls back to the
+# contract-faithful fixture, which approves nothing.
+public/fighters/rigging-projection.json

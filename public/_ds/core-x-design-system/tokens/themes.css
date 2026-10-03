@@ -1,0 +1,181 @@
+/* ============================================================
+   KBLLR Core-X — NAMED THEMES
+   Three operator themes. Set [data-theme] on <html> or any subtree.
+
+   KBLLR  — warm beige. Institutional, editorial, daylight. The default.
+   VECTRA — phosphor terminal. The runtime, the machine room, night ops.
+   EMBER  — coral alarm. Fault and warning surfaces ONLY, never a
+            general dark mode.
+
+   RULE: a theme is a context, not a preference. VECTRA means "you are
+   looking at the running machine". EMBER means "something is wrong".
+   Never switch theme for variety.
+   ============================================================ */
+
+:root,
+[data-theme="kbllr"] {
+  color: var(--fg1);
+
+  --bg:           #d1d1d0;                    /* @kind color */
+  --bg-surface:   rgba(209, 209, 208, 0.75);  /* @kind color */
+  --bg-elevated:  rgba(195, 195, 193, 0.70);  /* @kind color */
+  --bg-input:     rgba(255, 255, 255, 0.35);  /* @kind color */
+
+  --fg1:    #2d2824;                          /* @kind color */
+  --fg2:    #6b6560;                          /* @kind color */
+  --fg3:    #9a9a9a;                          /* @kind color */
+  --fg-dim: #b5b5b3;                          /* @kind color */
+
+  --border:       #9a9a9a;                    /* @kind color */
+  --border-light: #b5b5b3;                    /* @kind color */
+
+  --accent:       #ff7a3d;                    /* @kind color */
+  --accent-hover: #e06020;                    /* @kind color */
+  --accent-fg:    #0c1413;                    /* @kind color */
+  --accent-glow:  rgba(255, 122, 61, 0.30);   /* @kind color */
+
+  --grain: radial-gradient(ellipse at top left, rgba(212,165,116,0.05), transparent 60%); /* @kind other */
+  --scanline-ink: rgba(0, 0, 0, 0.03);        /* @kind color */
+}
+
+/* ── VECTRA · phosphor terminal ── */
+[data-theme="vectra"] {
+  color: var(--fg1);
+
+  --bg:           #0c0e0d;
+  --bg-surface:   rgba(12, 14, 13, 0.75);
+  --bg-elevated:  rgba(28, 36, 32, 0.80);
+  --bg-input:     rgba(0, 0, 0, 0.40);
+
+  --fg1:    #e6efe8;
+  --fg2:    #92a89a;
+  --fg3:    #5a6862;
+  --fg-dim: #3a4440;
+
+  --border:       rgba(140, 200, 160, 0.28);
+  --border-light: rgba(140, 200, 160, 0.14);
+
+  --accent:       #5cf08c;
+  --accent-hover: #46b86b;
+  --accent-fg:    #0a0c0b;
+  --accent-glow:  rgba(92, 240, 140, 0.40);
+
+  /* Status hues lifted for phosphor ground */
+  --status-green:  #6cc07a;
+  --status-yellow: #d8c86a;
+  --status-red:    #d68a7a;
+  --status-amber:  #d8b86a;
+  --status-blue:   #8fb6ff;
+
+  --mat-1-fill: transparent;
+  --mat-2-fill: rgba(16, 20, 18, 0.55);
+  --mat-3-fill: rgba(14, 18, 16, 0.72);
+  --mat-4-fill: rgba(12, 16, 14, 0.86);
+  --mat-5-fill: rgba(10, 13, 12, 0.94);
+  --mat-6-fill: rgba(8, 11, 10, 0.98);
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-2: 0 4px 10px rgba(0, 0, 0, 0.42);
+  --shadow-3: 0 12px 28px rgba(0, 0, 0, 0.5);
+  --shadow-4: 0 22px 44px rgba(0, 0, 0, 0.56);
+  --shadow-5: 0 34px 70px rgba(0, 0, 0, 0.64);
+
+  --edge-lip:  inset 0 1px 0 rgba(140, 200, 160, 0.16); /* @kind other */
+  --edge-base: inset 0 -1px 0 rgba(0, 0, 0, 0.35); /* @kind other */
+  --edge-both: inset 0 1px 0 rgba(140,200,160,0.16), inset 0 -1px 0 rgba(0,0,0,0.35); /* @kind other */
+
+  --scrim: rgba(4, 6, 5, 0.66);
+  --grain: radial-gradient(ellipse at 30% 20%, rgba(92,240,140,0.045), transparent 60%); /* @kind other */
+  --scanline-ink: rgba(140, 200, 160, 0.025); /* @kind color */
+}
+
+/* ── EMBER · fault surfaces only ── */
+[data-theme="ember"] {
+  color: var(--fg1);
+
+  --bg:           #18090a;
+  --bg-surface:   rgba(24, 9, 10, 0.75);
+  --bg-elevated:  rgba(56, 22, 25, 0.80);
+  --bg-input:     rgba(0, 0, 0, 0.50);
+
+  --fg1:    #ffdcdb;
+  --fg2:    #c28e90;
+  --fg3:    #8c5658;
+  --fg-dim: #543031;
+
+  --border:       rgba(255, 94, 108, 0.35);
+  --border-light: rgba(255, 94, 108, 0.15);
+
+  --accent:       #ff5e6c;
+  --accent-hover: #d13d4b;
+  --accent-fg:    #18090a;
+  --accent-glow:  rgba(255, 94, 108, 0.45);
+
+  --status-green:  #6cc07a;
+  --status-yellow: #d8c86a;
+  --status-red:    #ff8a8a;
+  --status-amber:  #e8a86a;
+  --status-blue:   #a8b6ff;
+
+  --mat-1-fill: transparent;
+  --mat-2-fill: rgba(34, 12, 14, 0.58);
+  --mat-3-fill: rgba(30, 11, 13, 0.74);
+  --mat-4-fill: rgba(26, 10, 11, 0.88);
+  --mat-5-fill: rgba(22, 8, 9, 0.95);
+  --mat-6-fill: rgba(18, 7, 8, 0.98);
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 10px rgba(0, 0, 0, 0.48);
+  --shadow-3: 0 12px 28px rgba(0, 0, 0, 0.55);
+  --shadow-4: 0 22px 44px rgba(0, 0, 0, 0.62);
+  --shadow-5: 0 34px 70px rgba(0, 0, 0, 0.7);
+
+  --edge-lip:  inset 0 1px 0 rgba(255, 94, 108, 0.18); /* @kind other */
+  --edge-base: inset 0 -1px 0 rgba(0, 0, 0, 0.4); /* @kind other */
+  --edge-both: inset 0 1px 0 rgba(255,94,108,0.18), inset 0 -1px 0 rgba(0,0,0,0.4); /* @kind other */
+
+  --scrim: rgba(10, 3, 4, 0.7);
+  --grain: radial-gradient(ellipse at 50% 0%, rgba(255,94,108,0.06), transparent 62%); /* @kind other */
+  --scanline-ink: rgba(255, 94, 108, 0.03); /* @kind color */
+}
+
+/* ============================================================
+   ATMOSPHERE — the cinematic layer. Apply to a shell, once.
+   All three are pointer-events:none overlays that never trap clicks.
+   ============================================================ */
+
+.atmos { position: relative; }
+
+/* Scanlines — CRT texture. The runtime's signature. */
+.atmos-scanlines::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3;
+  background-image: repeating-linear-gradient(to bottom,
+    transparent 0, transparent 3px,
+    var(--scanline-ink) 3px, var(--scanline-ink) 4px);
+}
+
+/* Film grain — a single warm/cool bloom from one corner. Not noise. */
+.atmos-grain::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background: var(--grain);
+}
+
+/* Vignette — darkens the frame edge so floating chrome reads. */
+.atmos-vignette { box-shadow: inset 0 0 180px 40px rgba(0, 0, 0, 0.28); }
+
+/* Phosphor bloom — for a VECTRA hero. One per screen, at most. */
+.atmos-bloom::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background:
+    radial-gradient(ellipse at 30% 45%, rgba(40, 80, 55, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 55%, rgba(80, 50, 40, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 50%, rgba(20, 30, 28, 0.9) 0%, #07080a 78%);
+}
+
+/* Glow text / element — uses the theme's accent-glow. Sparingly. */
+.glow { box-shadow: 0 0 8px var(--accent-glow); }
+.glow-text { text-shadow: 0 0 10px var(--accent-glow); }
+
+@media (prefers-reduced-motion: reduce) {
+  .atmos-scanlines::after { opacity: 0.4 }
+}

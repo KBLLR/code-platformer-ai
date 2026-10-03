@@ -1,0 +1,171 @@
+/* ============================================================
+   KBLLR Core-X — MOTION
+   Duration + easing tokens and the named primitives every surface uses.
+
+   THE FOUR RULES
+   1. Motion reports state, it never decorates. If nothing changed, nothing moves.
+   2. Distance is small — 2 to 8px. The system nudges; it does not travel.
+   3. One primitive per element per event. Never fade AND slide AND scale.
+   4. Everything respects prefers-reduced-motion. No exceptions.
+   ============================================================ */
+
+:root {
+  /* ── Durations ── */
+  --dur-instant: 80ms;              /* @kind other */
+  --dur-fast:    150ms;             /* @kind other */
+  --dur-base:    220ms;             /* @kind other */
+  --dur-slow:    320ms;             /* @kind other */
+  --dur-slower:  480ms;             /* @kind other */
+  --dur-marquee: 38s;               /* @kind other */
+  --dur-pulse:   1s;                /* @kind other */
+  --dur-spin:    900ms;             /* @kind other */
+  --dur-shimmer: 1.4s;              /* @kind other */
+  --dur-sweep:   1.6s;              /* @kind other */
+
+  /* ── Easings ──
+     out    : entrances, the default. Fast start, soft landing.
+     in      : exits only.
+     inout   : movement between two on-screen positions.
+     spring  : layout shifts (an item taking a new slot). Never for opacity.
+     linear  : marquees, spinners, anything continuous. */
+  --ease-out:    cubic-bezier(0.25, 1, 0.5, 1);        /* @kind other */
+  --ease-in:     cubic-bezier(0.5, 0, 0.75, 0);        /* @kind other */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);       /* @kind other */
+  --ease-spring: cubic-bezier(0.22, 1.4, 0.36, 1);     /* @kind other */
+  --ease-linear: linear;                               /* @kind other */
+
+  /* ── Stagger step — multiply by index ── */
+  --stagger: 34ms;                  /* @kind other */
+
+  /* ── Composed transitions — reach for these before writing your own ── */
+  --t-hover:  color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);   /* @kind other */
+  --t-raise:  box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);   /* @kind other */
+  --t-layout: transform var(--dur-slow) var(--ease-spring), width var(--dur-slow) var(--ease-spring), height var(--dur-slow) var(--ease-spring);  /* @kind other */
+}
+
+/* ============================================================
+   Named primitives. Use the class; don't re-author the keyframes.
+   ============================================================ */
+
+/* 1 · FADE — the default entrance for anything that appears in place. */
+@keyframes kx-fade-in  { from { opacity: 0 } to { opacity: 1 } }
+@keyframes kx-fade-out { from { opacity: 1 } to { opacity: 0 } }
+.kx-fade-in  { animation: kx-fade-in  var(--dur-base) var(--ease-out) both }
+.kx-fade-out { animation: kx-fade-out var(--dur-fast) var(--ease-in) both }
+
+/* 2 · RISE — fade + 6px lift + de-blur. For view changes and mounting panels.
+      The one primitive allowed to combine properties, because they resolve
+      together into a single "coming into focus" read. */
+@keyframes kx-rise-in { from { opacity: 0; transform: translateY(6px); filter: blur(3px) } to { opacity: 1; transform: none; filter: blur(0) } }
+@keyframes kx-rise-out { from { opacity: 1; transform: none; filter: blur(0) } to { opacity: 0; transform: translateY(-6px); filter: blur(3px) } }
+.kx-rise-in  { animation: kx-rise-in  var(--dur-slow) var(--ease-out) both }
+.kx-rise-out { animation: kx-rise-out var(--dur-fast) var(--ease-in) both }
+
+/* 3 · SLIDE — for surfaces entering from an edge. Direction says where from. */
+@keyframes kx-slide-r { from { opacity: 0; transform: translateX(8px) } to { opacity: 1; transform: none } }
+@keyframes kx-slide-l { from { opacity: 0; transform: translateX(-8px) } to { opacity: 1; transform: none } }
+@keyframes kx-slide-u { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+@keyframes kx-slide-d { from { opacity: 0; transform: translateY(-8px) } to { opacity: 1; transform: none } }
+.kx-slide-r { animation: kx-slide-r var(--dur-base) var(--ease-out) both }
+.kx-slide-l { animation: kx-slide-l var(--dur-base) var(--ease-out) both }
+.kx-slide-u { animation: kx-slide-u var(--dur-base) var(--ease-out) both }
+.kx-slide-d { animation: kx-slide-d var(--dur-base) var(--ease-out) both }
+
+/* 4 · PULSE — "this is live" or "this needs you". Opacity only, never scale. */
+@keyframes kx-pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.45 } }
+.kx-pulse { animation: kx-pulse var(--dur-pulse) var(--ease-in-out) infinite }
+
+/* Dot pulse — legacy alias kept for components already shipping. */
+@keyframes kx-dot-pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.45 } }
+
+/* 5 · BREATHE — a slow ring around an active input source (mic, camera).
+      The only primitive permitted to scale, and only by 4%. */
+@keyframes kx-breathe { 0%, 100% { opacity: 0.4; transform: scale(1) } 50% { opacity: 0.85; transform: scale(1.04) } }
+.kx-breathe { animation: kx-breathe 2.4s var(--ease-in-out) infinite }
+
+/* 6 · MARQUEE — the log ticker. Track must be duplicated for a seamless loop. */
+@keyframes kx-marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+.kx-marquee { animation: kx-marquee var(--dur-marquee) linear infinite }
+
+/* 7 · SPIN — indeterminate work. Linear, always. A spinner that eases is a lie. */
+@keyframes kx-spin { to { transform: rotate(360deg) } }
+.kx-spin { animation: kx-spin var(--dur-spin) linear infinite }
+
+/* 8 · SWEEP — a scanline crossing a track. Determinate-looking, indeterminate work. */
+@keyframes kx-sweep { 0% { transform: translateX(-100%) } 100% { transform: translateX(400%) } }
+.kx-sweep { animation: kx-sweep var(--dur-sweep) var(--ease-in-out) infinite }
+
+/* 9 · SHIMMER — skeleton placeholders only. Never on real content. */
+@keyframes kx-shimmer { 0% { background-position: -180% 0 } 100% { background-position: 180% 0 } }
+.kx-shimmer { animation: kx-shimmer var(--dur-shimmer) linear infinite }
+
+/* 10 · DASH — marching dashes along a dashed border. The system's own signature,
+       set in motion. Use for "streaming" and "connecting" states. */
+@keyframes kx-dash { to { stroke-dashoffset: -100 } }
+.kx-dash { animation: kx-dash 3s linear infinite }
+
+/* 11 · BLINK — a cursor or a hard alert. Step timing, no fade. */
+@keyframes kx-blink { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+.kx-blink { animation: kx-blink 1.06s steps(1, end) infinite }
+
+/* 12 · FILL — a cell or block lighting up in sequence. */
+@keyframes kx-fill { 0%, 100% { opacity: 0.18 } 40% { opacity: 1 } }
+
+/* ── Stagger helper — set --i on each child ── */
+.kx-stagger > * { animation-delay: calc(var(--i, 0) * var(--stagger)) }
+
+/* ============================================================
+   ENTITY MOTION — keyframes the per-entity loaders draw on.
+   Each entity owns ONE metaphor; these are the primitives those
+   metaphors are built from. Not for general UI use.
+   ============================================================ */
+
+/* a stroke drawing itself — signatures, constellations, vectors */
+@keyframes kx-draw { 0% { stroke-dashoffset: var(--dash, 70) } 55%, 100% { stroke-dashoffset: 0 } }
+/* a horizontal bar filling from its left edge — ledgers */
+@keyframes kx-fill-x { 0% { transform: scaleX(0) } 60%, 100% { transform: scaleX(1) } }
+/* a beam crossing a log surface */
+@keyframes kx-beam { 0% { transform: translateY(0) } 100% { transform: translateY(26px) } }
+/* an eye blink — step timing, never eased */
+@keyframes kx-wink { 0%, 92% { transform: scaleY(1) } 96% { transform: scaleY(0.1) } 100% { transform: scaleY(1) } }
+/* an aperture iris opening and closing */
+@keyframes kx-iris { 0%, 100% { transform: rotate(0) scale(0.55) } 50% { transform: rotate(40deg) scale(1) } }
+/* a jump */
+@keyframes kx-hop { 0%, 100% { transform: translateY(0) } 45% { transform: translateY(-11px) } }
+/* an equaliser bar */
+@keyframes kx-bar { 0%, 100% { transform: scaleY(0.3) } 50% { transform: scaleY(1) } }
+/* a block falling into place */
+@keyframes kx-drop { 0% { transform: translateY(-16px); opacity: 0 } 40%, 100% { transform: translateY(0); opacity: 1 } }
+/* a tag swinging from its hole */
+@keyframes kx-swing { 0%, 100% { transform: rotate(-9deg) } 50% { transform: rotate(9deg) } }
+/* a wireframe solid tilting */
+@keyframes kx-tilt { 0%, 100% { transform: rotate(-7deg) } 50% { transform: rotate(7deg) } }
+/* a spark rising off a forge */
+@keyframes kx-spark { 0% { transform: translateY(0); opacity: 0 } 30% { opacity: 1 } 100% { transform: translateY(-14px); opacity: 0 } }
+
+/* ── Hover raise — the ONE transform-on-hover the system allows, and only on
+      cards that are themselves links or buttons. Never on inline controls. ── */
+.kx-raise { transition: var(--t-raise) }
+.kx-raise:hover { transform: translateY(-2px); box-shadow: var(--shadow-3) }
+.kx-raise:active { transform: translateY(0); box-shadow: var(--shadow-1); transition-duration: var(--dur-instant) }
+
+/* ── Press — for buttons. Compression, not translation. ── */
+.kx-press { transition: var(--t-hover), transform var(--dur-instant) var(--ease-out) }
+.kx-press:active { transform: scale(0.985) }
+
+/* ============================================================
+   Reduced motion — continuous animation stops, entrances become
+   instant, transitions collapse. Non-negotiable.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .kx-pulse, .kx-breathe, .kx-marquee, .kx-spin, .kx-sweep, .kx-shimmer, .kx-dash, .kx-blink { animation: none !important }
+  .kx-fade-in, .kx-fade-out, .kx-rise-in, .kx-rise-out,
+  .kx-slide-r, .kx-slide-l, .kx-slide-u, .kx-slide-d { animation-duration: 1ms !important }
+  .kx-raise:hover, .kx-press:active { transform: none !important }
+  /* Entity loaders settle on their resolved frame instead of looping. */
+  [style*="kx-draw"], [style*="kx-fill"], [style*="kx-beam"], [style*="kx-wink"],
+  [style*="kx-iris"], [style*="kx-hop"], [style*="kx-bar"], [style*="kx-drop"],
+  [style*="kx-swing"], [style*="kx-tilt"], [style*="kx-spark"] { animation: none !important; opacity: 1 !important }
+  * { transition-duration: 1ms !important }
+}

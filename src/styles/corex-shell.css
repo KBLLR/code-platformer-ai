@@ -1,0 +1,195 @@
+/* ============================================================
+   Core-X framed shell for Toybox Arena.
+
+   Every colour, face and weight here resolves to a token from the vendored
+   design system (public/_ds/core-x-design-system/). Nothing is hard-coded:
+   if a value is not a token, the design did not specify it.
+
+   Aesthetic, per the design system README: "Warm beige, dashed borders,
+   Chakra Petch + Inter. Minimal, brutalist, material-focused." No rounded
+   corners anywhere — border-radius is never set in this file.
+   ============================================================ */
+
+.cx-shell {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--fg1);
+  font-family: var(--font-body);
+}
+
+/* ---------- navigation rail ---------- */
+
+.cx-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 168px;
+  padding: 14px 10px;
+  border-right: 1px dashed var(--border);
+  background: var(--mat-2-fill);
+  backdrop-filter: blur(12px);
+}
+.cx-rail--collapsed { width: 56px; }
+
+.cx-rail__brand { display: flex; align-items: baseline; gap: 8px; padding: 2px 6px 12px; border-bottom: 1px dashed var(--border-light); }
+.cx-rail__tag { font-family: var(--font-heading); font-size: 15px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.cx-rail__sub { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em; color: var(--fg3); }
+
+.cx-rail__items { display: flex; flex-direction: column; gap: 1px; }
+.cx-rail__footer { margin-top: auto; display: flex; flex-direction: column; gap: 1px; padding-top: 12px; border-top: 1px dashed var(--border-light); }
+
+.cx-rail__item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--fg2);
+  cursor: pointer;
+  text-align: left;
+}
+.cx-rail__item:hover { color: var(--fg1); border-color: var(--border-light); }
+.cx-rail__item.is-active { color: var(--accent); border: 1px solid var(--accent); box-shadow: 0 0 6px var(--accent-glow); }
+.cx-rail__code { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; width: 24px; flex: none; }
+.cx-rail__name { font-family: var(--font-body); font-size: 12px; }
+.cx-rail__svc { margin-top: 10px; font-family: var(--font-mono); font-size: 9px; line-height: 1.6; color: var(--fg3); }
+
+/* ---------- header + marquee ---------- */
+
+.cx-main { display: flex; flex-direction: column; min-width: 0; }
+
+.cx-header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 13px 18px;
+  border-bottom: 1px dashed var(--border);
+  background: var(--mat-3-fill);
+  backdrop-filter: blur(12px);
+}
+.cx-header__title { font-family: var(--font-heading); font-weight: 600; font-size: 20px; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.1; }
+.cx-header__screen { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--fg3); }
+.cx-header__spacer { margin-left: auto; }
+.cx-header__right { display: flex; align-items: center; gap: 8px; }
+
+.cx-marquee { position: relative; overflow: hidden; border-bottom: 1px dashed var(--border-light); background: var(--mat-2-fill); }
+.cx-marquee__track { display: flex; align-items: center; gap: 28px; height: 100%; white-space: nowrap; width: max-content; animation-name: cxMarquee; animation-timing-function: linear; animation-iteration-count: infinite; }
+.cx-marquee__item { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; color: var(--fg3); }
+@keyframes cxMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .cx-marquee__track { animation: none; } }
+
+/* ---------- screens ---------- */
+
+.cx-screen { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+.cx-panel { border: 1px dashed var(--border-light); background: var(--mat-2-fill); backdrop-filter: blur(12px); padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.cx-panel__head { display: flex; align-items: baseline; gap: 10px; }
+.cx-panel__title { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg2); }
+.cx-panel__meta { font-family: var(--font-mono); font-size: 9px; color: var(--fg3); margin-left: auto; }
+.cx-note { font-family: var(--font-body); font-size: 12px; line-height: 1.6; color: var(--fg2); margin: 0; max-width: 62ch; }
+.cx-grid { display: grid; gap: 10px; }
+.cx-grid--4 { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+.cx-grid--cards { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+
+/* ---------- stat tile ---------- */
+
+.cx-stat { border: 1px dashed var(--border-light); padding: 10px 11px; display: flex; flex-direction: column; gap: 5px; }
+.cx-stat__label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg3); }
+.cx-stat__value { font-family: var(--font-heading); font-size: 23px; font-weight: 600; line-height: 1; display: flex; align-items: baseline; gap: 5px; }
+.cx-stat__unit { font-family: var(--font-mono); font-size: 10px; color: var(--fg3); font-weight: 400; }
+.cx-stat__note { font-family: var(--font-mono); font-size: 9px; line-height: 1.5; color: var(--fg3); }
+
+/* A withheld tile must not be mistakable for a zero: no numeral, dashed
+   emphasis, and the reason is shown rather than hidden in a tooltip. */
+.cx-stat--withheld { border-style: dashed; border-color: var(--border); }
+.cx-stat__withheld { display: flex; align-items: baseline; gap: 7px; }
+.cx-stat__withheld-mark { font-family: var(--font-heading); font-size: 23px; font-weight: 600; line-height: 1; color: var(--fg-dim); }
+.cx-stat__withheld-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-dim); }
+.cx-stat__note--why { color: var(--fg-dim); max-width: 40ch; }
+
+/* ---------- provenance + service chips ---------- */
+
+.cx-prov, .cx-svc { display: inline-flex; align-items: center; gap: 6px; padding: 2px 7px; border: 1px dashed var(--border); font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.05em; color: var(--fg2); }
+.cx-prov__dot, .cx-svc__dot { width: 6px; height: 6px; flex: none; }
+.cx-prov--fresh   .cx-prov__dot { background: var(--status-green); box-shadow: 0 0 4px var(--status-green); }
+.cx-prov--stale   .cx-prov__dot { background: var(--status-amber); box-shadow: 0 0 4px var(--status-amber); }
+.cx-prov--missing .cx-prov__dot { background: var(--fg-dim); }
+.cx-prov--missing { color: var(--fg3); }
+.cx-prov__status { text-transform: uppercase; }
+.cx-prov__age { color: var(--fg3); }
+.cx-prov__detail { color: var(--fg3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 52ch; }
+
+.cx-svc--up   .cx-svc__dot { background: var(--status-green); box-shadow: 0 0 4px var(--status-green); }
+.cx-svc--idle .cx-svc__dot { background: var(--fg-dim); }
+.cx-svc--warn .cx-svc__dot { background: var(--status-amber); box-shadow: 0 0 4px var(--status-amber); }
+.cx-svc--down .cx-svc__dot { background: var(--status-red); box-shadow: 0 0 4px var(--status-red); }
+.cx-svc__port, .cx-svc__note { color: var(--fg3); }
+
+/* ---------- funnel ---------- */
+
+.cx-funnel { display: flex; flex-direction: column; gap: 6px; }
+.cx-funnel__row { display: flex; align-items: center; gap: 9px; }
+.cx-funnel__label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.05em; color: var(--fg3); flex: none; }
+.cx-funnel__track { position: relative; flex: 1; min-width: 0; height: 12px; border: 1px dashed var(--border-light); }
+.cx-funnel__fill { position: absolute; inset: 1px auto 1px 1px; background: var(--accent); opacity: 0.85; }
+.cx-funnel__totals { font-family: var(--font-mono); font-size: 9px; color: var(--fg2); flex: none; width: 54px; text-align: right; }
+
+/* ---------- buttons + fields ---------- */
+
+.cx-btn { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 10px; cursor: pointer; background: transparent; color: var(--fg2); border: 1px dashed var(--border); }
+.cx-btn:hover:not(:disabled) { color: var(--fg1); border-style: solid; }
+.cx-btn--primary { background: var(--accent); color: var(--accent-fg); border: 1px solid var(--accent); }
+.cx-btn--primary:hover:not(:disabled) { box-shadow: 0 0 8px var(--accent-glow); }
+.cx-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.cx-field { display: flex; flex-direction: column; gap: 4px; }
+.cx-field__label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg3); }
+.cx-field__input { font-family: var(--font-mono); font-size: 11px; padding: 6px 8px; background: var(--bg-input, transparent); color: var(--fg1); border: 1px dashed var(--border); }
+.cx-field__hint { font-family: var(--font-mono); font-size: 9px; line-height: 1.5; color: var(--fg-dim); }
+
+/* ---------- roster ---------- */
+
+.cx-roster { display: flex; flex-direction: column; }
+.cx-roster__row { display: flex; align-items: center; gap: 11px; padding: 9px 10px; border-bottom: 1px dashed var(--border-light); }
+.cx-roster__row:last-child { border-bottom: none; }
+.cx-roster__bar { width: 4px; height: 20px; flex: none; }
+.cx-roster__name { font-family: var(--font-body); font-size: 12px; min-width: 140px; }
+.cx-roster__meta { font-family: var(--font-mono); font-size: 9px; color: var(--fg3); }
+.cx-roster__state { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+/* State badge. Colour encodes the ladder: dim → amber → green, with real
+   motion the only solid fill, so a glance cannot confuse a reviewed rig
+   with a released one. */
+.cx-state { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.05em; padding: 2px 7px; border: 1px dashed var(--border); color: var(--fg3); white-space: nowrap; }
+.cx-state--SOURCE_ONLY { color: var(--fg-dim); }
+.cx-state--RIGGING { color: var(--status-blue); border-color: var(--status-blue); }
+.cx-state--AWAITING_REVIEW { color: var(--status-amber); border-color: var(--status-amber); }
+.cx-state--APPROVED { color: var(--status-green); border-color: var(--status-green); }
+.cx-state--WAREHOUSE_RELEASED { color: var(--status-green); border-color: var(--status-green); border-style: solid; }
+.cx-state--PLAYABLE_WITH_FALLBACKS { color: var(--accent); border-color: var(--accent); border-style: solid; }
+.cx-state--PLAYABLE_REAL_MOTION { background: var(--accent); color: var(--accent-fg); border: 1px solid var(--accent); }
+.cx-state__reason { font-family: var(--font-mono); font-size: 9px; color: var(--fg3); }
+
+/* ---------- slot table ---------- */
+
+.cx-slots { display: flex; flex-direction: column; }
+.cx-slots__row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-bottom: 1px dashed var(--border-light); }
+.cx-slots__row:last-child { border-bottom: none; }
+.cx-slots__id { font-family: var(--font-mono); font-size: 9px; color: var(--fg3); width: 26px; flex: none; }
+.cx-slots__bar { width: 3px; height: 14px; flex: none; background: var(--accent); }
+.cx-slots__name { font-family: var(--font-body); font-size: 12px; }
+.cx-slots__ctl { font-family: var(--font-mono); font-size: 9px; color: var(--fg3); margin-left: auto; }
+.cx-slots__empty { padding: 10px 8px; font-family: var(--font-mono); font-size: 10px; color: var(--fg-dim); }
+.cx-capacity { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.05em; color: var(--fg3); }
+
+/* ---------- dev / provenance layer ---------- */
+
+.cx-dev { border-top: 1px dashed var(--border); background: var(--mat-3-fill); padding: 13px 18px; display: flex; flex-direction: column; gap: 10px; }
+.cx-dev__chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.cx-dev__mono { font-family: var(--font-mono); font-size: 10px; line-height: 1.7; color: var(--fg3); margin: 0; }
+
+.cx-fixture {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px;
+  border: 1px dashed var(--status-amber);
+  color: var(--status-amber);
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase;
+}
