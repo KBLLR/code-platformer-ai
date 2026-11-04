@@ -4,6 +4,7 @@ import process from "node:process";
 import { validateChallengeCatalog, validateFighterCatalog, validateModeCatalog, validateStageCatalog } from "../src/content/contracts.js";
 import { createMatchConfig } from "../src/game/MatchConfig.js";
 import { ToyboxMatch } from "../src/game/ToyboxMatch.js";
+import { resolveMatchStage } from "../src/game/MatchStage.js";
 
 const rootDir = process.cwd();
 
@@ -85,4 +86,33 @@ assert(survivalSnapshot.finished, "Survival smoke: expected match to finish");
 assert(survivalSnapshot.result?.completedSurvival === true, "Survival smoke: expected survival completion result");
 assert(survivalSnapshot.players.every((player) => typeof player.loopAnimationState === "string"), "Survival smoke: expected loop animation state output");
 
-console.log(`Toybox smoke passed: FFA scores ${ffaSnapshot.players.map((player) => `${player.fighterId}:${player.score}`).join(", ")}; survival winner ${survivalSnapshot.result.winnerLabel}.`);
+// Opt-in generated stage: same match loop, stage built from a seed.
+const generated = resolveMatchStage({
+  stages,
+  stageId: ffaMode.defaultStageId,
+  fighters,
+  generated: { seed: "smoke", brief: "balanced clockwork chaotic" },
+});
+assert(generated.source === "generated", "Generated smoke: expected generated stage source");
+const generatedMatch = new ToyboxMatch({
+  mode: ffaMode,
+  stage: generated.stage,
+  fighters,
+  config: createMatchConfig({
+    modeId: ffaMode.id,
+    stageId: generated.stage.id,
+    selectedFighterId: "pink",
+    botCount: ffaMode.botCount,
+    stageSource: "generated",
+    stageSeed: generated.stage.generator.seed,
+  }),
+});
+for (let frame = 0; frame < 720; frame += 1) {
+  generatedMatch.update(1 / 60, scriptedInput(frame));
+}
+const generatedSnapshot = generatedMatch.createSnapshot();
+assert(generatedSnapshot.players.length === 4, "Generated smoke: expected four fighters");
+assert(generatedSnapshot.players.every((player) => Number.isFinite(player.x) && Number.isFinite(player.y)), "Generated smoke: invalid player positions");
+assert(generatedSnapshot.hazardFloor > generated.stage.hazardFloor, "Generated smoke: rising floor should rise");
+
+console.log(`Toybox smoke passed: FFA scores ${ffaSnapshot.players.map((player) => `${player.fighterId}:${player.score}`).join(", ")}; survival winner ${survivalSnapshot.result.winnerLabel}; generated stage ${generated.stage.id} (${generated.stage.displayName}) ran 720 frames.`);

@@ -8,6 +8,8 @@ import {
   validateStageCatalog,
   validateRiggedRuntimeManifest,
 } from "../src/content/contracts.js";
+import { validateGeneratedStage } from "../src/content/stageContract.js";
+import { generateStage } from "../src/stage/StageGenerator.js";
 
 const rootDir = process.cwd();
 
@@ -56,4 +58,14 @@ for (const challenge of challenges) {
   }
 }
 
-console.log(`Validated Toybox content: ${fighters.length} fighters, ${stages.length} stages, ${modes.length} modes, ${challenges.length} challenges.`);
+// Generated stages are a contract too: a fixed sample must satisfy
+// toybox-generated-stage-v1 against the live roster. Full coverage: test:stages.
+let generatedCount = 0;
+for (const layout of ["balanced", "vertical", "wide"]) {
+  for (let hazardLevel = 0; hazardLevel <= 2; hazardLevel += 1) {
+    validateGeneratedStage(generateStage({ seed: `contracts-${layout}-${hazardLevel}`, brief: { layout, hazardLevel }, fighters }), { fighters });
+    generatedCount += 1;
+  }
+}
+
+console.log(`Validated Toybox content: ${fighters.length} fighters, ${stages.length} stages, ${modes.length} modes, ${challenges.length} challenges, ${generatedCount} generated stage samples.`);
