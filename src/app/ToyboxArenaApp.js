@@ -8,6 +8,7 @@ import { ToyboxCoreXShell } from "../ui/ToyboxCoreXShell.js";
 import { buildRosterProjection } from "../content/rosterProjection.js";
 import { getBindingSummary } from "../input/ActionMap.js";
 import { ToyboxMatch } from "../game/ToyboxMatch.js";
+import { resolveMatchStage } from "../game/MatchStage.js";
 
 export class ToyboxArenaApp {
   constructor({ canvas, uiContainer }) {
@@ -31,6 +32,10 @@ export class ToyboxArenaApp {
     this.selectedModeId = "tdm";
     this.selectedStageId = "balanced";
     this.selectedFighterId = this.profile.selectedFighterId;
+    // Opt-in generated stage ({ seed, brief }); null keeps catalog stages.
+    // Set via `?stageSeed=<seed>&stageBrief=<text>` or setGeneratedStage().
+    this.generatedStageRequest = null;
+    this.activeStageSource = "catalog";
     this.match = null;
     this.currentSnapshot = null;
     this.lastFrame = performance.now();
@@ -133,6 +138,7 @@ export class ToyboxArenaApp {
     const stageId = params.get("stage");
     const fighterId = params.get("fighter");
     const autostart = params.get("autostart");
+    const stageSeed = params.get("stageSeed");
 
     if (modeId && this.content.modes.some((entry) => entry.id === modeId)) {
       this.selectedModeId = modeId;
@@ -144,6 +150,10 @@ export class ToyboxArenaApp {
 
     if (stageId && this.content.stages.some((entry) => entry.id === stageId)) {
       this.selectedStageId = stageId;
+    }
+
+    if (stageSeed && stageSeed.trim()) {
+      this.setGeneratedStage({ seed: stageSeed.trim(), brief: params.get("stageBrief") });
     }
 
     if (fighterId && this.unlockState.unlocked.has(fighterId)) {
@@ -240,14 +250,37 @@ export class ToyboxArenaApp {
     }
   }
 
+  /** Opt into (or, with null, out of) generated stages for the next match. */
+  setGeneratedStage(request) {
+    this.generatedStageRequest = request && request.seed ? { seed: String(request.seed), brief: request.brief ?? null } : null;
+  }
+
+  _resolveStage() {
+    try {
+      return resolveMatchStage({
+        stages: this.content.stages,
+        stageId: this.selectedStageId,
+        fighters: this.content.fighters,
+        generated: this.generatedStageRequest,
+      });
+    } catch (error) {
+      // A generated stage must never block play: fall back to the catalog.
+      console.warn("[toybox] stage generation failed; using catalog stage", error);
+      return resolveMatchStage({ stages: this.content.stages, stageId: this.selectedStageId });
+    }
+  }
+
   async _startMatch() {
     const mode = this.content.modes.find((entry) => entry.id === this.selectedModeId) ?? this.content.modes[0];
-    const stage = this.content.stages.find((entry) => entry.id === this.selectedStageId) ?? this.content.stages[0];
+    const { stage, source } = this._resolveStage();
+    this.activeStageSource = source;
     const config = createMatchConfig({
       modeId: mode.id,
       stageId: stage.id,
       selectedFighterId: this.selectedFighterId,
       botCount: mode.botCount,
+      stageSource: source,
+      stageSeed: source === "generated" ? stage.generator.seed : null,
     });
 
     this.match = new ToyboxMatch({
@@ -292,6 +325,7 @@ export class ToyboxArenaApp {
       },
       mode: this.currentSnapshot.mode.id,
       stage: this.currentSnapshot.stage.id,
+      stageSource: this.activeStageSource,
       paused: this.currentSnapshot.paused,
       finished: this.currentSnapshot.finished,
       aliveCount: this.currentSnapshot.aliveCount,

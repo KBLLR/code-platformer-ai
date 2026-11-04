@@ -121,11 +121,48 @@ function makeStageProps(stage, palette) {
   return props;
 }
 
+/**
+ * Bumper hazards from generated stages; `y` is the bottom edge like the sim.
+ * Drawn as camera-facing pinball discs with a rim so they never read as a
+ * (capsule-shaped) fallback fighter.
+ */
+function makeBumpers(stage, palette) {
+  const group = new THREE.Group();
+  for (const hazard of stage.hazards ?? []) {
+    if (hazard.kind !== "bumper") continue;
+    const bumper = new THREE.Group();
+    const disc = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.5, 0.5, 0.9, 28),
+      new THREE.MeshStandardMaterial({
+        color: palette.hazard,
+        emissive: palette.hazard,
+        emissiveIntensity: 0.45,
+        roughness: 0.3,
+        metalness: 0.25,
+      }),
+    );
+    disc.rotation.x = Math.PI / 2;
+    const rim = new THREE.Mesh(
+      new THREE.TorusGeometry(0.5, 0.09, 10, 32),
+      new THREE.MeshStandardMaterial({ color: palette.accent, emissive: palette.accent, emissiveIntensity: 0.3, roughness: 0.4 }),
+    );
+    rim.position.z = 0.46;
+    bumper.add(disc, rim);
+    bumper.scale.set(hazard.width, hazard.height, 1);
+    bumper.position.set(hazard.x, hazard.y + hazard.height / 2, 0);
+    bumper.traverse((child) => { child.castShadow = true; });
+    group.add(bumper);
+  }
+  return group;
+}
+
 export function buildStageGroup(stage, { preview = false } = {}) {
-  const palette = STAGE_PALETTES[stage.theme] ?? STAGE_PALETTES.balanced;
+  // Generated stages carry their own palette; catalog stages map by theme.
+  const palette = stage.palette ?? STAGE_PALETTES[stage.theme] ?? STAGE_PALETTES.balanced;
   const group = new THREE.Group();
   const platformMeshes = stage.platforms.map((platform) => makeRoundedPlatform(platform, palette));
   platformMeshes.forEach((mesh) => group.add(mesh));
+  group.add(makeBumpers(stage, palette));
 
   const backdrop = makeBackdrop(stage, palette);
   const props = makeStageProps(stage, palette);

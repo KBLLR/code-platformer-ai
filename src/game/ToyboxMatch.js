@@ -6,7 +6,7 @@ const ATTACK_COOLDOWN = 0.52;
 const ATTACK_WINDOW = 0.14;
 const PICKUP_RESPAWN = 6;
 const MAX_FRAME_DELTA = 1 / 24;
-const ITEM_TYPES = [
+export const ITEM_TYPES = [
   "movement-boost",
   "temporary-shield",
   "bomb-throwable",
@@ -14,6 +14,18 @@ const ITEM_TYPES = [
   "spring-trap",
 ];
 const ONE_SHOT_STATES = new Set(["jump_start", "land", "attack", "stomp", "pickup", "throw", "ringout"]);
+const HAZARD_HIT_COOLDOWN = 0.6;
+
+/**
+ * Physics constants the stage generator/validator reasons about. Exported so
+ * reachability checks use the same numbers the simulation integrates with.
+ */
+export const MATCH_PHYSICS = Object.freeze({
+  gravity: GRAVITY,
+  playerWidth: PLAYER_WIDTH,
+  playerHeight: PLAYER_HEIGHT,
+  pickupSize: 0.8,
+});
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -116,6 +128,7 @@ function createPlayer(slot, spawn, index, mode) {
     actionAnimTimer: 0,
     actionAnimState: null,
     ringoutTimer: 0,
+    hazardCooldown: 0,
   };
 }
 
@@ -150,6 +163,9 @@ export class ToyboxMatch {
     this.finished = false;
     this.result = null;
     this.hazardFloor = stage.hazardFloor;
+    // Generated stages carry explicit bumper hazards; catalog stages have none,
+    // so their behaviour is unchanged.
+    this.bumpers = (stage.hazards ?? []).filter((hazard) => hazard.kind === "bumper");
     this.teamScores = { sun: 0, moon: 0 };
     this.spawnCursor = 0;
 
@@ -189,6 +205,7 @@ export class ToyboxMatch {
       const controls = player.isHuman ? input : this._computeBotControls(player);
       this._handlePlayerActions(player, controls, dt);
       this._integratePlayer(player, dt);
+      this._applyStageHazards(player);
       this._collectPickup(player);
       this._checkRingOut(player);
     }
@@ -210,6 +227,7 @@ export class ToyboxMatch {
     player.landTimer = Math.max(0, player.landTimer - dt);
     player.actionAnimTimer = Math.max(0, player.actionAnimTimer - dt);
     player.ringoutTimer = Math.max(0, player.ringoutTimer - dt);
+    player.hazardCooldown = Math.max(0, player.hazardCooldown - dt);
     if (player.attackTimer === 0) {
       player.attackTargets.clear();
     }
@@ -240,7 +258,11 @@ export class ToyboxMatch {
   }
 
   _updateModeHazard(dt) {
-    const baseRise = this.stage.id === "hazard" ? 0.1 : 0.04;
+    // Generated stages declare their rise rate; catalog stages keep the
+    // original id-based rule.
+    const baseRise = typeof this.stage.hazardRiseRate === "number"
+      ? this.stage.hazardRiseRate
+      : (this.stage.id === "hazard" ? 0.1 : 0.04);
     const riseRate = this.mode.id === "survival" ? baseRise * 2.8 : baseRise;
     this.hazardFloor += riseRate * dt;
   }
@@ -443,6 +465,21 @@ export class ToyboxMatch {
         player.vy = 0;
       }
     }
+  }
+
+  _applyStageHazards(player) {
+    if (this.bumpers.length === 0 || player.hazardCooldown > 0 || player.invulnTimer > 0) return;
+    const bumper = this.bumpers.find((entry) => rectsOverlap(entry, player));
+    if (!bumper) return;
+    // Bumpers push fighters away from their centre. They add damage but never
+    // credit a ring-out to anyone, and keep the last attacker's credit intact.
+    const resistance = fighterRoleWeight(player.fighter);
+    const launchScale = 1 + player.damage * 0.018;
+    const horizontal = sign(player.x - bumper.x) || player.facing;
+    player.damage = Math.min(220, player.damage + bumper.power * 0.35);
+    player.vx = horizontal * (bumper.power * launchScale) / resistance;
+    player.vy = Math.max(player.vy, (bumper.lift * launchScale) / resistance);
+    player.hazardCooldown = HAZARD_HIT_COOLDOWN;
   }
 
   _collectPickup(player) {

@@ -6,6 +6,8 @@ export function createMatchConfig({
   selectedFighterId = "blue",
   botCount = 3,
   inputProfile = "keyboard+gamepad",
+  stageSource = "catalog",
+  stageSeed = null,
 } = {}) {
   return validateMatchConfig({
     modeId,
@@ -13,5 +15,7 @@ export function createMatchConfig({
     selectedFighterId,
     botCount,
     inputProfile,
+    stageSource,
+    stageSeed,
   });
 }

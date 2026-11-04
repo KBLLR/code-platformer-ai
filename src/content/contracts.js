@@ -387,21 +387,29 @@ export function validateFighterCatalog(catalog) {
   });
 }
 
+/**
+ * Runtime shape every stage must have before ToyboxMatch can use it, whether
+ * it comes from the catalog or from the stage generator.
+ */
+export function validateStageDefinition(stage) {
+  assert(stage && typeof stage === "object", "stage must be an object");
+  assertString(stage.id, "stage.id");
+  assertString(stage.displayName, `displayName for stage "${stage.id}"`);
+  assertString(stage.theme, `theme for stage "${stage.id}"`);
+  assertString(stage.description, `description for stage "${stage.id}"`);
+  assert(Array.isArray(stage.spawnPoints) && stage.spawnPoints.length >= 4, `spawnPoints missing for stage "${stage.id}"`);
+  assert(Array.isArray(stage.itemSpawns) && stage.itemSpawns.length >= 5, `itemSpawns missing for stage "${stage.id}"`);
+  assert(Array.isArray(stage.platforms) && stage.platforms.length >= 4, `platforms missing for stage "${stage.id}"`);
+  assert(stage.blastZone, `blastZone missing for stage "${stage.id}"`);
+  ["left", "right", "bottom", "top"].forEach((key) => assertNumber(stage.blastZone[key], `blastZone.${key} for stage "${stage.id}"`));
+  assertNumber(stage.hazardFloor, `hazardFloor for stage "${stage.id}"`);
+  return stage;
+}
+
 export function validateStageCatalog(catalog) {
   const stages = catalog?.stages ?? [];
   assert(Array.isArray(stages) && stages.length >= 3, "stages catalog must include at least three stages");
-  return stages.map((stage) => {
-    assertString(stage.id, "stage.id");
-    assertString(stage.displayName, `displayName for stage "${stage.id}"`);
-    assertString(stage.theme, `theme for stage "${stage.id}"`);
-    assertString(stage.description, `description for stage "${stage.id}"`);
-    assert(Array.isArray(stage.spawnPoints) && stage.spawnPoints.length >= 4, `spawnPoints missing for stage "${stage.id}"`);
-    assert(Array.isArray(stage.itemSpawns) && stage.itemSpawns.length >= 5, `itemSpawns missing for stage "${stage.id}"`);
-    assert(Array.isArray(stage.platforms) && stage.platforms.length >= 4, `platforms missing for stage "${stage.id}"`);
-    assert(stage.blastZone, `blastZone missing for stage "${stage.id}"`);
-    ["left", "right", "bottom", "top"].forEach((key) => assertNumber(stage.blastZone[key], `blastZone.${key} for stage "${stage.id}"`));
-    return stage;
-  });
+  return stages.map((stage) => validateStageDefinition(stage));
 }
 
 export function validateModeCatalog(catalog) {
@@ -511,5 +519,14 @@ export function validateMatchConfig(config) {
   assertString(config.selectedFighterId, "matchConfig.selectedFighterId");
   assertNumber(config.botCount, "matchConfig.botCount");
   assertString(config.inputProfile, "matchConfig.inputProfile");
+  // Optional: absent means "catalog" so older callers keep working.
+  const stageSource = config.stageSource ?? "catalog";
+  assert(
+    stageSource === "catalog" || stageSource === "generated",
+    `matchConfig.stageSource must be "catalog" or "generated", got "${stageSource}"`,
+  );
+  if (stageSource === "generated") {
+    assertString(config.stageSeed, "matchConfig.stageSeed (required for generated stages)");
+  }
   return config;
 }

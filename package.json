@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:release": "npm run sync:fighters && npm run validate:contracts && npm run validate:roster && npm run validate:assets -- --strict && npm run test:smoke && vite build",
+    "build:release": "npm run sync:fighters && npm run validate:contracts && npm run validate:roster && npm run validate:assets -- --strict && npm run test:smoke && npm run test:stages && vite build",
     "preview": "vite preview",
     "sync:fighters": "node scripts/sync-fighter-assets.mjs",
     "validate:assets": "node scripts/validate-fighter-assets.mjs",
     "test:smoke": "node scripts/validate-toybox-smoke.mjs",
+    "test:stages": "node scripts/validate-stage-generation.mjs",
     "validate:contracts": "node scripts/validate-toybox-content.mjs",
     "sync:rigging": "node scripts/sync-rigging-projection.mjs",
     "validate:roster": "node scripts/validate-roster-truthfulness.mjs"
