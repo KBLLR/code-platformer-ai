@@ -139,3 +139,22 @@ Original prompt: make the world generator integration real and production ready 
   - finish the blocked `rigging-portal` export path for `blue`, `red`, `pink`, `black`; current runtime manifests remain `pending`
   - once palace exports are available, promote manifests to `ready` and replace procedural fallback with real clip playback
   - split the main bundle if chunk size matters for production
+
+- 2026-11-04: stage/world-creation prototype (CC3) — first working slice of `docs/FEATURED_STAGE_GENERATION_AGENT.md`.
+  - prototyped:
+    - deterministic, seedable generator `src/stage/StageGenerator.js`: `generateStage({ seed, brief, fighters })` returns a stage as plain data (bounds, blast zone, platforms, 4 spawns, 5 item spawns, hazards, theme + palette). Same seed + brief + roster gives byte-identical JSON. It generates, then tests each candidate against the contract and retries deterministically when one is rejected.
+    - contract `toybox-generated-stage-v1` in `src/content/stageContract.js`, next to `contracts.js`. It is a superset of the catalog stage shape (new shared `validateStageDefinition`) and adds checks for: no overlaps, head room under overhangs, spawns landing on their declared platform, collectable pickups, bumpers clear of spawns/items, rising floor below play, render-safe blast zone, and every platform mutually reachable with the main deck.
+    - reachability model `src/stage/stageRules.js`, built from `MATCH_PHYSICS` plus the weakest fighter on the roster (90% of the jump + double-jump apex). Calibrated against runtime physics: `red` actually rises 5.57, and the model allows 5.12.
+    - brief parser `src/stage/arenaBrief.js` (text or object → layout / theme / hazard level / tiers) and 6 themes in `src/stage/stageThemes.js`.
+    - optional agent step `src/stage/stageAgent.js`: an injected `planner` (e.g. an LLM bridge) proposes a brief, which goes through the normaliser like any other input. If there is no planner, or it throws, times out, or returns junk, the deterministic parser is used instead. There is no network code in Toybox.
+    - runtime: `ToyboxMatch` reads `stage.hazardRiseRate` and `stage.hazards` (bumpers) when present. Catalog stages have neither, so their behaviour is unchanged (asserted in tests). `StageFactory` renders the stage palette and draws bumpers as pinball discs.
+    - opt-in loading only: `?stageSeed=<seed>&stageBrief=<text>` (or `app.setGeneratedStage({ seed, brief })`) goes through `src/game/MatchStage.js#resolveMatchStage`. Catalog stages stay the default; if generation fails, the match falls back to the catalog stage. `MatchConfig` gains optional `stageSource` / `stageSeed`, both validated.
+  - verification: `validate:contracts` (now also checks 9 generated samples), `test:smoke` (now also runs a generated-stage FFA), the new `test:stages` (34 checks across 432 generated stages, including determinism, a golden fingerprint, schema, reachability, runtime spawn landing, an independent overlap check, 14 validator rejection cases, and agent fallbacks with `fetch` stubbed to throw), and `build` all pass. Checked in Chromium with `vite preview`: `?autostart=1&mode=ffa&stageSeed=demo&stageBrief=vertical%20ember%20chaotic` reports `stageSource: "generated"` and renders, and the default URL still reports `catalog`.
+  - finding (informational, not changed): under the same reachability model, catalog `hazard` (Clockwork Drop) reaches only 3/6 platforms. Its `danger` platforms sit 5.5 above the main deck, which is 97% of `red`'s theoretical jump apex.
+  - left / next:
+    - shell UI to pick a seed or brief, and to show the generated stage name on the setup screen (today only the URL flag and the API opt in)
+    - pickup-distribution balance and camera-readability scoring (the spec's `spawn-and-pickup-balancer` / camera checks are geometric only so far)
+    - a bot-navigation pass driven by simulation, beyond the analytical reachability graph; the graph ignores mid-jump blocking by third platforms
+    - more hazard kinds (moving platforms, crumbling ledges) and per-theme props and lighting
+    - persisting or publishing generated stages (for example via Warehouse) and a real planner bridge from a Core-X host; HTDI display-stage reuse
+    - `@corex/warehouse-client` is a `file:../../warehouse/client` dependency, so a standalone clone of this repo cannot `pnpm install` or `build` without the core-x monorepo around it
